@@ -10,7 +10,7 @@
 
 from __future__ import with_statement
 
-from math import log10
+from math import log10, log, atan2
 
 from sys import argv, stderr
 from optparse import OptionParser
@@ -59,6 +59,8 @@ class Particle(object):
         self.colors = int(color1), int(color2)
         self.p = px, py, pz
         self.pt = (px**2 + py**2)**0.5
+        self.eta = -log(tan(atan2(self.pt, self.pz)/2.))
+        self.phi = atan2(self.px, self.py)
         self.e = e
         self.m = m
         self.tags = set()
