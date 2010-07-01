@@ -215,15 +215,17 @@ class EventGraph(object):
                 
             for particle in vertex.outgoing:
                 particle.vertex_in = vertex
-                
+
+        self.vertices = dict((v.vno,v) for v in self.vertices.values())
+
         self.contract()
     
     def contract(self):
         """
         Remove vertices for the particle representation
         """
-        for key in list(self.vertices.keys()):
-            vertex = self.vertices[key]
+        for no in self.vertices.keys():
+            vertex = self.vertices[no]
             if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
                 incoming = list(vertex.incoming)[0]
                 outgoing = list(vertex.outgoing)[0]    
@@ -240,7 +242,7 @@ class EventGraph(object):
                     
                     # remove superfluous stuff
                     del self.particles[incoming.no]
-                    del self.vertices[key]
+                    del self.vertices[no]
                     
     def draw_particles(self):        
         print("strict digraph pythia {")
