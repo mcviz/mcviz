@@ -255,7 +255,7 @@ class EventGraph(object):
         print("edge [labelangle=90, fontsize=12]")
         print("ratio=1")
         
-        for vertex in self.vertices.itervalues():
+        for vertex in sorted(self.vertices.itervalues()):
             vertex.draw()
         print("}")
     
