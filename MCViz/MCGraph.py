@@ -29,6 +29,9 @@ class Vertex(object):
         return "<Vertex id=%i in=set(%r) out=set(%r)>" % args
     
     def __lt__(self, rhs):
+        """
+        Sort vertices in order of vno
+        """
         return self.vno < rhs.vno
     
     def draw(self):
@@ -154,12 +157,8 @@ class EventGraph(object):
         
         # Convert mothers/daughters to objects
         for particle in particles:
-            #if particle.no == 243:
-       	    #    print >> stderr, particle.no, particle.mothers, particle.daughters
             particle.daughters = set(particles[d] for d in particle.daughters)
             particle.mothers = set(particles[m] for m in particle.mothers)
-            #if particle.no == 243:
-       	    #    print >> stderr, particle.no, map(lambda x:x.no, particle.mothers), map(lambda x:x.no, particle.daughters)
 
         # Populate mothers and daughters for particles
         for particle in particles:
@@ -181,8 +180,8 @@ class EventGraph(object):
         vno = 0
         for particle in particles:
             found_v = None
-            if frozenset(particle.mothers) in self.vertices:
-                found_v = self.vertices[frozenset(particle.mothers)]
+            if particle.mothers in self.vertices:
+                found_v = self.vertices[particle.mothers]
             else:
                 for v in self.vertices.itervalues():
                     for m in particle.mothers:
@@ -197,7 +196,7 @@ class EventGraph(object):
                 found_v.outgoing.add(particle)
             else:
                 vno += 1
-                self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
+                self.vertices[particle.mothers] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
                     print >> stderr, particle.no, particle.daughters
                 
@@ -217,7 +216,7 @@ class EventGraph(object):
                 particle.vertex_in = vertex
                 
         self.contract()
-                
+    
     def contract(self):
         """
         Remove vertices for the particle representation
@@ -269,6 +268,7 @@ class EventGraph(object):
         Parse a pythia event record from a log file.
         Numbers are converted to floats where possible.
         """
+        
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
