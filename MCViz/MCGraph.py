@@ -5,7 +5,6 @@ from __future__ import with_statement
 from math import log10, log, atan2, tan
 
 from sys import argv, stderr
-from optparse import OptionParser
 
 FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
     "-------------------------------------------------------------------")
@@ -237,7 +236,6 @@ class EventGraph(object):
         
     @classmethod
     def from_pythia_log(cls, filename):
-        print >>stderr, "BLAH!", filename
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
@@ -250,31 +248,3 @@ class EventGraph(object):
 
         records = [map(maybe_num, line.split()) for line in lines[first:last]]
         return EventGraph(records)
-        
-def main():
-    p = OptionParser()
-    o = p.add_option
-    o("-m", "--method", choices=["pt", "eta", "generations"], default="pt",
-      help="Specify a method")
-
-    o("-d", "--dual", action="store_true",
-      help="Draw the dual of the Feynman graph")
-
-    options, args = p.parse_args(argv)
-    
-    if not args:
-        p.error("Specify a pythia log file to run on")
-
-    event = EventGraph.from_pythia_log(args[1])
-    
-    event.draw_feynman()
-    #event.draw_particles()
-    
-
-if __name__ == "__main__":
-    """
-    try:
-        import 
-    """
-
-    main()
