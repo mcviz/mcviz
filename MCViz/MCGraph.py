@@ -139,10 +139,16 @@ class Particle(object):
             print('%i->%i // daughter' % (self.no, daughter.no))
             
 class EventGraph(object):
-    def __init__(self, records):
+    def __init__(self, records, options=None):
         """
         `records`: A list containing many particles
         """
+        
+        self.options = options
+        
+        if options.limit is not None:
+            # Limit the number of records used to generate the graph
+            records = records[:options.limit]
         
         # Make particle objects and {no:Particle} dictionary
         particles = [Particle(*p) for p in records]
@@ -260,7 +266,7 @@ class EventGraph(object):
         "TODO"
         
     @classmethod
-    def from_pythia_log(cls, filename):
+    def from_pythia_log(cls, filename, options=None):
         """
         Parse a pythia event record from a log file.
         Numbers are converted to floats where possible.
@@ -276,5 +282,5 @@ class EventGraph(object):
                 return s
 
         records = [map(maybe_num, line.split()) for line in lines[first:last]]
-        return EventGraph(records)
+        return EventGraph(records, options)
 
