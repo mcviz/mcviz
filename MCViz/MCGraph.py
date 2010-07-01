@@ -44,7 +44,7 @@ class Vertex(object):
         print_node(self.vno, height=0.1, width=0.1, color="black")
             
         # Printing edges
-        for out_particle in self.outgoing:
+        for out_particle in sorted(self.outgoing):
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
                 
