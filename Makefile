@@ -11,3 +11,13 @@ all: inputs/pythia01.ps
 %.png: %.dot
 	time fdp -Tpng -o $@ $<
 
+test:
+	nosetests tests/
+	
+	# Does not work :-(
+	
+	#find . -iname "*.py" | xargs grep TODO
+	#if $? == 0
+	#    echo "WARNING: TODOs remain"
+	#endif
+
