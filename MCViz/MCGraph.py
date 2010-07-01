@@ -44,7 +44,7 @@ class Vertex(object):
         print_node(self.vno, height=0.1, width=0.1, color="black")
             
         # Printing edges
-        for out_particle in self.outgoing:
+        for out_particle in sorted(self.outgoing):
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
                 
@@ -147,7 +147,7 @@ class EventGraph(object):
         
         self.options = options
         
-        if options.limit is not None:
+        if options and options.limit is not None:
             # Limit the number of records used to generate the graph
             records = records[:options.limit]
         
