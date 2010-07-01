@@ -3,7 +3,7 @@
 all: inputs/pythia01.ps
 
 %.dot: %.out MCViz/MCGraph.py
-	time python2.6 MCViz/MCGraph.py $< > $@
+	time python2.6 bin/mcviz.py $< > $@
 
 %.ps: %.dot
 	time fdp -Tps -o $@ $<

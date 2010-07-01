@@ -187,7 +187,7 @@ class EventGraph(object):
                     for m in particle.mothers:
                         if m in v.incoming:
                             found_v = v
-                            print >> stderr, map(lambda x: x.no, v.incoming), map(lambda x: x.no, particle.mothers)
+                            #print >> stderr, map(lambda x: x.no, v.incoming), map(lambda x: x.no, particle.mothers)
                             break
                     if found_v:
                         break
@@ -198,14 +198,15 @@ class EventGraph(object):
                 vno += 1
                 self.vertices[particle.mothers] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
-                    print >> stderr, particle.no, particle.daughters
+                    # this is the system vertex
+                    print >> stderr, "No mothers: ", particle.no, particle
                 
         for particle in particles:
             if particle.final_state:
                 vno += 1
                 self.vertices[particle] = Vertex(vno, [particle], [])
             if particle.initial_state:
-                print >> stderr, particle.no, particle.daughters
+                print >> stderr, "INITIAL PARTICLE: ", particle.no, particle.name
                 
         # Connect particles to their vertices
         for vertex in self.vertices.itervalues():

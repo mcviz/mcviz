@@ -30,8 +30,11 @@ def main():
     
     event = EventGraph.from_pythia_log(args[1], options)
     
-    event.draw_feynman()
-    #event.draw_particles()
+    if options.dual:
+        event.draw_particles()
+    else:
+        event.draw_feynman()
+
     
 
 if __name__ == "__main__":
