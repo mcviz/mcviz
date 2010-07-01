@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 from __future__ import with_statement
 
-from math import log10, log, atan2, tan
+from .graphviz import print_node, print_edge
 
+from math import log10, log, atan2, tan
 from sys import argv, stderr
 
 FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
@@ -36,17 +37,20 @@ class Vertex(object):
         """
         size = 5
         args = self.vno, self.vno, size
-        #print('%i [label="%i",fontsize=%.0f]' % args)
-        # 
-        print('%i [label="", height=0.1, width=0.1, color=black]' % self.vno)
+            
+        print_node(self.vno, height=0.1, width=0.1, color="black")
             
         # Printing edges
         for out_particle in self.outgoing:
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
-                args = (self.vno, out_particle.vertex_out.vno, out_particle.name, 
-                        out_particle.no, color, log10(out_particle.pt+1)*10 + 1, log10(out_particle.e+1)*20 + 1)
-                print('%i->%i [label="%s (%i)", color=%s, penwidth=%f, weight=%i]' % args)
+                
+                going, coming = self.vno, out_particle.vertex_out.vno
+                print_edge(going, coming, 
+                           label="%s (%i)" % (out_particle.name, out_particle.no),
+                           color=color,
+                           penwidth=log10(out_particle.pt+1)*10 + 1,
+                           weight=log10(out_particle.e+1)*20 + 1)
         
 class Particle(object):
     def __init__(self, no, pdgid, name, status, mother1, mother2, 
@@ -119,24 +123,18 @@ class Particle(object):
         size = (15 + log10(self.pt + 1)*100)
         args = (self.no, self.name, self.no, color, size)
         
-        if len(self.daughters) == 0:
-            # Printing a leaf node
-            print('%i [label="%s (%i)",fillcolor=%s,height,fontsize=%.0f]' % args)
-            
-        elif len(self.mothers) == 0:
-            # Printing a head node
-            print('%i [label="%s (%i)",fillcolor=%s,height,fontsize=%.0f]' % args)
-            
-        else:
-            # Printing an internal node
-            print('%i [label="%s (%i)",fillcolor=%s,height,fontsize=%.0f]' % args)
+        # TODO: Do different things for initial/final state
+        print_node(self.no, 
+                   label="%s (%s)" % (self.name, self.no), 
+                   fillcolor=color,
+                   fontsize=size)
         
         # Printing edges
         for mother in self.mothers:
-            print('%i->%i // mother' % (mother.no, self.no))
-        
+            print_edge(mother.no, self.no, comment="mother")
+            
         for daughter in self.daughters:
-            print('%i->%i // daughter' % (self.no, daughter.no))
+            print_edge(self.no, daughter.no, comment="daughter")
             
 class EventGraph(object):
     def __init__(self, records, options=None):
