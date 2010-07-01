@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 from __future__ import with_statement
 
 from math import log10, log, atan2, tan
@@ -13,8 +12,12 @@ LAST_LINE = ("--------  End PYTHIA Event Listing  -----------------------------"
 
 class Vertex(object):
     """
+    Each vertex is identified by either:
     
+    * An id (vno)
+    * The frozenset of particles going into that vertex
     """
+    
     def __init__(self, vno, incoming, outgoing):
         self.vno = vno
         self.incoming = set(incoming)
@@ -87,6 +90,16 @@ class Particle(object):
             
         return color
             
+    @property
+    def initial_state(self):
+        "No mothers"
+        return not bool(self.mothers)
+    
+    @property
+    def final_state(self):
+        "No daughters"
+        return not bool(self.daughters)
+            
     def draw(self):
         color = self.get_color("gray")
         size = (15 + log10(self.pt + 1)*100)
@@ -111,7 +124,6 @@ class Particle(object):
         for daughter in self.daughters:
             print('%i->%i // daughter' % (self.no, daughter.no))
             
-
 class EventGraph(object):
     def __init__(self, records):
         """
@@ -119,8 +131,8 @@ class EventGraph(object):
         """
         
         # Make particle objects and {no:Particle} dictionary
-        particles = [Particle(*particle) for particle in records]
-        self.particles = dict((v.no, v) for v in particles)
+        particles = [Particle(*p) for p in records]
+        self.particles = dict((p.no, p) for p in particles)
         
         # Convert mothers/daughters to objects
         for particle in particles:
@@ -131,14 +143,14 @@ class EventGraph(object):
             #if particle.no == 243:
        	    #    print >> stderr, particle.no, map(lambda x:x.no, particle.mothers), map(lambda x:x.no, particle.daughters)
 
-        # Populate daughters for particles
+        # Populate mothers and daughters for particles
         for particle in particles:
             for mother in particle.mothers:
                 mother.daughters.add(particle)
             for daughter in particle.daughters:
                 daughter.mothers.add(particle)
 
-        # Remove loops 
+        # Remove self-connections
         for particle in particles:
             particle.mothers.discard(particle)
             particle.daughters.discard(particle)
@@ -146,6 +158,7 @@ class EventGraph(object):
             m.sort()
             particle.mothers = frozenset(m)
                 
+        # TODO: Johannes: Please explain!
         self.vertices = dict()
         vno = 0
         for particle in particles:
@@ -157,7 +170,7 @@ class EventGraph(object):
                     for m in particle.mothers:
                         if m in v.incoming:
                             found_v = v
-                            print >> stderr, map(lambda x:x.no,v.incoming), map(lambda x : x.no,particle.mothers)
+                            print >> stderr, map(lambda x: x.no, v.incoming), map(lambda x: x.no, particle.mothers)
                             break
                     if found_v:
                         break
@@ -171,13 +184,13 @@ class EventGraph(object):
                     print >> stderr, particle.no, particle.daughters
                 
         for particle in particles:
-            if len(particle.daughters) == 0:
+            if particle.final_state:
                 vno += 1
                 self.vertices[particle] = Vertex(vno, [particle], [])
-            if len(particle.mothers) == 0:
+            if particle.initial_state:
                 print >> stderr, particle.no, particle.daughters
                 
-                
+        # Connect particles to their vertices
         for vertex in self.vertices.itervalues():
             for particle in vertex.incoming:
                 particle.vertex_out = vertex
@@ -211,8 +224,6 @@ class EventGraph(object):
                     del self.particles[incoming.no]
                     del self.vertices[key]
                     
-            
-                    
     def draw_particles(self):        
         print("strict digraph pythia {")
         print("node [style=filled, shape=oval]")
@@ -236,6 +247,10 @@ class EventGraph(object):
         
     @classmethod
     def from_pythia_log(cls, filename):
+        """
+        Parse a pythia event record from a log file.
+        Numbers are converted to floats where possible.
+        """
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
@@ -248,3 +263,4 @@ class EventGraph(object):
 
         records = [map(maybe_num, line.split()) for line in lines[first:last]]
         return EventGraph(records)
+
