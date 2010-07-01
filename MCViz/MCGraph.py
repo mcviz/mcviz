@@ -147,7 +147,7 @@ class EventGraph(object):
         
         self.options = options
         
-        if options.limit is not None:
+        if options and options.limit is not None:
             # Limit the number of records used to generate the graph
             records = records[:options.limit]
         
