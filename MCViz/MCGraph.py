@@ -10,7 +10,7 @@
 
 from __future__ import with_statement
 
-from math import log10, log, atan2
+from math import log10, log, atan2, tan
 
 from sys import argv, stderr
 from optparse import OptionParser
@@ -45,7 +45,7 @@ class Vertex(object):
                 color = out_particle.get_color("black")
                 args = (self.vno, out_particle.vertex_out.vno, out_particle.name, 
                         out_particle.no, color, log10(out_particle.pt+1)*10 + 1, log10(out_particle.e+1)*20 + 1)
-                print('%i->%i [label="%s (%i)", color=%s, penwidth=%f, weight=%i]' % args)       
+                print('%i->%i [label="%s (%i)", color=%s, penwidth=%f, weight=%i]' % args)
         
 class Particle(object):
     def __init__(self, no, pdgid, name, status, mother1, mother2, 
@@ -59,8 +59,8 @@ class Particle(object):
         self.colors = int(color1), int(color2)
         self.p = px, py, pz
         self.pt = (px**2 + py**2)**0.5
-        self.eta = -log(tan(atan2(self.pt, self.pz)/2.))
-        self.phi = atan2(self.px, self.py)
+        #self.eta = -log(tan(atan2(self.pt, pz)/2.))
+        self.phi = atan2(px, py)
         self.e = e
         self.m = m
         self.tags = set()
@@ -80,7 +80,7 @@ class Particle(object):
         for daughter in self.daughters:
             daughter.tag(tag)
     
-    def get_color(self,default):
+    def get_color(self, default):
         
         color = self.colors[0] != 0
         anticolor = self.colors[1] != 0
@@ -144,20 +144,36 @@ class EventGraph(object):
         for particle in particles:
             for mother in particle.mothers:
                 mother.daughters.add(particle)
+            for daughter in particle.daughters:
+                daughter.mothers.add(particle)
+
+        # Remove loops 
+        for particle in particles:
+            particle.mothers.discard(particle)
+            particle.daughters.discard(particle)
+            m = list(particle.mothers)
+            m.sort()
+            particle.mothers = frozenset(m)
                 
         self.vertices = dict()
         vno = 0
         for particle in particles:
+            found_v = None
             if frozenset(particle.mothers) in self.vertices:
-                self.vertices[frozenset(particle.mothers)].outgoing.add(particle)
-                
+                found_v = self.vertices[frozenset(particle.mothers)]
             else:
                 for v in self.vertices.itervalues():
                     for m in particle.mothers:
                         if m in v.incoming:
-                            print >> stderr, v.incoming, particle.mothers
-                
-                
+                            found_v = v
+                            print >> stderr, map(lambda x:x.no,v.incoming), map(lambda x : x.no,particle.mothers)
+                            break
+                    if found_v:
+                        break
+
+            if found_v:
+                found_v.outgoing.add(particle)
+            else:
                 vno += 1
                 self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
@@ -229,7 +245,8 @@ class EventGraph(object):
         
     @classmethod
     def from_pythia_log(cls, filename):
-        with open(argv[1]) as fd:
+        print >>stderr, "BLAH!", filename
+        with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
         first, last = lines.index(FIRST_LINE)+2, lines.index(LAST_LINE)-1
@@ -256,11 +273,16 @@ def main():
     if not args:
         p.error("Specify a pythia log file to run on")
 
-    event = EventGraph.from_pythia_log(args[0])
+    event = EventGraph.from_pythia_log(args[1])
     
     event.draw_feynman()
-    #   event.draw_particles()
+    #event.draw_particles()
     
 
 if __name__ == "__main__":
+    """
+    try:
+        import 
+    """
+
     main()
