@@ -1,13 +1,5 @@
 #! /usr/bin/env python
 
-# TODO:
-# Unit tests:
-# - Momentum sum of final state particles
-# - Check for coloured particles with no daughters
-# - Check for vertices without mothers
-# - Check graph consistency (mothers/daughters/incoming/outgoing match up)
-
-
 from __future__ import with_statement
 
 from math import log10, log, atan2, tan

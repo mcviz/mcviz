@@ -1,1 +1,57 @@
-- Release Script that runs tests
+Key:
+    * TODO
+    . Done (Should be put after TODO tasks)
+
+Unit tests:
+
+* Momentum sum of final state particles
+* Check for coloured particles with no daughters
+* Check for vertices without mothers
+* Check graph consistency (mothers/daughters/incoming/outgoing match up)
+* Grep source for the word "TODO", print warnings
+* Nodes should only appear in one subgraph
+* Drawing individual subgraphs
+* Cycles
+* Test on multiple pythia input examples
+
+Arrangement:
+
+* Subgraph class
+* Final state particles in eta/phi/pt
+* Tag application
+* Subgraphs from tag heirarchies
+* "By whether or not the particle was visible to a detector"
+    - Emphasis on detector observables
+* Chromatic lines
+* Views at final state/hadronization
+
+Other enhancements:
+
+* Command line parameters for tweaking display view
+* Make vertices a set or dict/enhance graph internal representation
+* Use triangle symbol for 1->2 vertices, square for 2->2 and * for N->N
+* Print statement writes to configurable fd
+* Run Graphviz directly
+* Use logging
+* Box subgraphs
+* Make movie of evolution
+    - Possibility to do it in 3D space and use fog
+    - Possibility to save CPU intensive part of processing and re-use it
+    - Colour "not yet appeared" nodes white.
+* Chromatic lines
+
+Ideas:
+
+* Represent charge by curving tracks
+* Represent flavour/color/charge/P_T/m/q/phi/e/p
+    - Things we can tweak: edge/node size/colour/position/thickness/weight/style
+* Make graphviz draw gluon symbol for gluon edges
+* 
+
+Goals:
+
+* Algorithms should work on one graph representation
+    - RB tree? (particles and vertices?)
+* Command line options with sane defaults
+* Publish to helpforge
+
