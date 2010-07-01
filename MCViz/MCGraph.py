@@ -22,7 +22,14 @@ class Vertex(object):
         self.vno = vno
         self.incoming = set(incoming)
         self.outgoing = set(outgoing)
-        
+    
+    def __repr__(self):
+        args = self.vno, sorted(self.incoming), sorted(self.outgoing)
+        return "<Vertex id=%i in=set(%r) out=set(%r)>" % args
+    
+    def __lt__(self, rhs):
+        return self.vno < rhs.vno
+    
     def draw(self):
         """
         
@@ -63,7 +70,14 @@ class Particle(object):
         
         # States like "drawn"
         self.state = set()
-        
+    
+    def __repr__(self):
+        return "<Particle id=%i name=%s>" % (self.no, self.name)
+    
+    def __lt__(self, rhs):
+        "Define p1 < p2 so that we can sort particles (by id in this case)"
+        return self.no < rhs.no
+    
     def tag(self, tag):
         """
         Used to record a tag for a particle.
