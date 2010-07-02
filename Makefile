@@ -13,11 +13,13 @@ all: inputs/pythia01.ps
 
 test:
 	nosetests tests/
+
+
+
+# Does not work :-(
 	
-	# Does not work :-(
-	
-	#find . -iname "*.py" | xargs grep TODO
-	#if $? == 0
-	#    echo "WARNING: TODOs remain"
-	#endif
+#find . -iname "*.py" | xargs grep TODO
+#if $? == 0
+#    echo "WARNING: TODOs remain"
+#endif
 

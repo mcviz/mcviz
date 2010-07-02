@@ -171,17 +171,15 @@ class EventGraph(object):
         for particle in particles:
             particle.mothers.discard(particle)
             particle.daughters.discard(particle)
-            m = list(particle.mothers)
-            m.sort()
-            particle.mothers = frozenset(m)
-                
+
+
         # TODO: Johannes: Please explain!
         self.vertices = dict()
         vno = 0
         for particle in particles:
             found_v = None
-            if particle.mothers in self.vertices:
-                found_v = self.vertices[particle.mothers]
+            if frozenset(particle.mothers) in self.vertices:
+                found_v = self.vertices[frozenset(particle.mothers)]
             else:
                 for v in self.vertices.itervalues():
                     for m in particle.mothers:
@@ -194,9 +192,12 @@ class EventGraph(object):
 
             if found_v:
                 found_v.outgoing.add(particle)
+                for new_mother in found_v.incoming:
+                    particle.mothers.add(new_mother)
+                    new_mother.daughters.add(particle)
             else:
                 vno += 1
-                self.vertices[particle.mothers] = Vertex(vno, particle.mothers, [particle])
+                self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
                     # this is the system vertex
                     print >> stderr, "No mothers: ", particle.no, particle
