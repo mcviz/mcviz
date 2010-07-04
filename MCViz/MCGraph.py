@@ -195,7 +195,7 @@ class EventGraph(object):
                 for new_mother in found_v.incoming:
                     particle.mothers.add(new_mother)
                     new_mother.daughters.add(particle)
-            else:
+            elif len(particle.mothers) > 0:
                 vno += 1
                 self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
@@ -226,6 +226,8 @@ class EventGraph(object):
         """Contracts a particle in the graph, 
         it attaches all particles that are attached to the particle start vertex
         to the particle end vertex"""
+
+
         v_in = particle.vertex_in
         v_out = particle.vertex_out
         v_out.incoming.update(v_in.incoming)
@@ -234,7 +236,26 @@ class EventGraph(object):
         v_out.outgoing.update(v_in.outgoing)
         for p in v_in.outgoing:
             p.vertex_in = v_out
+
+        # remove occurred loops:
+        loops = v_out.incoming.intersection(v_out.outgoing)
+        for p in loops:
+            v_out.incoming.discard(p)
+            v_out.outgoing.discard(p)
+
+        # remove the particle itself
+        v_out.incoming.discard(particle)
+        v_out.outgoing.discard(particle)
+
+        # update mother/daughter list of 
+        for p in v_out.incoming:
+            p.daughters = set(v_out.outgoing)
+        for p in v_out.outgoing:
+            p.mothers = set(v_out.incoming)
+
         # now there should be no more reference to v_in
+        #print >> stderr, "del ", v_in
+        #print "del vertex ", v_in.vno 
         del self.vertices[v_in.vno]
         del self.particles[particle.no]
 
@@ -247,17 +268,19 @@ class EventGraph(object):
         """
         Remove vertices for the particle representation
         """
-        for no in self.vertices.keys():
-            # Continue if this vertex is already removed
-            if not no in self.vertices:
-                continue
-
-            vertex = self.vertices[no]
-            if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
-                incoming = list(vertex.incoming)[0]
-                outgoing = list(vertex.outgoing)[0]    
-                if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
-                    self.contract_incoming_vertices(vertex)
+        nr_vertices = len(self.vertices) + 1
+        while len(self.vertices) < nr_vertices:
+            nr_vertices = len(self.vertices)
+            for no in self.vertices.keys():
+                # Continue if this vertex is already removed
+                if not no in self.vertices:
+                    continue
+                vertex = self.vertices[no]
+                if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
+                    incoming = list(vertex.incoming)[0]
+                    outgoing = list(vertex.outgoing)[0]    
+                    if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
+                        self.contract_particle(outgoing)
 
                     
     def draw_particles(self):        
