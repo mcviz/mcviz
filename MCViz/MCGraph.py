@@ -41,7 +41,7 @@ class Vertex(object):
         size = 5
         args = self.vno, self.vno, size
             
-        print_node(self.vno, height=0.1, width=0.1, color="black")
+        print_node(self.vno, height=0.01, width=0.01, color="black", label="")
             
         # Printing edges
         for out_particle in sorted(self.outgoing):
