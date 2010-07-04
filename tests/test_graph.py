@@ -57,5 +57,7 @@ def test_graph():
     graph_is_consistent(event_graph)
     print "removing all vertices"
     for no in event_graph.particles.keys():
-        if event_graph.particles[no].vertex_in and event_graph.particles[no].vertex_out:
+        if no in event_graph.particles and not event_graph.particles[no].initial_state and not event_graph.particles[no].final_state:
             event_graph.contract_particle(event_graph.particles[no])
+
+

@@ -52,8 +52,8 @@ class Vertex(object):
                 print_edge(going, coming, 
                            label="%s (%i)" % (out_particle.name, out_particle.no),
                            color=color,
-                           penwidth=log10(out_particle.pt+1)*10 + 1,
-                           weight=log10(out_particle.e+1)*20 + 1)
+                           penwidth=log10(out_particle.pt+1)*1 + 1,
+                           weight=log10(out_particle.e+1)*0.1 + 1)
         
 class Particle(object):
     def __init__(self, no, pdgid, name, status, mother1, mother2, 
@@ -195,7 +195,7 @@ class EventGraph(object):
                 for new_mother in found_v.incoming:
                     particle.mothers.add(new_mother)
                     new_mother.daughters.add(particle)
-            elif len(particle.mothers) > 0:
+            else:
                 vno += 1
                 self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
@@ -227,9 +227,9 @@ class EventGraph(object):
         it attaches all particles that are attached to the particle start vertex
         to the particle end vertex"""
 
-
         v_in = particle.vertex_in
         v_out = particle.vertex_out
+
         v_out.incoming.update(v_in.incoming)
         for p in v_in.incoming:
             p.vertex_out = v_out
@@ -240,8 +240,10 @@ class EventGraph(object):
         # remove occurred loops:
         loops = v_out.incoming.intersection(v_out.outgoing)
         for p in loops:
-            v_out.incoming.discard(p)
-            v_out.outgoing.discard(p)
+            if not p == particle:
+                v_out.incoming.discard(p)
+                v_out.outgoing.discard(p)
+                del self.particles[p.no]
 
         # remove the particle itself
         v_out.incoming.discard(particle)
@@ -254,8 +256,6 @@ class EventGraph(object):
             p.mothers = set(v_out.incoming)
 
         # now there should be no more reference to v_in
-        #print >> stderr, "del ", v_in
-        #print "del vertex ", v_in.vno 
         del self.vertices[v_in.vno]
         del self.particles[particle.no]
 
@@ -282,6 +282,10 @@ class EventGraph(object):
                     if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
                         self.contract_particle(outgoing)
 
+    def contract_to_final(self):
+        for no in self.particles.keys():
+            if no in self.particles.keys() and not self.particles[no].initial_state and not self.particles[no].final_state:
+                self.contract_particle(self.particles[no])
                     
     def draw_particles(self):        
         print("strict digraph pythia {")
