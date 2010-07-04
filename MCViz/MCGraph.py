@@ -198,12 +198,15 @@ class EventGraph(object):
                 for new_mother in found_v.incoming:
                     particle.mothers.add(new_mother)
                     new_mother.daughters.add(particle)
-            else:
+            elif particle.mothers:
                 vno += 1
                 self.vertices[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
                 if len(particle.mothers) == 0:
                     # this is the system vertex
                     print >> stderr, "No mothers: ", particle.no, particle
+            else: # initial state vertex
+                vno += 1
+                self.vertices[particle] = Vertex(vno, [], [particle])
                 
         for particle in particles:
             if particle.final_state:
