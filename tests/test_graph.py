@@ -43,12 +43,12 @@ def test_vertex_consistency():
         print "INCOMING: ", v.incoming
         for p in v.incoming:
             assert v == p.vertex_out
-            assert p.daughters == v.outgoing
+            assert p.daughters.issubset(v.outgoing)
 
         print "OUTGOING: ", v.outgoing
         for p in v.outgoing:
             assert v == p.vertex_in
-            assert p.mothers == v.incoming
+            assert p.mothers.issubset(v.incoming)
 
 
 def test_graph():

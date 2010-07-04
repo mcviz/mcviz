@@ -221,29 +221,106 @@ class EventGraph(object):
 
         self.contract()
     
+
+    def contract_particle(self, particle):
+        """Contracts a particle in the graph, 
+        it attaches all particles that are attached to the particle start vertex
+        to the particle end vertex"""
+        v_in = particle.vertex_in
+        v_out = particle.vertex_out
+        v_out.incoming.update(v_in.incoming)
+        for p in v_in.incoming:
+            p.vertex_out = v_out
+        v_out.outgoing.update(v_in.outgoing)
+        for p in v_in.outgoing:
+            p.vertex_in = v_out
+        # now there should be no more reference to v_in
+        del self.vertices[v_in.vno]
+        del self.particles[particle.no]
+
+
+    def contract_vertex(self, vertex):
+        """Contracts all vertices around this vertex into this one"""
+        # collect all incoming particles
+        new_incoming = reduce(set.union, (v.vertex_in.incoming for v in vertex.incoming))
+        new_incoming.update(reduce(set.union, (v.vertex_in.incoming for v in vertex.outgoing)))
+        new_outgoing = reduce(set.union, (v.vertex_out.outgoing for v in vertex.incoming))
+        new_outgoing.update(reduce(set.union, (v.vertex_out.outgoing for v in vertex.outgoing)))
+
+        # tell all of them that we are now their vertex
+        for p in new_incoming:
+            p.vertex_out = vertex
+        for p in new_outgoing:
+            p.vertex_in = vertex
+
+        # remove contracted vertices
+        for v in vertex.incoming:
+
+            print >> stderr, "removing vertex ", v.vertex_in.vno
+            del self.vertices[v.vertex_in.vno]
+        for v in vertex.outgoing:
+            print >> stderr, "removing vertex ", v.vertex_out.vno
+            del self.vertices[v.vertex_out.vno]
+            
+        # remove contracted particles
+        for p in vertex.incoming.union(vertex.outgoing):
+            print >> stderr, "removing particle ", p.no
+            del self.particles[p.no]
+
+        # Set own incoming/outgoing
+        vertex.incoming = new_incoming
+        vertex.outgoing = new_outgoing
+
+    def contract_incoming_vertices(self, vertex):
+        """Contracts all incoming vertices around this vertex into this one"""
+        for p in list(vertex.incoming):
+            self.contract_particle(p)
+        return
+        # collect all incoming particles
+        new_incoming = reduce(set.union, (v.vertex_in.incoming for v in vertex.incoming))
+        new_outgoing = reduce(set.union, (v.vertex_out.outgoing for v in vertex.incoming))
+
+        # tell all of them that we are now their vertex
+        for p in new_incoming:
+            p.vertex_out = vertex
+        for p in new_outgoing:
+            p.vertex_in = vertex
+
+        if vertex.vno == 8:
+            print vertex.incoming, vertex.outgoing
+            print [p.vertex_in for p in vertex.incoming]
+            print [p.vertex_out for p in vertex.outgoing]
+        # remove contracted vertices
+        for v in vertex.incoming:
+            print >> stderr, "removing vertex ", v.vertex_in.vno
+            del self.vertices[v.vertex_in.vno]
+
+        # remove contracted particles
+        for p in vertex.incoming:
+            print >> stderr, "removing particle ", p.no
+            del self.particles[p.no]
+
+        # Set own incoming/outgoing
+        vertex.incoming = new_incoming
+        vertex.outgoing = new_outgoing
+    
     def contract(self):
         """
         Remove vertices for the particle representation
         """
         for no in self.vertices.keys():
+            # Continue if this vertex is already removed
+            if not no in self.vertices:
+                continue
+
             vertex = self.vertices[no]
             if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
                 incoming = list(vertex.incoming)[0]
                 outgoing = list(vertex.outgoing)[0]    
                 if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
-                    # attach outgoing particle to previous vertex
-                    outgoing.vertex_in = incoming.vertex_in
-                    
-                    # fix mothers of outgoing particle
-                    outgoing.mothers = set(outgoing.vertex_in.incoming)
-                    
-                    # in previous vertex, replace particle
-                    incoming.vertex_in.outgoing.remove(incoming)
-                    incoming.vertex_in.outgoing.add(outgoing)
-                    
-                    # remove superfluous stuff
-                    del self.particles[incoming.no]
-                    del self.vertices[no]
+                    print >> stderr, "contracting vertex ", vertex.vno, vertex.incoming, vertex.outgoing
+                    self.contract_incoming_vertices(vertex)
+
                     
     def draw_particles(self):        
         print("strict digraph pythia {")
