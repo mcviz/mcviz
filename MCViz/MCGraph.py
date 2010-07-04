@@ -225,8 +225,9 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
 
+        self.contract_gluons()
         self.contract()
-    
+     
 
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
@@ -287,6 +288,14 @@ class EventGraph(object):
                     outgoing = list(vertex.outgoing)[0]    
                     if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
                         self.contract_particle(outgoing)
+
+    def contract_gluons(self):
+        """
+        Remove vertices for the particle representation
+        """
+        for no in self.particles.keys():
+            if no in self.particles.keys() and self.particles[no].pdgid == 21 and all(m.pdgid == 21 for m in self.particles[no].mothers):
+                self.contract_particle(self.particles[no])
 
     def contract_to_final(self):
         for no in self.particles.keys():
