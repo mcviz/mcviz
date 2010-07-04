@@ -238,71 +238,10 @@ class EventGraph(object):
         del self.vertices[v_in.vno]
         del self.particles[particle.no]
 
-
-    def contract_vertex(self, vertex):
-        """Contracts all vertices around this vertex into this one"""
-        # collect all incoming particles
-        new_incoming = reduce(set.union, (v.vertex_in.incoming for v in vertex.incoming))
-        new_incoming.update(reduce(set.union, (v.vertex_in.incoming for v in vertex.outgoing)))
-        new_outgoing = reduce(set.union, (v.vertex_out.outgoing for v in vertex.incoming))
-        new_outgoing.update(reduce(set.union, (v.vertex_out.outgoing for v in vertex.outgoing)))
-
-        # tell all of them that we are now their vertex
-        for p in new_incoming:
-            p.vertex_out = vertex
-        for p in new_outgoing:
-            p.vertex_in = vertex
-
-        # remove contracted vertices
-        for v in vertex.incoming:
-
-            print >> stderr, "removing vertex ", v.vertex_in.vno
-            del self.vertices[v.vertex_in.vno]
-        for v in vertex.outgoing:
-            print >> stderr, "removing vertex ", v.vertex_out.vno
-            del self.vertices[v.vertex_out.vno]
-            
-        # remove contracted particles
-        for p in vertex.incoming.union(vertex.outgoing):
-            print >> stderr, "removing particle ", p.no
-            del self.particles[p.no]
-
-        # Set own incoming/outgoing
-        vertex.incoming = new_incoming
-        vertex.outgoing = new_outgoing
-
     def contract_incoming_vertices(self, vertex):
         """Contracts all incoming vertices around this vertex into this one"""
         for p in list(vertex.incoming):
             self.contract_particle(p)
-        return
-        # collect all incoming particles
-        new_incoming = reduce(set.union, (v.vertex_in.incoming for v in vertex.incoming))
-        new_outgoing = reduce(set.union, (v.vertex_out.outgoing for v in vertex.incoming))
-
-        # tell all of them that we are now their vertex
-        for p in new_incoming:
-            p.vertex_out = vertex
-        for p in new_outgoing:
-            p.vertex_in = vertex
-
-        if vertex.vno == 8:
-            print vertex.incoming, vertex.outgoing
-            print [p.vertex_in for p in vertex.incoming]
-            print [p.vertex_out for p in vertex.outgoing]
-        # remove contracted vertices
-        for v in vertex.incoming:
-            print >> stderr, "removing vertex ", v.vertex_in.vno
-            del self.vertices[v.vertex_in.vno]
-
-        # remove contracted particles
-        for p in vertex.incoming:
-            print >> stderr, "removing particle ", p.no
-            del self.particles[p.no]
-
-        # Set own incoming/outgoing
-        vertex.incoming = new_incoming
-        vertex.outgoing = new_outgoing
     
     def contract(self):
         """
@@ -318,7 +257,6 @@ class EventGraph(object):
                 incoming = list(vertex.incoming)[0]
                 outgoing = list(vertex.outgoing)[0]    
                 if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
-                    print >> stderr, "contracting vertex ", vertex.vno, vertex.incoming, vertex.outgoing
                     self.contract_incoming_vertices(vertex)
 
                     
