@@ -1,25 +1,10 @@
 #! /usr/bin/env python
 
-from MCViz import EventGraph
-from optparse import OptionParser
+from MCViz import EventGraph, parse_options
 from sys import argv
 
 def main():
-    p = OptionParser()
-    o = p.add_option
-    o("-m", "--method", choices=["pt", "eta", "generations"], default="pt",
-      help="Specify a method")
-
-    o("-d", "--dual", action="store_true",
-      help="Draw the dual of the Feynman graph")
-
-    o("-D", "--debug", action="store_true",
-      help="Drop to ipython shell on exception")
-    
-    o("-L", "--limit", action="store", type=int, default=None,
-      help="Limit number of particles made")
-
-    options, args = p.parse_args(argv)
+    options, args = parse_options(argv)
     
     if options.debug:
         from IPython.Shell import IPShellEmbed
@@ -34,8 +19,6 @@ def main():
         event.draw_particles()
     else:
         event.draw_feynman()
-
-    
 
 if __name__ == "__main__":
     """

@@ -2,6 +2,7 @@
 from __future__ import with_statement
 
 from .graphviz import print_node, print_edge
+from .options import parse_options
 
 from math import log10, log, atan2, tan
 from sys import argv, stderr
@@ -140,14 +141,16 @@ class Particle(object):
             print_edge(self.no, daughter.no, comment="daughter")
             
 class EventGraph(object):
-    def __init__(self, records, options=None):
+    def __init__(self, records, options=None, argv=[]):
         """
         `records`: A list containing many particles
         """
-        
+        if options is None:
+            options, args = parse_options(argv)
+            
         self.options = options
         
-        if options and options.limit is not None:
+        if options.limit is not None:
             # Limit the number of records used to generate the graph
             records = records[:options.limit]
         
