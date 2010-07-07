@@ -3,7 +3,7 @@ Key:
     . Done (Should be put after TODO tasks)
 
 Urgent algorithmic problems:
-* Non-deterministic output.
+. Non-deterministic output.
     This could create significant problems so far as testing goes, and I don't
     how graphviz behaves if things are presented in a different order each time.
     Currently I can't refactor without worry because I don't know if I changed 

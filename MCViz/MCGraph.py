@@ -34,6 +34,10 @@ class Vertex(object):
         Sort vertices in order of vno
         """
         return self.vno < rhs.vno
+
+    @property
+    def edge(self):
+        return not self.incoming or not self.outgoing
     
     def draw(self):
         """
@@ -225,8 +229,8 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
 
-        self.contract_gluons()
-        self.contract()
+        #self.contract_gluons()
+        #self.contract()
      
 
     def contract_particle(self, particle):
@@ -318,7 +322,7 @@ class EventGraph(object):
         for vertex in sorted(self.vertices.itervalues()):
             vertex.draw()
         print("}")
-    
+
     @classmethod
     def from_hepmc(cls, filename):
         "TODO"
