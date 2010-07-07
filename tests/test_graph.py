@@ -103,3 +103,17 @@ def test_momentum():
     print ediff
     assert ediff < 1
 
+
+def test_color():
+    for vertex in event_graph.vertices.values():
+        color_in = set(particle.colors[0] for particle in vertex.incoming)
+        color_in.update(particle.colors[1] for particle in vertex.outgoing)
+        color_out = set(particle.colors[1] for particle in vertex.incoming)
+        color_out.update(particle.colors[0] for particle in vertex.outgoing)
+
+        color_in.discard(0)
+        color_out.discard(0)
+        print vertex
+        print color_in, color_out
+        assert len(color_in) == len(color_out)
+        #assert color_in == color_out # not valid

@@ -11,10 +11,10 @@ Urgent algorithmic problems:
 
 Unit tests:
 
-* Momentum sum of final state particles
-* Check for coloured particles with no daughters
-* Check for vertices without mothers
-* Check graph consistency (mothers/daughters/incoming/outgoing match up)
+. Momentum sum of final state particles
+. Check for coloured particles with no daughters
+. Check for vertices without mothers (listed as initial state)
+. Check graph consistency (mothers/daughters/incoming/outgoing match up)
 * Grep source for the word "TODO", print warnings
 * Nodes should only appear in one subgraph
 * Drawing individual subgraphs
