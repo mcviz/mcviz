@@ -38,6 +38,14 @@ class Vertex(object):
     @property
     def edge(self):
         return not self.incoming or not self.outgoing
+
+    @property
+    def hadronization(self):
+        return any(v.colored for v in self.incoming) and any(not v.colored for v in self.outgoing)
+
+    @property
+    def particles(self):
+        return self.incoming | self.outgoing
     
     def draw(self):
         """
@@ -45,8 +53,21 @@ class Vertex(object):
         """
         size = 5
         args = self.vno, self.vno, size
-            
-        print_node(self.vno, height=0.05, width=0.05, color="black", label="")
+        
+        style = "filled"
+        fc = "black"
+        size = 0.02
+
+        if self.hadronization:
+            size = 1.0
+            fc = "white"
+        elif not self.incoming:
+            size = 0.2
+            fc = "red"
+        elif not self.outgoing:
+            style = "invis"
+
+        print_node(self.vno, height=size, width=size, color="black", fillcolor=fc, label="", style=style)
             
         # Printing edges
         for out_particle in sorted(self.outgoing):
@@ -125,6 +146,10 @@ class Particle(object):
     def final_state(self):
         "No daughters"
         return not bool(self.daughters)
+
+    @property
+    def colored(self):
+        return any(color for color in self.colors)
             
     def draw(self):
         color = self.get_color("gray")
