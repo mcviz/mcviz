@@ -12,7 +12,7 @@ all: inputs/pythia01.ps
 	time dot2tex -s -c -t raw --prog fdp $< > $@
 
 %.pdf: %.tex
-	time pdflatex $<
+	time pdflatex -output-directory $(dir $@) $<
 
 %.png: %.dot
 	time fdp -Tpng -o $@ $<
