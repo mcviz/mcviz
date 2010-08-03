@@ -24,6 +24,9 @@ def get_option_parser():
     o("-I", "--show-id", action="store_true",
       help="Controls labelling particle ids")
     
+    o("-c", "--contract", action="append", type=str, default=[],
+      help="Particle graph contraction. Value: 'gluballs', 'kinks'")
+
     return p
     
 def parse_options(argv=None):

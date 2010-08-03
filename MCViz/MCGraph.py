@@ -279,8 +279,11 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
 
-        #self.contract_gluons()
-        #self.contract()
+        if "gluballs" in options.contract:
+            self.contract_gluons()
+            
+        if "kinks" in options.contract:
+            self.contract()
      
 
     def contract_particle(self, particle):
