@@ -11,6 +11,18 @@ all: inputs/pythia01.ps
 %.png: %.dot
 	time fdp -Tpng -o $@ $<
 
+%.svg: %.dot
+	time fdp -Tsvg -o $@ $<
+	
+%.sfdpsvg: %.dot
+	time fdp -Tsvg -o $@ $<
+
+%.dotsvg: %.dot
+	time dot -Tsvg -o $@ $<
+	
+%.dotpng: %.dot
+	time dot -Tpng -o $@ $<
+
 test:
 	nosetests tests/
 
