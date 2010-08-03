@@ -44,7 +44,8 @@ class Vertex(object):
     @property
     def is_initial(self):
         return not self.incoming
-        
+    
+    @property    
     def is_final(self):
         return not self.outgoing
 
