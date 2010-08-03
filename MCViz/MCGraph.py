@@ -1,8 +1,10 @@
 #! /usr/bin/env python
+
 from __future__ import with_statement
 
 from .graphviz import print_node, print_edge
 from .options import parse_options
+from .utils import make_unicode_name
 
 from math import log10, log, atan2, tan
 from sys import argv, stderr
@@ -74,9 +76,11 @@ class Vertex(object):
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
                 
+                name = make_unicode_name(out_particle.name)
+                
                 going, coming = self.vno, out_particle.vertex_out.vno
                 print_edge(going, coming, 
-                           label="%s (%i)" % (out_particle.name, out_particle.no),
+                           label="%s (%i)" % (name, out_particle.no),
                            color=color,
                            penwidth=log10(out_particle.pt+1)*1 + 1,
                            weight=log10(out_particle.e+1)*0.1 + 1)

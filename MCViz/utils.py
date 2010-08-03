@@ -1,13 +1,21 @@
+# -*- coding: UTF-8 -*-
+
 import re
 import unicodedata as UD
 
 GREEK_RANGE = xrange(0x3b1, 0x3ca)
-GREEK_LETTERS = [UD.name(unichr(x)).split()[-1].lower() for x in GREEK_RANGE]
+GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
+GREEK_NAME = lambda l: UD.name(l).split()[-1].lower()
+GREEK_NAMECHARS = [(GREEK_NAME(l), l) for l in GREEK_LETTERS]
 GREEK_ALTERNATES = "(%s)" % "|".join("[%c%c]%s" % (g[0].upper(), g[0], g[1:])
-                                     for g in GREEK_LETTERS)
+                                     for g, c in GREEK_NAMECHARS)
 
 GREEK_FINDER = re.compile(GREEK_ALTERNATES)
 BAR_FINDER = re.compile(r"([^\s]+?)(?<!\\)bar(.*)")
+
+SUPER_ZERO = u"⁰"
+SUPER_PLUS = u"⁺"
+SUPER_MINUS = u"⁻"
 
 def latexize_particle_name(name, n=0):
     r"""
@@ -30,6 +38,18 @@ def latexize_particle_name(name, n=0):
         return latexize_particle_name(name, n+1)
     
     return name
+
+def make_unicode_name(name):
+    replacements = [
+        ("0", SUPER_ZERO),
+        ("+", SUPER_PLUS),
+        ("-", SUPER_MINUS),
+    ] + GREEK_NAMECHARS
+    
+    for what, replacement in replacements:
+        name = name.replace(what, replacement)
+        
+    return name.encode("UTF-8")
     
 def test():
     print latexize_particle_name(r"I am the alpha0 and the Zeta etabar")
