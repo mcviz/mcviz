@@ -3,10 +3,16 @@
 import re
 import unicodedata as UD
 
+def fixup_unicodedata_name(x):
+    "Oh dear. unicodedata misspelt lambda."
+    if x == "lamda": return "lambda"
+    return x
+
 GREEK_RANGE = xrange(0x3b1, 0x3ca)
 GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
-GREEK_NAME = lambda l: UD.name(l).split()[-1].lower()
+GREEK_NAME = lambda l: fixup_unicodedata_name(UD.name(l).split()[-1].lower())
 GREEK_NAMECHARS = [(GREEK_NAME(l), l) for l in GREEK_LETTERS]
+GREEK_UNAMECHARS = [(g.capitalize(), l.upper()) for g, l in GREEK_NAMECHARS]
 GREEK_ALTERNATES = "(%s)" % "|".join("[%c%c]%s" % (g[0].upper(), g[0], g[1:])
                                      for g, c in GREEK_NAMECHARS)
 
@@ -16,6 +22,7 @@ BAR_FINDER = re.compile(r"([^\s]+?)(?<!\\)bar(.*)")
 SUPER_ZERO = u"⁰"
 SUPER_PLUS = u"⁺"
 SUPER_MINUS = u"⁻"
+BAR = u"̅"
 
 def latexize_particle_name(name, n=0):
     r"""
@@ -44,7 +51,8 @@ def make_unicode_name(name):
         ("0", SUPER_ZERO),
         ("+", SUPER_PLUS),
         ("-", SUPER_MINUS),
-    ] + GREEK_NAMECHARS
+        ("bar", BAR),
+    ] + GREEK_NAMECHARS + GREEK_UNAMECHARS
     
     for what, replacement in replacements:
         name = name.replace(what, replacement)
