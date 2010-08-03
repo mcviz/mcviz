@@ -2,10 +2,6 @@
 
 from __future__ import with_statement
 
-from .graphviz import print_node, print_edge
-from .options import parse_options
-from .utils import latexize_particle_name
-
 from math import log10, log, atan2, tan
 from sys import argv, stderr
 
@@ -58,51 +54,7 @@ class Vertex(object):
         return (any(v.colored for v in self.incoming) and 
                 any(not v.colored for v in self.outgoing))
 
-    def draw(self, options):        
-        style = "filled"
-        size = 0.1
-        fillcolor = "black"
-        
-        if self.hadronization:
-            # Big white hardronization vertices
-            size, fillcolor = 1.0, "white"
-            
-        elif self.is_initial:
-            # Big red initial vertices
-            size, fillcolor = 1.0, "red"
-            
-        elif self.is_final:
-            # Don't show final particle vertices
-            style = "invis"
 
-        print_node(self.vno, height=size, width=size, 
-                   color="black", fillcolor=fillcolor, label="", style=style)
-            
-        # Printing edges
-        for out_particle in sorted(self.outgoing):
-            if out_particle.vertex_out:
-                color = out_particle.get_color("black")
-                
-                # Halfsize arrows for final vertices
-                arrowsize = 1.0 if not out_particle.final_state else 0.5
-                
-                # Greek-character-ize names.
-                name = latexize_particle_name(out_particle.name)
-                if options.show_id:
-                    label = "%s (%i)" % (name, out_particle.no)
-                else:
-                    if name == "g":
-                        # Don't bother naming gluons.
-                        label = ""
-                    else:
-                        label = name
-                
-                going, coming = self.vno, out_particle.vertex_out.vno
-                print_edge(going, coming, label=label, color=color,
-                           penwidth=log10(out_particle.pt+1)*1 + 1,
-                           weight=log10(out_particle.e+1)*0.1 + 1,
-                           arrowsize=arrowsize)
-        
 class Particle(object):
     def __init__(self, no, pdgid, name, status, mother1, mother2, 
                  daughter1, daughter2, color1, color2, px, py, pz, e, m):
@@ -122,9 +74,6 @@ class Particle(object):
         self.tags = set()
         self.vertex_in = None
         self.vertex_out = None
-        
-        # States like "drawn"
-        self.state = set()
     
     def __repr__(self):
         return "<Particle id=%i name=%s>" % (self.no, self.name)
@@ -173,32 +122,12 @@ class Particle(object):
     def colored(self):
         return any(color for color in self.colors)
             
-    def draw(self):
-        color = self.get_color("gray")
-        size = (15 + log10(self.pt + 1)*100)
-        args = (self.no, self.name, self.no, color, size)
-        
-        # TODO: Do different things for initial/final state
-        print_node(self.no, 
-                   label="%s (%s)" % (self.name, self.no), 
-                   fillcolor=color,
-                   fontsize=size)
-        
-        # Printing edges
-        for mother in self.mothers:
-            print_edge(mother.no, self.no, comment="mother")
-            
-        for daughter in self.daughters:
-            print_edge(self.no, daughter.no, comment="daughter")
-            
+
 class EventGraph(object):
-    def __init__(self, records, options=None, argv=[]):
+    def __init__(self, records, options=None):
         """
         `records`: A list containing many particles
         """
-        if options is None:
-            options, args = parse_options(argv)
-            
         self.options = options
         
         if options.limit is not None:
@@ -359,26 +288,7 @@ class EventGraph(object):
             if no in self.particles.keys() and not self.particles[no].initial_state and not self.particles[no].final_state:
                 self.contract_particle(self.particles[no])
                     
-    def draw_particles(self):        
-        print("strict digraph pythia {")
-        print("node [style=filled, shape=oval]")
-        
-        for particle in self.particles.itervalues():
-            particle.draw(self.options)
-            
-        print("}")
     
-    def draw_feynman(self):        
-        print("strict digraph pythia {")
-        print("node [style=filled, shape=oval]")
-        print("edge [labelangle=90, fontsize=12]")
-        print("ratio=1")
-        
-        for vertex in sorted(self.vertices.itervalues()):
-            vertex.draw(self.options)
-            
-        print("}")
-
     @classmethod
     def from_hepmc(cls, filename):
         "TODO"
@@ -389,7 +299,7 @@ class EventGraph(object):
         Parse a pythia event record from a log file.
         Numbers are converted to floats where possible.
         """
-        
+
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 

@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
 from MCViz import EventGraph, parse_options
+from MCViz.FeynmanArtist import FeynmanArtist
+from MCViz.DualArtist import DualArtist
 from sys import argv
 
 def main():
@@ -9,21 +11,23 @@ def main():
     if options.debug:
         from IPython.Shell import IPShellEmbed
         ip = IPShellEmbed(["-pdb"], rc_override=dict(quiet=True))
-    
-    if not args:
-        p.error("Specify a pythia log file to run on")
-    
+
+    if len(args) <= 1:
+        print "Specify a pythia log file to run on"
+        return -1
+
     event = EventGraph.from_pythia_log(args[1], options)
     
     if options.dual:
-        event.draw_particles()
+        artist = DualArtist(options)
     else:
-        event.draw_feynman()
+        artist = FeynmanArtist(options)
+
+    artist.draw(event)
 
 if __name__ == "__main__":
     """
     try:
         import 
     """
-
     main()
