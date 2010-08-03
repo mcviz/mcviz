@@ -36,15 +36,21 @@ def latexize_particle_name(name, n=0):
     
     if not n:
         # only do this on the first pass
-        name = GREEK_FINDER.sub(lambda g: "{\\" + g.group(0) + "}", name)
+        name = GREEK_FINDER.sub(lambda g: "\\\\" + g.group(0), name)
+        replacements = [
+            ("0", "^0"),
+            ("+", "^+"),
+            ("-", "^-")]
+        for what, replacement in replacements:
+            name = name.replace(what, replacement)
     
-    name = BAR_FINDER.sub(lambda g: "\\bar{%s}%s" % g.groups(), name)
+    name = BAR_FINDER.sub(lambda g: "\\\\bar{%s}%s" % g.groups(), name)
     
     if name != start_name:
         # Keep going until we didn't make any changes
         return latexize_particle_name(name, n+1)
     
-    return name
+    return "$" + name + "$"
 
 def make_unicode_name(name):
     replacements = [

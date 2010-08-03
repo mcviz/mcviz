@@ -3,7 +3,7 @@
 all: inputs/pythia01.ps
 
 %.dot: %.out MCViz/MCGraph.py
-	time python2.6 bin/mcviz.py $< > $@
+	time python2.6 bin/mcviz.py -c gluballs -c kinks $< > $@
 
 %.ps: %.dot
 	time fdp -Tps -o $@ $<

@@ -4,7 +4,7 @@ from __future__ import with_statement
 
 from .graphviz import print_node, print_edge
 from .options import parse_options
-from .utils import make_unicode_name
+from .utils import latexize_particle_name
 
 from math import log10, log, atan2, tan
 from sys import argv, stderr
@@ -87,7 +87,7 @@ class Vertex(object):
                 arrowsize = 1.0 if not out_particle.final_state else 0.5
                 
                 # Greek-character-ize names.
-                name = make_unicode_name(out_particle.name)
+                name = latexize_particle_name(out_particle.name)
                 if options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:
@@ -275,7 +275,7 @@ class EventGraph(object):
                 particle.vertex_in = vertex
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
-
+        
         if "gluballs" in options.contract:
             self.contract_gluons()
             
