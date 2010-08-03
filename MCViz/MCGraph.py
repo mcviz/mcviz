@@ -61,35 +61,35 @@ class Vertex(object):
     def particles(self):
         return self.incoming | self.outgoing
     
-    def draw(self):
-        """
-        
-        """
-        size = 5
-        args = self.vno, self.vno, size
-        
+    def draw(self, options):        
         style = "filled"
-        fc = "black"
-        size = 0.02
-
+        size = 0.1
+        fillcolor = "black"
+        
         if self.hadronization:
-            size = 1.0
-            fc = "white"
-        elif not self.incoming:
-            size = 0.2
-            fc = "red"
-        elif not self.outgoing:
+            # Big white hardronization vertices
+            size, fillcolor = 1.0, "white"
+            
+        elif self.is_initial:
+            # Big red initial vertices
+            size, fillcolor = 1.0, "red"
+            
+        elif self.is_final:
+            # Don't show final particle vertices
             style = "invis"
 
-        print_node(self.vno, height=size, width=size, color="black", fillcolor=fc, label="", style=style)
+        print_node(self.vno, height=size, width=size, 
+                   color="black", fillcolor=fillcolor, label="", style=style)
             
         # Printing edges
         for out_particle in sorted(self.outgoing):
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
                 
+                # Halfsize arrows for final vertices
                 arrowsize = 1.0 if not out_particle.final_state else 0.5
                 
+                # Greek-character-ize names.
                 name = make_unicode_name(out_particle.name)
                 
                 going, coming = self.vno, out_particle.vertex_out.vno
@@ -334,13 +334,16 @@ class EventGraph(object):
                 if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
                     incoming = list(vertex.incoming)[0]
                     outgoing = list(vertex.outgoing)[0]    
-                    if incoming.pdgid == outgoing.pdgid and incoming.vertex_in and outgoing.vertex_out:
+                    if (incoming.pdgid == outgoing.pdgid and 
+                        incoming.vertex_in and outgoing.vertex_out):
                         self.contract_particle(outgoing)
 
     def contract_gluons(self):
         """
         Remove vertices for the particle representation
         """
+        # TODO: Pw->Je: 1) Why not for particle in particles? 
+        #               2) Isn't "if no in self.particles.keys" redundent?
         for no in self.particles.keys():
             if no in self.particles.keys() and self.particles[no].pdgid == 21 and all(m.pdgid == 21 for m in self.particles[no].mothers):
                 self.contract_particle(self.particles[no])
@@ -353,8 +356,10 @@ class EventGraph(object):
     def draw_particles(self):        
         print("strict digraph pythia {")
         print("node [style=filled, shape=oval]")
+        
         for particle in self.particles.itervalues():
-            particle.draw()
+            particle.draw(self.options)
+            
         print("}")
     
     def draw_feynman(self):        
@@ -364,7 +369,8 @@ class EventGraph(object):
         print("ratio=1")
         
         for vertex in sorted(self.vertices.itervalues()):
-            vertex.draw()
+            vertex.draw(self.options)
+            
         print("}")
 
     @classmethod
