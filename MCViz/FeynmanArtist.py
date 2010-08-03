@@ -49,7 +49,7 @@ class FeynmanArtist(object):
                 
                 # Greek-character-ize names.
                 name = latexize_particle_name(out_particle.name)
-                if self.options.show_id:
+                if self.options and self.options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:
                     if name == "g":

@@ -130,7 +130,7 @@ class EventGraph(object):
         """
         self.options = options
         
-        if options.limit is not None:
+        if options and options.limit is not None:
             # Limit the number of records used to generate the graph
             records = records[:options.limit]
         
@@ -205,10 +205,10 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
         
-        if "gluballs" in options.contract:
+        if options and "gluballs" in options.contract:
             self.contract_gluons()
             
-        if "kinks" in options.contract:
+        if options and "kinks" in options.contract:
             self.contract()
      
 
