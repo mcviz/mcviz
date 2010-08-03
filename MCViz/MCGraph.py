@@ -42,8 +42,20 @@ class Vertex(object):
         return not self.incoming or not self.outgoing
 
     @property
+    def is_initial(self):
+        return not self.incoming
+        
+    def is_final(self):
+        return not self.outgoing
+
+    @property
     def hadronization(self):
-        return any(v.colored for v in self.incoming) and any(not v.colored for v in self.outgoing)
+        """
+        Any vertex which has a coloured particle incoming and a non-coloured 
+        particle outgoing is a hadronization vertex
+        """
+        return (any(v.colored for v in self.incoming) and 
+                any(not v.colored for v in self.outgoing))
 
     @property
     def particles(self):
@@ -76,6 +88,8 @@ class Vertex(object):
             if out_particle.vertex_out:
                 color = out_particle.get_color("black")
                 
+                arrowsize = 1.0 if not out_particle.final_state else 0.5
+                
                 name = make_unicode_name(out_particle.name)
                 
                 going, coming = self.vno, out_particle.vertex_out.vno
@@ -83,7 +97,8 @@ class Vertex(object):
                            label="%s (%i)" % (name, out_particle.no),
                            color=color,
                            penwidth=log10(out_particle.pt+1)*1 + 1,
-                           weight=log10(out_particle.e+1)*0.1 + 1)
+                           weight=log10(out_particle.e+1)*0.1 + 1,
+                           arrowsize=arrowsize)
         
 class Particle(object):
     def __init__(self, no, pdgid, name, status, mother1, mother2, 
