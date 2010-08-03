@@ -21,6 +21,9 @@ def get_option_parser():
     o("-w", "--pen-width", choices=["pt", "off"], default="off")
     o("-W", "--edge-weight", choices=["e", "off"], default="off")
     
+    o("-I", "--show-id", action="store_true",
+      help="Controls labelling particle ids")
+    
     return p
     
 def parse_options(argv=None):

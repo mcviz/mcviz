@@ -91,11 +91,17 @@ class Vertex(object):
                 
                 # Greek-character-ize names.
                 name = make_unicode_name(out_particle.name)
+                if options.show_id:
+                    label = "%s (%i)" % (name, out_particle.no)
+                else:
+                    if name == "g":
+                        # Don't bother naming gluons.
+                        label = ""
+                    else:
+                        label = name
                 
                 going, coming = self.vno, out_particle.vertex_out.vno
-                print_edge(going, coming, 
-                           label="%s (%i)" % (name, out_particle.no),
-                           color=color,
+                print_edge(going, coming, label=label, color=color,
                            penwidth=log10(out_particle.pt+1)*1 + 1,
                            weight=log10(out_particle.e+1)*0.1 + 1,
                            arrowsize=arrowsize)
