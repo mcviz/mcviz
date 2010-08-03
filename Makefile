@@ -1,12 +1,18 @@
-.PRECIOUS: %.dot
+CODE=MCViz/*.py Makefile bin/*.py
 
 all: inputs/pythia01.ps
 
-%.dot: %.out MCViz/MCGraph.py
-	time python2.6 bin/mcviz.py -c gluballs -c kinks $< > $@
+%.dot: %.out ${CODE}
+	time python2.6 bin/mcviz.py -c kinks $< > $@
 
 %.ps: %.dot
 	time fdp -Tps -o $@ $<
+
+%.tex: %.dot
+	time dot2tex -s -c -t raw --prog fdp $< > $@
+
+%.pdf: %.tex
+	time pdflatex $<
 
 %.png: %.dot
 	time fdp -Tpng -o $@ $<

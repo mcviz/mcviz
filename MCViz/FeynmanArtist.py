@@ -52,15 +52,23 @@ class FeynmanArtist(object):
                 if self.options and self.options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:
-                    if name == "g":
-                        # Don't bother naming gluons.
-                        label = ""
-                    else:
-                        label = name
-                
+                    label = name
+
+                style = ""
+                dir = "forward"
+                if out_particle.gluon:
+                    label = ""
+                    style = "decorate, draw=green, decoration={coil,amplitude=4pt, segment length=5pt}"
+                elif out_particle.photon:
+                    label = ""
+                    style = "decorate, decoration=snake, draw=red"
+                    dir = "none"
+
                 going, coming = vertex.vno, out_particle.vertex_out.vno
                 print_edge(going, coming, label=label, color=color,
                            penwidth=log10(out_particle.pt+1)*1 + 1,
                            weight=log10(out_particle.e+1)*0.1 + 1,
-                           arrowsize=arrowsize)
+                           arrowsize=arrowsize,
+                           style=style,
+                           dir=dir)
         

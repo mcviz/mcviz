@@ -121,6 +121,22 @@ class Particle(object):
     @property
     def colored(self):
         return any(color for color in self.colors)
+
+    @property
+    def gluon(self):
+        return self.pdgid == 21
+
+    @property
+    def photon(self):
+        return self.pdgid == 22
+
+    @property
+    def quark(self):
+        return 1 <= abs(self.pdgid) <= 8
+    
+    @property
+    def lepton(self):
+        return 11 <= abs(self.pdgid) <= 18
             
 
 class EventGraph(object):

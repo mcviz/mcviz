@@ -50,7 +50,7 @@ def latexize_particle_name(name, n=0):
         # Keep going until we didn't make any changes
         return latexize_particle_name(name, n+1)
     
-    return "$" + name + "$"
+    return "$\\\\mathbf{" + name + "}$"
 
 def make_unicode_name(name):
     replacements = [
