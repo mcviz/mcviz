@@ -1,4 +1,4 @@
-
+.PRECIOUS: %.dot
 
 all: inputs/pythia01.ps
 
