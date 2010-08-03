@@ -58,10 +58,6 @@ class Vertex(object):
         return (any(v.colored for v in self.incoming) and 
                 any(not v.colored for v in self.outgoing))
 
-    @property
-    def particles(self):
-        return self.incoming | self.outgoing
-    
     def draw(self, options):        
         style = "filled"
         size = 0.1
