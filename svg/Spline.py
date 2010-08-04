@@ -1,6 +1,6 @@
 from __future__ import division
 
-from math import sqrt 
+from math import sqrt, hypot
 from bisect import bisect_left
 
 class Spline(object):
@@ -38,11 +38,11 @@ class Spline(object):
 
     def sample_path(self, N):
         self.N = N
-        self.points = [self.get_point(x / N) for x in range(N + 1))
+        self.points = [self.get_point(x / N) for x in range(N + 1)]
         self.distances = [hypot(p1[0] - p2[0], p1[1] - p2[1])
-                          for p1, p2 in zip(self.points[:-1], self.points[1:]))
+                          for p1, p2 in zip(self.points[:-1], self.points[1:])]
         self.length = sum(self.distances)
-        cum = [0]
+        cum = self.cumulative = [0]
         for dist in self.distances:
             cum.append(cum[-1] + dist)
 
