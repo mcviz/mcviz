@@ -1,4 +1,4 @@
-from spline import Spline
+from Spline import Spline
 
 #spline = Spline(5.0, -10, 10.000, -9.722, 10.0, 10.000, 15.0, 10.000)
 spline = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
