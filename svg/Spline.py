@@ -52,8 +52,8 @@ class Spline(object):
         i = bisect_left(self.cumulative, s)
         if i == 0: 
             i = 1
-        part = (s - self.cumulative[i]) / self.distances[i - 1]
-        return (i + part) / self.N
+        part = (s - self.cumulative[i]) / self.distances[i-1]
+        return (i*1.0 + part)/self.N
 
     def transform(self, ix, iy):
         """transform a point according to the spline trafo
