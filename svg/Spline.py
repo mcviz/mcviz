@@ -39,7 +39,9 @@ class Spline(object):
         self.points = map(lambda x : self.get_point(x*1.0/N), range(N+1))
         self.distances = map(lambda (p1,p2) : sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2), zip(self.points[:-1], self.points[1:]))
         self.length = sum(self.distances)
-        self.cumulative = reduce(lambda cum, dist : cum + [cum[-1]+dist], self.distances, [0])
+        cum = [0]
+        for dist in self.distances:
+            cum.append(cum[-1] + dist)
 
     def get_t(self, s):
         assert 0 <= s <= 1
