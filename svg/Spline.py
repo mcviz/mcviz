@@ -1,8 +1,10 @@
-from math import sqrt 
+from __future__ import division
+
+from math import sqrt, hypot
 from bisect import bisect_left
 
 class Spline(object):
-    def __init__(self, x0, y0, x1, y1, x2, y2, x3, y3, N = 100):
+    def __init__(self, x0, y0, x1, y1, x2, y2, x3, y3, N=100):
         A = x3 - 3*x2 + 3*x1 - x0
         B = 3*x2 - 6*x1 + 3*x0
         C = 3*x1 - 3*x0
@@ -36,10 +38,11 @@ class Spline(object):
 
     def sample_path(self, N):
         self.N = N
-        self.points = map(lambda x : self.get_point(x*1.0/N), range(N+1))
-        self.distances = map(lambda (p1,p2) : sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2), zip(self.points[:-1], self.points[1:]))
+        self.points = [self.get_point(x / N) for x in range(N + 1)]
+        self.distances = [hypot(p1[0] - p2[0], p1[1] - p2[1])
+                          for p1, p2 in zip(self.points[:-1], self.points[1:])]
         self.length = sum(self.distances)
-        cum = [0]
+        cum = self.cumulative = [0]
         for dist in self.distances:
             cum.append(cum[-1] + dist)
 
@@ -68,10 +71,11 @@ if __name__=="__main__":
     s = Spline(5.0, -10, 20.000, -10, 20.0, 10.000, 40.0, 10.000)
     lx, ly = 0, 0
     for i in range(500):
-        t = s.get_t(i/500.0)
+        t = s.get_t(i / 500)
         x, y, px, py = s.get_point_perp(t)
-        if lx == 0 and ly == 0: lx, ly = x, y        
-        print t, x,y, px, py, sqrt((x-lx)**2 + (y-ly)**2)
+        if lx == 0 and ly == 0: 
+            lx, ly = x, y        
+        print t, x,y, px, py, hypot(x - lx, y - ly)
         lx, ly = x, y
 
 
