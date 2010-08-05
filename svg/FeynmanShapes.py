@@ -1,89 +1,158 @@
-from Spline import Spline
-
-#spline = Spline(5.0, -10, 10.000, -9.722, 10.0, 10.000, 15.0, 10.000)
-spline = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
+from __future__ import division
+max_amp = 5
 
 
-def getPhotonDataRaw(N, d, amplitude, power=3):
-    data = ["M %.5f %.5f\n" % spline.transform(0,0)]
-
-    strength0 = d/2.0
-
-    # scalings of interior points
-    scalings = [(1 - abs(i*2.0/(N-1) - 1)**power) for i in range(N)]
+def get_photon_splines(length, amplitude, n_waves, power = 5):
+    N = n_waves * 2
+    wavelength = length / N
+    cntrl_strength = wavelength / 2
+    
+    # scaling envelope 
+    envelope = [1 - abs(2*i/(N-1) - 1)**power for i in range(N)]
 
     # x offsets of points:
-    cpx = [0.0]
-    cpx.extend(map(lambda x : d/2.0 + x*d, range(N)))
-    cpx.append(cpx[-1] + d/2.0)
+    px = [0.0] + [wavelength * (0.5 + i) for i in range(N)]
+    px.append(px[-1] + wavelength / 2)
 
     # y offsets of points:
-    cpy = [0.0]
-    cpy.extend(map(lambda i : amplitude*scalings[i], range(N)))
-    cpy.append(0.0)
-
+    py = [0.0] + [amplitude * envelope[i] for i in range(N)] + [0.0]
+    
+    splines = []
     sgn = 1
     for i in range(1, N+2):
-        cp1 = cpx[i-1]+strength0, -sgn*cpy[i-1]
-        cp2 = cpx[i]-strength0, sgn*cpy[i]
-        dp  = cpx[i], sgn*cpy[i]
-        #print cp1, cp2, dp
-        cp1 = spline.transform(*cp1)
-        cp2 = spline.transform(*cp2)
-        dp = spline.transform(*dp)
-        #print cp1, cp2, dp
-        data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (cp1[0], cp1[1], cp2[0], cp2[1], dp[0], dp[1]))
+        op  = px[i-1], -sgn * px[i-1]
+        cp1 = px[i-1] + cntrl_strength, -sgn * py[i-1]
+        cp2 = px[i] - cntrl_strength, sgn * py[i]
+        dp  = px[i], sgn * py[i]
+        if i == 1:
+            cp1 = op
+        elif i == N+1:
+            cp2 = dp
+        splines.append([op, cp1, cp2, dp])
         sgn = -sgn
+    return splines
+
+def get_gluon_splines(length, amplitude, n_waves):
+    loopyness = 0.7
+    init_length = 2
+
+    N = n_waves * 2 + 1
+    wavelength = length / (N - 1 + 2*init_length)
+    cntrl_strength = wavelength * loopyness
+    
+    # x offsets of points:
+
+    px = [0.0] + [wavelength * (init_length + i) for i in range(N)]
+    px.append(px[-1] + init_length * wavelength)
+
+    # y offsets of points:
+    py = [0.0] + [amplitude for i in range(N)] + [0.0]
+    
+    splines = []
+    sgn = 1
+    for i in range(1, N+2):
+        op  = px[i-1], -sgn * px[i-1]
+        cp1 = px[i-1] - sgn * (2 - sgn) * cntrl_strength, -sgn * py[i-1]
+        cp2 = px[i] - sgn * (2 + sgn) * cntrl_strength, sgn * py[i]
+        dp  = px[i], sgn * py[i]
+        if i == 1:
+            cp1 = op
+        elif i == N+1:
+            cp2 = dp
+        splines.append([op, cp1, cp2, dp])
+        sgn = -sgn
+    return splines
+    
+def pathdata_from_splines(splines, trafo_spline = None):
+    if trafo_spline:
+        splines = [map(trafo_spline.transform, s) for s in splines]
+    data = ["M %.5f %.5f\n" % splines[0][0]]
+    for s in splines:
+        data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (s[1] + s[2] + s[3]))
+    return "".join(data)
+
+def pathdata_from_splines_smooth(splines, trafo_spline = None):
+    if trafo_spline:
+        new_splines = []
+        for s in splines:
+            s0T = trafo_spline.transform(s[0])
+            s3T = trafo_spline.transform(s[3])
+            s1T = trafo_spline.transform_to(s[0][0],s[1])
+            s2T = trafo_spline.transform_to(s[3][0],s[2])
+            new_splines.append([s0T, s1T, s2T, s3T])        
+        splines = new_splines
+    data = ["M %.5f %.5f\n" % splines[0][0]]
+    for s in splines:
+        data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (s[1] + s[2] + s[3]))
     return "".join(data)
 
 
-def getPhotonData(length, energy, base_length = 0.1, N_min = 5, N_max = 20):
-    """Get Photon Data depending on energy (clamped from 0 to 1)"""
+def photon(energy, length = None, spline = None, n_max = 10, n_min = 3):
+    """Get the SVG path data for a photon.
+    energy must be between 0 and 1
+    either length or spline must be given."""
+    assert length or spline
+    assert not (length and spline)
+    if not length:
+        length = spline.length
     energy = min(1, max(0,energy))
-    N = int(N_min + energy*(N_max-N_min))
-    d = length*1.0/N
-    amplitude = d/2.0
-    print N, d, amplitude 
-    return getPhotonDataRaw(N, d, amplitude)
+    amplitude = (0.5 + 0.5*energy) * max_amp
+    n_per_50 = n_min + energy * (n_max - n_min)
+    n = max(2, int(n_per_50 * length / 50))
+    if spline:
+        return pathdata_from_splines_smooth(get_photon_splines(spline.length, amplitude, n), trafo_spline = spline)
+    else:
+        return pathdata_from_splines(get_photon_splines(length, amplitude, n))
 
-import sys
-from math import sin, cos, pi
+def gluon(energy, length = None, spline = None, n_max = 11, n_min = 1):
+    """Get the SVG path data for a gluon.
+    energy must be between 0 and 1
+    either length or spline must be given."""
+    assert length or spline
+    assert not (length and spline)
+    if not length:
+        length = spline.length
+    energy = min(1, max(0,energy))
+    amplitude = (1 - 0.3*energy) * max_amp
+    n_per_50 = n_min + energy * (n_max - n_min)
+    n = max(1, int(n_per_50 * length / 50))
+    if spline:
+        return pathdata_from_splines_smooth(get_gluon_splines(spline.length, amplitude, n), trafo_spline = spline)
+    else:
+        return pathdata_from_splines(get_gluon_splines(length, amplitude, n))
 
-#e = float(sys.argv[1])
+if __name__=="__main__":
+    from Spline import Spline
+    
+    spline = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
+    print spline.length
 
-#amplitude = float(sys.argv[3])
-#strength0 = float(sys.argv[4])
-#strength0 = d/2.0
-e = 0.5
-length = 1
+    s = ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 700">\n']
+    n = 10
+    for i in range(n+1):
+        x = 10
+        y = 40 + i*25
+        e = i/n
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon(e, spline.length)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (100+x, y, photon(e, spline = spline)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (200+x, y, gluon(e, spline.length)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (300+x, y, gluon(e, spline = spline)))
 
-s = []
-s.append('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 400">\n')
-s.append('<path transform="translate(10,40)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(length,e,1))
-#s.append('<path transform="translate(10,80)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,2))
-#s.append('<path transform="translate(10,120)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,3))
-#s.append('<path transform="translate(10,160)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,4))
+    for i in range(n+1):
+        x = 10
+        y = 400 + i*25
+        e = 0.6
+        l = (i + 0.5) / n * 180
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon(e, l)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (200+x, y, gluon(e, l)))
 
-#s.append('<path transform="translate(180,40)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,1))
-#s.append('<path transform="translate(180,80)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,2))
-#s.append('<path transform="translate(180,120)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,3))
-#s.append('<path transform="translate(180,160)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,4))
+    #s.append('<path transform="translate(10,10)" fill="none" stroke="red" id="u" d="%s" />\n' % (gluon(0.5, 200)))
 
-#s.append('<path transform="translate(10,240)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,1))
-#s.append('<path transform="translate(10,280)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,2))
-#s.append('<path transform="translate(10,320)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,3))
-#s.append('<path transform="translate(10,360)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,,4))
+    s.append('" />\n')
+    s.append('</svg>\n')
 
-#s.append('<path transform="translate(120,240)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,/2,1))
-#s.append('<path transform="translate(120,280)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,/2,2))
-#s.append('<path transform="translate(120,320)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,/2,3))
-#s.append('<path transform="translate(120,360)" fill="none" stroke="red" id="u" d="%s" />\n' % getPhotonData(len,e,/2,4))
-s.append('" />\n')
-#s.append('</symbol>\n')
-#s.append("</defs>\n")
-#s.append('<use x="60" y="0" transform="scale(2, 4)"  width="200" height="100" fill="none" stroke-width="2" stroke="red" xlink:href="#S"/>\n')
-s.append('</svg>\n')
+    f = file("photon.svg","w")
+    f.write("".join(s))
+    f.close()
 
-f = file("photon.svg","w")
-f.write("".join(s))
-f.close()
+    print "Written photon.svg."

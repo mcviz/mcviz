@@ -29,6 +29,16 @@ class Spline(object):
         d = sqrt(dx**2 + dy**2)
         return x, y, -dy/d, dx/d
 
+    def get_point_tan_perp(self, t):
+        A, B, C, D = self.Ax
+        E, F, G, H = self.Ay
+        x = (((A*t) + B)*t + C)*t + D
+        y = (((E*t) + F)*t + G)*t + H
+        dx = 3*A*t**2 + 2*B*t + C
+        dy = 3*E*t**2 + 2*F*t + G
+        d = sqrt(dx**2 + dy**2)
+        return x, y, dx/d, dy/d, -dy/d, dx/d
+
     def get_point(self, t):
         A, B, C, D = self.Ax
         E, F, G, H = self.Ay
@@ -47,7 +57,7 @@ class Spline(object):
             cum.append(cum[-1] + dist)
 
     def get_t(self, s):
-        assert 0 <= s <= 1
+        s = min(1, max(0, s))
         s *= self.length
         i = bisect_left(self.cumulative, s)
         if i == 0: 
@@ -55,16 +65,20 @@ class Spline(object):
         part = (s - self.cumulative[i]) / self.distances[i-1]
         return (i*1.0 + part)/self.N
 
-    def transform(self, ix, iy):
+    def transform(self, ip):
         """transform a point according to the spline trafo
-        x is in [0,1] and is along the spline
+        x is length along the spline
         y is across and in the same units as x"""
-        t = self.get_t(ix)
+        ix, iy = ip
+        t = self.get_t(ix/self.length)
         x, y, px, py = self.get_point_perp(t)
-        #return x + px*iy/self.length, y + py*iy/self.length
-        print x, px, py, iy
-        return x + px*iy*self.length, y + py*iy*self.length
+        return x + px*iy, y + py*iy
 
+    def transform_to(self, ix, pt):
+        """transform a point pt according to the spline trafo at splinepoint x"""
+        t = self.get_t(ix/self.length)
+        x, y, dx, dy, px, py = self.get_point_tan_perp(t)
+        return x + dx*(pt[0]-ix) + px*pt[1], y + dy*(pt[0]-ix) + py*pt[1]
 
 if __name__=="__main__":
     #s = Spline(55.000, -9.722, 60.000, -9.722, 60.000, 10.000, 65.000, 10.000)
