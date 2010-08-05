@@ -40,7 +40,10 @@ def latexize_particle_name(name, n=0):
         replacements = [
             ("0", "^0"),
             ("+", "^+"),
-            ("-", "^-")]
+            ("-", "^-"),
+            ("^-^-", "^{--}"),
+            ("^+^+", "^{++}"),
+            ("_^", "_")]
         for what, replacement in replacements:
             name = name.replace(what, replacement)
     
