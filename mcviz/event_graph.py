@@ -4,8 +4,8 @@ from __future__ import with_statement
 
 from sys import argv, stderr
 
-from .Particle import Particle
-from .Vertex import Vertex
+from .particle import Particle
+from .vertex import Vertex
 
 FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
     "-------------------------------------------------------------------")

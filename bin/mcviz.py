@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-from MCViz import EventGraph, parse_options
-from MCViz.FeynmanArtist import FeynmanArtist
-from MCViz.DualArtist import DualArtist
+from mcviz import EventGraph, parse_options
+from mcviz.feynman_artist import FeynmanArtist
+from mcviz.dual_artist import DualArtist
 from sys import argv
 
 def main():
