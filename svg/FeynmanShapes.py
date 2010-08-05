@@ -122,12 +122,22 @@ def gluon(energy, length = None, spline = None, n_max = 11, n_min = 1):
         return pathdata_from_splines(get_gluon_splines(length, amplitude, n))
 
 if __name__=="__main__":
-    from Spline import Spline
+    from Spline import Spline, Splines
     
-    spline = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
+    spline1 = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
+    spline2 = Spline(40, 10, 65, -10, 60, 30, 80, 20)
+    dat1 = ("M %.5f %.5f C " + "%.f "*6) % (5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
+    dat2 = ("M %.5f %.5f C " + "%.f "*6) % (40, 10, 65, -10, 60, 30, 80, 20)
+    spline = Splines((spline1, spline2))
     print spline.length
 
+
     s = ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 700">\n']
+
+    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, dat1))
+    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, dat2))
+
+
     n = 10
     for i in range(n+1):
         x = 10

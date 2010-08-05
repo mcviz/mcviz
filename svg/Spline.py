@@ -1,7 +1,31 @@
 from __future__ import division
 
 from math import sqrt, hypot
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
+
+class Splines(object):
+    def __init__(self, splines):
+        self.splines = splines
+        cum = self.cumulative = [0]
+        for spline in self.splines:
+            cum.append(cum[-1] + spline.length)
+
+    @property
+    def length(self):
+        return sum(s.length for s in self.splines)
+
+    def getSplineAt(self, s):
+        i = bisect_left(self.cumulative, s) - 1
+        i = max(0, min(len(self.splines) - 1, i))
+        return self.splines[i], s - self.cumulative[i], self.cumulative[i]
+
+    def transform(self, ip):
+        spline, x, xleft = self.getSplineAt(ip[0])
+        return spline.transform((x, ip[1]))
+
+    def transform_to(self, ix, pt):
+        spline, x, xleft = self.getSplineAt(ix)
+        return spline.transform_to(x, (pt[0] - xleft, pt[1]))
 
 class Spline(object):
     def __init__(self, x0, y0, x1, y1, x2, y2, x3, y3, N=100):
