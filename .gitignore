@@ -1,4 +1,10 @@
+*.svg
 *.pyc
 *.ps
 *.dot
 *~
+*.dotsvg
+*.dotpng
+*.fdpsvg
+*.pdf
+*.png
