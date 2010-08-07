@@ -25,7 +25,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
-import os, tempfile, sys, xml.dom.minidom
+import os, tempfile, sys
+from xml.dom import minidom
+
+
+particle_data = minidom.parse("ParticleData.xml")
+
+for particle in particle_data.getElementsByTagName("particle"):
+    #print particle.toprettyxml()
+    print '%10s %10s %s' % (particle.getAttribute("id"), particle.getAttribute("name"), particle.getAttribute("antiName"))
+
+
 
 class TexGlyph(object):
     def __init__(self, formula, name):
@@ -116,11 +126,11 @@ class TexGlyph(object):
         def clone_and_rewrite(self, node_in):
             in_tag = node_in.nodeName
             if in_tag != 'svg':
-                node_out = xml.dom.minidom.Element(in_tag)
+                node_out = minidom.Element(in_tag)
                 for name, value in node_in.attributes.items():
                     node_out.setAttribute(name, value)
             else:
-                node_out = xml.dom.minidom.Element("svg")
+                node_out = minidom.Element("svg")
                 node_out.setAttribute("viewBox","0 0 %s %s" % (doc_sizeH, doc_sizeW))
                 node_out.setAttribute("xmlns", "http://www.w3.org/2000/svg")
                 node_out.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
@@ -136,7 +146,7 @@ class TexGlyph(object):
                     node_out.appendChild(child)
             return node_out
 
-        doc = xml.dom.minidom.parse(filename)
+        doc = minidom.parse(filename)
         svg = [cn for cn in doc.childNodes if cn.childNodes][0]
         group = clone_and_rewrite(self, svg)
         return group
