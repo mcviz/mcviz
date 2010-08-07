@@ -9,7 +9,7 @@ class Particle(object):
         self.status = status
         self.mothers = [int(m) for m in (mother1, mother2) if m != 0]
         self.daughters = [int(d) for d in (daughter1, daughter2) if d != 0]
-        self.colors = int(color1), int(color2)
+        self.color, self.anticolor = int(color1), int(color2)
         self.p = px, py, pz
         self.pt = (px**2 + py**2)**0.5
         #self.eta = -log(tan(atan2(self.pt, pz)/2.))
@@ -35,23 +35,30 @@ class Particle(object):
         """
         self.tags.add(tag)
         for daughter in self.daughters:
-            daughter.tag(tag)
+            daughter.tag_and_decendents(tag)
     
-    def get_color(self, default):
+    def get_color(self, default, mechanism="colour_charge"):
         
-        color = self.colors[0] != 0
-        anticolor = self.colors[1] != 0
-        
-        if color and not anticolor:
-            color = "blue"
-        elif color and anticolor:
-            color = "green"
-        elif not color and anticolor:
-            color = "red"
-        else:
-            color = default
+        if mechanism == "colour_charge":
+            if self.color and self.anticolor:
+                return "green"
+            elif self.color:
+                return "blue"
+            elif self.anticolor:
+                return "red"
+            return default
             
-        return color
+        elif mechanism == "ascendents":
+            if self.decends_both:
+                return "purple"
+            elif self.decends(1):
+                return "red"
+            elif self.decends(2):
+                return "blue"
+            return default
+        
+        else:
+            raise NotImplementedError("Mechanism == '%s'" % mechanism)
             
     @property
     def initial_state(self):
@@ -65,7 +72,7 @@ class Particle(object):
 
     @property
     def colored(self):
-        return any(color for color in self.colors)
+        return self.color or self.anticolor
 
     @property
     def gluon(self):
