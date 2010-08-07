@@ -3,10 +3,12 @@
 from __future__ import with_statement
 
 from sys import argv, stderr
+from itertools import takewhile
 
 from .particle import Particle
 from .vertex import Vertex
 from .options import parse_options
+from .utils import OrderedSet
 
 FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
     "-------------------------------------------------------------------")
@@ -99,6 +101,59 @@ class EventGraph(object):
             
         if "kinks" in options.contract:
             self.contract()
+            
+        # Remove system vertex
+        del self.particles[0]
+        
+        assert len(self.initial_particles) == 2
+        p1, p2 = self.initial_particles
+        self.walk(p1, Particle.tagger("decendent_of_p1"))
+        self.walk(p2, Particle.tagger("decendent_of_p2"))
+        
+    def walk(self, particle, 
+             walk_action=lambda x:None, loop_action=lambda x:None, 
+             completed_walks=None, uncompleted_walks=None):
+        """
+        Walk the particle graph.
+        
+        Shamelessly stolen algorithm from:
+        http://www.electricmonk.nl/log/2008/08/07/dependency-resolving-algorithm
+        
+        Enhanced for our purposes to provide loop marking.
+        """
+        if completed_walks is None: completed_walks = OrderedSet()
+        if uncompleted_walks is None: uncompleted_walks = OrderedSet()
+        
+        walk_action(particle)
+        
+        uncompleted_walks.add(particle)
+        
+        for daughter in particle.daughters:
+            if daughter not in completed_walks:
+                # we haven't yet seen this particle, walk it.
+                if daughter in uncompleted_walks:
+                    # We have a loop, because we have seen it but not walked it.
+                    # All particles from the end up to this daughter are 
+                    # participating in the loop
+                    if not loop_action:
+                        continue
+                     
+                    lps = takewhile(lambda x: x != daughter, 
+                                    reversed(uncompleted_walks))
+                                     
+                    looping_particles = list(lps) + [daughter]
+                    
+                    for looping_particle in looping_particles:
+                        loop_action(looping_particle)
+                        
+                else:
+                    # Not circular, so walk it.
+                    self.walk(daughter, walk_action, loop_action, 
+                              completed_walks, uncompleted_walks)
+        
+        completed_walks.add(particle)
+        uncompleted_walks.discard(particle)
+        return completed_walks
     
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
@@ -170,6 +225,10 @@ class EventGraph(object):
             particle = self.particles[no]
             if not (particle.initial_state or particle.final_state):
                 self.contract_particle(particle)
+    
+    @property
+    def initial_particles(self):
+        return set(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
     def from_hepmc(cls, filename):

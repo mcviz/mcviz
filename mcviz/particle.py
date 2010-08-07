@@ -26,16 +26,23 @@ class Particle(object):
     def __lt__(self, rhs):
         "Define p1 < p2 so that we can sort particles (by id in this case)"
         return self.no < rhs.no
-    
-    def tag(self, tag):
-        """
-        Used to record a tag for a particle.
         
-        Particles can be selected by tag.
+    @property
+    def decends_both(self):
+        return self.decends(1) and self.decends(2)
+        
+    def decends(self, n):
+        assert n == 1 or n == 2, "Only supported for initial particles"
+        return "decendent_of_p%i" % n in self.tags
+    
+    @classmethod
+    def tagger(self, what):
         """
-        self.tags.add(tag)
-        for daughter in self.daughters:
-            daughter.tag_and_decendents(tag)
+        Return a function which tags particles with `what`
+        """
+        def tag(particle):
+            particle.tags.add(what)
+        return tag
     
     def get_color(self, default, mechanism="colour_charge"):
         
