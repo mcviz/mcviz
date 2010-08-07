@@ -1,21 +1,24 @@
-CODE=MCViz/*.py Makefile bin/*.py
+CODE=mcviz/*.py Makefile bin/*.py
 
-EXTRAOPTS=-c kinks -c gluballs
+EXTRAOPTS=-I -c kinks -c gluballs
 
 all: inputs/pythia01.ps
 
-inputs/pythia01.referencedot inputs/pythia01.testdot: inputs/pythia01.out
+inputs/pythia01.referencedot: inputs/pythia01.out 
+	time python2.6 bin/mcviz.py ${EXTRAOPTS} $< > $@
+
+inputs/pythia01.testdot: inputs/pythia01.out ${CODE}
 	time python2.6 bin/mcviz.py ${EXTRAOPTS} $< > $@
 
 check: inputs/pythia01.referencedot inputs/pythia01.testdot
-	diff -u inputs/pythia01.referencedot inputs/pythia01.testdot | less
+	diff -u inputs/pythia01.referencedot inputs/pythia01.testdot | less -F
 	rm inputs/pythia01.testdot
 
 %.dot: %.out ${CODE}
 	time python2.6 bin/mcviz.py -c kinks $< > $@
 
 %.ps: %.dot
-	time fdp -Tps -o $@ $<
+	time fdp -Tps -o $@ $<$<
 
 %.tex: %.dot
 	time dot2tex -s -c -t raw --prog fdp $< > $@
