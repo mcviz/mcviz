@@ -27,18 +27,73 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 import os
 import tempfile
+import re
+import unicodedata as UD
 import sys
 from xml.dom import minidom
 from shutil import rmtree
 from textwrap import dedent
 
-def particledata():
-    particle_data = minidom.parse("ParticleData.xml")
+def fixup_unicodedata_name(x):
+    "Oh dear. unicodedata misspelt lambda."
+    if x == "lamda": return "lambda"
+    return x
 
+GREEK_RANGE = xrange(0x3b1, 0x3ca)
+GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
+GREEK_NAME = lambda l: fixup_unicodedata_name(UD.name(l).split()[-1].lower())
+GREEK_NAMECHARS = [(GREEK_NAME(l), l) for l in GREEK_LETTERS]
+GREEK_UNAMECHARS = [(g.capitalize(), l.upper()) for g, l in GREEK_NAMECHARS]
+GREEK_ALTERNATES = "(%s)" % "|".join("[%c%c]%s" % (g[0].upper(), g[0], g[1:])
+                                     for g, c in GREEK_NAMECHARS)
+GREEK_FINDER = re.compile(GREEK_ALTERNATES)
+BAR_FINDER = re.compile(r"([^\s]+?)(?<!\\)bar(.*)")
+
+
+#PARTICLES_GREEK = re.compile(r"(\~?)" + GREEK_ALTERNATES + r"(\*?)(_[A-Za-z]*|_[0-9]*)?(bar)?(\+\+|--|\+|-|0)?(\([0-9]*\))?([^\s]+?)")
+#PARTICLES_GREEK = re.compile(r"(\~?)([A-Za-z]*)(\*)?(_[A-Za-z]*|_[0-9]*)?(bar)?(++|--|+|-|0)?(\([0-9]*\))?([^\s]+?)")
+
+
+grp_susy = r"(?P<susy>\~)?"
+grp_name = r"(?P<name>[A-Za-z8/]+?)"
+grp_star = r"(?P<star>\*)?"
+grp_prime = r"(?P<prime>'+)?"
+grp_sub = r"(?P<sub>(_([A-Za-z]+?)|_([0-9]+?(s|c|b)?))*)"
+grp_mass = r"(\((?P<mass>[0-9]*)\))?"
+grp_bar = r"(?P<bar>bar)?"
+grp_charge = r"(?P<charge>\+\+|--|\+|-|0)?"
+grp_techni = r"(?P<techni>_tc)?"
+grp_2s = r"(\((?P<state>2S)\))?"
+grp_extra = r"(\[(?P<extra>.*?)\])?"
+grp_alt = r"(\((?P<alt>.*?)\))?"
+grp_end = r"$"
+re_groups = [grp_susy, grp_name, grp_star, grp_prime, grp_sub, grp_mass, grp_bar, grp_charge, grp_techni, grp_2s, grp_extra, grp_alt, grp_end]
+PARTICLE_MATCH = re.compile(r"".join(re_groups))
+
+def get_particle_db():
+    particles = {}
+    particle_data = minidom.parse("mcviz/svg/ParticleData.xml")
     for particle in particle_data.getElementsByTagName("particle"):
-        #print particle.toprettyxml()
-        print '%10s %10s %s' % (particle.getAttribute("id"), particle.getAttribute("name"), particle.getAttribute("antiName"))
+        for name in (particle.getAttribute("name"), particle.getAttribute("antiName")):
+            if name:
+                gd = PARTICLE_MATCH.match(name).groupdict()
+                particles[name] = gd
+    return particles
 
+def test_particle_data():
+    db = get_particle_db()
+    keys = ['star', 'extra', 'sub', 'techni', 'susy', 'alt', 'prime', 'bar', 'name', 'state', 'charge', 'mass']
+    s = []
+    for key in keys:
+        s.append("-"*80)
+        s.append("    " + key)
+        s.append("-"*80)
+        for name, gd in sorted(db.iteritems()):
+            if name:
+                gd = PARTICLE_MATCH.match(name).groupdict()
+                if gd[key]:
+                    s.append("%20s | %s" % (name, gd[key]))
+    return "\n".join(s)
 
 class TexGlyph(object):
     def __init__(self, formula, name):
@@ -154,9 +209,10 @@ class TexGlyph(object):
         return group
 
 if __name__ == '__main__':
-    e = TexGlyph(r"$\bar{K}^{++}$", "barKpp")
-    print e.get_svg().toprettyxml()
+    #e = TexGlyph(r"$\bar{K}^{++}$", "barKpp")
+    #print e.get_svg().toprettyxml()
     #print e.get_def().toprettyxml()
+    print test_particle_data()
     
 
 
