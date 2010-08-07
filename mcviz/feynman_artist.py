@@ -1,4 +1,4 @@
-from .graphviz import print_node, print_edge
+from .graphviz import make_node, make_edge
 from .utils import latexize_particle_name
 
 from math import log10
@@ -14,10 +14,18 @@ class FeynmanArtist(object):
         print("edge [labelangle=90, fontsize=12]")
         print("ratio=1")
 
-        for vertex in sorted(graph.vertices.itervalues()):
-            self.draw_vertex(vertex)
+        edges = self.draw_vertices(graph.vertices)
+        
+        for edge in sorted(edges):
+            print edge
 
         print("}")
+        
+    def draw_vertices(self, vertices):
+        edges = set()
+        for vertex in sorted(vertices.itervalues()):
+            edges.update(self.draw_vertex(vertex))
+        return edges
 
     def draw_vertex(self, vertex):
         style = "filled"
@@ -36,9 +44,12 @@ class FeynmanArtist(object):
             # Don't show final particle vertices
             style = "invis"
 
-        print_node(vertex.vno, height=size, width=size, 
-                   color="black", fillcolor=fillcolor, label="", style=style)
+        node = make_node(vertex.vno, height=size, width=size, label="", 
+                         color="black", fillcolor=fillcolor, style=style)
             
+        print node
+            
+        edges = set()
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
@@ -65,10 +76,14 @@ class FeynmanArtist(object):
                     dir = "none"
 
                 going, coming = vertex.vno, out_particle.vertex_out.vno
-                print_edge(going, coming, label=label, color=color,
-                           penwidth=log10(out_particle.pt+1)*1 + 1,
-                           weight=log10(out_particle.e+1)*0.1 + 1,
-                           arrowsize=arrowsize,
-                           style=style,
-                           dir=dir)
+                edge = make_edge(going, coming, label=label, color=color,
+                                 penwidth=log10(out_particle.pt+1)*1 + 1,
+                                 weight=log10(out_particle.e+1)*0.1 + 1,
+                                 arrowsize=arrowsize,
+                                 style=style,
+                                 dir=dir)
+                                 
+                edges.add(edge)
+                
+        return edges
         

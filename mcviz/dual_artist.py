@@ -1,4 +1,4 @@
-from .graphviz import print_node, print_edge
+from .graphviz import make_node, make_edge
 from .utils import latexize_particle_name
 
 class DualArtist(object):
@@ -20,15 +20,14 @@ class DualArtist(object):
         args = (particle.no, particle.name, particle.no, color, size)
         
         # TODO: Do different things for initial/final state
-        print_node(particle.no, 
-                   label="%s (%s)" % (particle.name, particle.no), 
-                   fillcolor=color,
-                   fontsize=size)
+        print(make_node(particle.no, 
+                        label="%s (%s)" % (particle.name, particle.no), 
+                        fillcolor=color, fontsize=size))
         
         # Printing edges
         for mother in particle.mothers:
-            print_edge(mother.no, particle.no, comment="mother")
+            print(make_edge(mother.no, particle.no, comment="mother"))
             
         for daughter in particle.daughters:
-            print_edge(particle.no, daughter.no, comment="daughter")
+            print(make_edge(particle.no, daughter.no, comment="daughter"))
             
