@@ -25,16 +25,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
-import os, tempfile, sys
+import os
+import tempfile
+import sys
 from xml.dom import minidom
+from shutil import rmtree
+from textwrap import dedent
 
+def particledata():
+    particle_data = minidom.parse("ParticleData.xml")
 
-particle_data = minidom.parse("ParticleData.xml")
-
-for particle in particle_data.getElementsByTagName("particle"):
-    #print particle.toprettyxml()
-    print '%10s %10s %s' % (particle.getAttribute("id"), particle.getAttribute("name"), particle.getAttribute("antiName"))
-
+    for particle in particle_data.getElementsByTagName("particle"):
+        #print particle.toprettyxml()
+        print '%10s %10s %s' % (particle.getAttribute("id"), particle.getAttribute("name"), particle.getAttribute("antiName"))
 
 
 class TexGlyph(object):
@@ -54,20 +57,12 @@ class TexGlyph(object):
         err_file = os.path.join(base_dir, "eq.err")
 
         def clean():
-            os.remove(latex_file)
-            os.remove(aux_file)
-            os.remove(log_file)
-            os.remove(ps_file)
-            os.remove(dvi_file)
-            os.remove(svg_file)
-            os.remove(out_file)
-            if os.path.exists(err_file):
-                os.remove(err_file)
-            os.rmdir(base_dir)
+            rmtree(base_dir)
 
         self.create_equation_tex(latex_file)
         os.system('latex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
                   % (base_dir, latex_file, out_file))
+                  
         try:
             os.stat(dvi_file)
         except OSError:
@@ -105,19 +100,19 @@ class TexGlyph(object):
         return dom.childNodes[0]
 
     def create_equation_tex(self, filename):
-        tex = open(filename, 'w')
-        tex.write("""%% processed with eqtexsvg.py
-    \\documentclass{article}
-    \\usepackage{amsmath}
-    \\usepackage{amssymb}
-    \\usepackage{amsfonts}
+        with open(filename, "w") as fd:
+            fd.write(dedent(r"""
+                %% processed with eqtexsvg.py
+                \documentclass{article}
+                \usepackage{amsmath}
+                \usepackage{amssymb}
+                \usepackage{amsfonts}
 
-    \\thispagestyle{empty}
-    \\begin{document}
-    """)
-        tex.write(self.formula)
-        tex.write("\n\\end{document}\n")
-        tex.close()
+                \thispagestyle{empty}
+                \begin{document}
+                %s
+                \end{document}
+            """ % self.formula).strip())
 
     def svg_open(self, filename):
         doc_sizeH = 100
@@ -129,6 +124,7 @@ class TexGlyph(object):
                 node_out = minidom.Element(in_tag)
                 for name, value in node_in.attributes.items():
                     node_out.setAttribute(name, value)
+                    
             else:
                 node_out = minidom.Element("svg")
                 node_out.setAttribute("viewBox","0 0 %s %s" % (doc_sizeH, doc_sizeW))
@@ -138,12 +134,18 @@ class TexGlyph(object):
 
             for c in node_in.childNodes:
                 c_tag = c.nodeName
-                if c_tag in ('g', 'path', 'polyline', 'polygon'):
-                    child = clone_and_rewrite(self, c)
-                    if c_tag == 'g':
-                        child.setAttribute('transform','matrix('+str(doc_sizeH/700.)+',0,0,'+str(-doc_sizeH/700.)+','+str(-doc_sizeH*0.25)+','+str(doc_sizeW*0.75)+')')
-                        child.setAttribute('id', self.name)
-                    node_out.appendChild(child)
+                if c_tag not in ('g', 'path', 'polyline', 'polygon'):
+                    continue
+                    
+                child = clone_and_rewrite(self, c)
+                if c_tag == 'g':
+                    matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeH/700., -doc_sizeH/700., 
+                                                          -doc_sizeH*0.25,  doc_sizeW*0.75)
+                    child.setAttribute('transform', matrix)
+                    child.setAttribute('id', self.name)
+                    
+                node_out.appendChild(child)
+                
             return node_out
 
         doc = minidom.parse(filename)
@@ -152,7 +154,7 @@ class TexGlyph(object):
         return group
 
 if __name__ == '__main__':
-    e = TexGlyph("$\\bar{K}^{++}$", "barKpp")
+    e = TexGlyph(r"$\bar{K}^{++}$", "barKpp")
     print e.get_svg().toprettyxml()
     #print e.get_def().toprettyxml()
     
