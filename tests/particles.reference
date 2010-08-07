@@ -329,7 +329,6 @@
          Sigma_cbar- | _c
         Sigma_cbar-- | _c
          Sigma_cbar0 | _c
-               V8_tc | _tc
                 W_R+ | _R
                 W_R- | _R
               Xi'_b- | _b
@@ -475,22 +474,21 @@
               nu_tau | _tau
            nu_taubar | _tau
             omega_di | _di
-            omega_tc | _tc
             p_diffr+ | _diffr
          p_diffrbar- | _diffr
             phi_diff | _diff
              pi'_tc0 | _tc
-          pi_22_1_tc | _22_1_tc
-          pi_22_8_tc | _22_8_tc
+          pi_22_1_tc | _22_1
+          pi_22_8_tc | _22_8
            pi_diffr+ | _diffr
            pi_diffr- | _diffr
               pi_tc+ | _tc
               pi_tc- | _tc
               pi_tc0 | _tc
-           rho_11_tc | _11_tc
-           rho_12_tc | _12_tc
-           rho_21_tc | _21_tc
-           rho_22_tc | _22_tc
+           rho_11_tc | _11
+           rho_12_tc | _12
+           rho_21_tc | _21
+           rho_22_tc | _22
            rho_diff0 | _diff
              rho_tc+ | _tc
              rho_tc- | _tc
@@ -571,6 +569,14 @@
 --------------------------------------------------------------------------------
     techni
 --------------------------------------------------------------------------------
+               V8_tc | _tc
+            omega_tc | _tc
+          pi_22_1_tc | _tc
+          pi_22_8_tc | _tc
+           rho_11_tc | _tc
+           rho_12_tc | _tc
+           rho_21_tc | _tc
+           rho_22_tc | _tc
 --------------------------------------------------------------------------------
     susy
 --------------------------------------------------------------------------------

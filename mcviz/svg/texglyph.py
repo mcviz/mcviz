@@ -58,7 +58,7 @@ grp_susy = r"(?P<susy>\~)?"
 grp_name = r"(?P<name>[A-Za-z8/]+?)"
 grp_star = r"(?P<star>\*)?"
 grp_prime = r"(?P<prime>'+)?"
-grp_sub = r"(?P<sub>(_([A-Za-z]+?)|_([0-9]+?(s|c|b)?))*)"
+grp_sub = r"(?P<sub>(_([A-Za-z]+?)|_([0-9]+?(s|c|b)?))*?)"
 grp_mass = r"(\((?P<mass>[0-9]*)\))?"
 grp_bar = r"(?P<bar>bar)?"
 grp_charge = r"(?P<charge>\+\+|--|\+|-|0)?"
@@ -89,11 +89,76 @@ def test_particle_data():
         s.append("    " + key)
         s.append("-"*80)
         for name, gd in sorted(db.iteritems()):
-            if name:
-                gd = PARTICLE_MATCH.match(name).groupdict()
-                if gd[key]:
-                    s.append("%20s | %s" % (name, gd[key]))
+            if gd[key]:
+                s.append("%20s | %s" % (name, gd[key]))
     return "\n".join(s)
+
+def particle_to_latex(gd):
+    rep = []
+    rep.append(r"$\mathbf{")
+    if gd["mass"]:
+        rep.append(r"\underset{\mbox{\tiny (%s)}}{" % gd["mass"])
+    if gd["bar"]:
+        rep.append(r"\overline{")
+    if gd["susy"]:
+        rep.append(r"\tilde{")
+
+    rep.append(gd["name"])
+    if gd["susy"]:
+        rep.append(r"}")
+    if gd["bar"]:
+        rep.append(r"}")
+
+
+
+    if gd["sub"] or gd["techni"]:
+        rep.append(r"_{")
+        subs = []
+        if gd["sub"]:
+            subs.extend(gd["sub"].strip("_").split("_"))
+        if gd["techni"]:
+            subs.append(gd["techni"].strip("_"))
+        if gd["state"]:
+            subs.append(gd["state"])
+        if gd["extra"]:
+            subs.append(gd["extra"])
+        if gd["alt"]:
+            subs.append(gd["alt"])
+        rep.append(",".join(subs))
+        rep.append(r"}")
+
+    if gd["star"] or gd["charge"] or gd["prime"]:
+        rep.append(r"^{")
+        if gd["prime"]:
+            rep.append("\prime")
+        rep.append(r"*" if gd["star"] else "")
+        if gd["charge"]:
+            rep.append(gd["charge"])
+        rep.append(r"}")
+
+    if gd["mass"]:
+        rep.append(r"}")
+
+    rep.append(r"}$")
+    name = "".join(rep)
+    name = GREEK_FINDER.sub(lambda g: "\\" + g.group(0) + " ", name)
+    return name
+
+def test_particle_display():
+    res = []
+    db = get_particle_db()
+    for name, gd in sorted(db.iteritems()):
+        res.append(particle_to_latex(gd))
+    return "\\\\\n".join(res)
+
+def glyph_library():
+    res = {}
+    db = get_particle_db()
+    for name, gd in sorted(db.iteritems()):
+        print name
+        res[name] = TexGlyph(particle_to_latex(gd), name).get_svg().toprettyxml()
+
+    return res
 
 class TexGlyph(object):
     def __init__(self, formula, name):
@@ -122,7 +187,7 @@ class TexGlyph(object):
             os.stat(dvi_file)
         except OSError:
             print >>sys.stderr, "invalid LaTeX input:"
-            print >>sys.stderr, self.options.formula
+            print >>sys.stderr, self.formula
             print >>sys.stderr, "temporary files were left in:", base_dir
             raise
 
@@ -212,7 +277,16 @@ if __name__ == '__main__':
     #e = TexGlyph(r"$\bar{K}^{++}$", "barKpp")
     #print e.get_svg().toprettyxml()
     #print e.get_def().toprettyxml()
-    print test_particle_data()
+    #print test_particle_data()
+    #formula = test_particle_display()
+    #e = TexGlyph(formula, "test")
+    #e.create_equation_tex('test.tex')
+    #e.get_svg().toprettyxml()
+    lib = glyph_library()
+
+
+lib = glyph_library()
+    
     
 
 

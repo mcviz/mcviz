@@ -1,9 +1,9 @@
 
 
-Interesting Attributes in Dot
+Interesting Attributes in Dot:
 * graph: splines --> 
 * group attribute
 * pin (neato or fdp)
 * pos
-* nodesep
-
+* nodesep!
+* seed
