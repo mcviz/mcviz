@@ -20,6 +20,23 @@ class Vertex(object):
         Sort vertices in order of vno
         """
         return self.vno < rhs.vno
+        
+    def transplant_particles(self, to_vertex):
+        
+        to_vertex.incoming.update(self.incoming)
+        to_vertex.outgoing.update(self.outgoing)
+        for p in self.incoming:
+            p.vertex_out = to_vertex
+        for p in self.outgoing:
+            p.vertex_in = to_vertex
+    
+    def remove_loops(self):
+        
+        loops = self.incoming.intersection(self.outgoing) #- set([particle])
+        for p in loops:
+            self.incoming.discard(p)
+            self.outgoing.discard(p)
+        return [p.no for p in loops]
 
     @property
     def edge(self):
