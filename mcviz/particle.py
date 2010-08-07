@@ -44,9 +44,9 @@ class Particle(object):
             particle.tags.add(what)
         return tag
     
-    def get_color(self, default, mechanism="colour_charge"):
+    def get_color(self, default, mechanism="color_charge"):
         
-        if mechanism == "colour_charge":
+        if mechanism == "color_charge":
             if self.color and self.anticolor:
                 return "green"
             elif self.color:

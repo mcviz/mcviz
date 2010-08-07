@@ -53,7 +53,7 @@ class Vertex(object):
     @property
     def hadronization(self):
         """
-        Any vertex which has a coloured particle incoming and a non-coloured 
+        Any vertex which has a colored particle incoming and a non-colored 
         particle outgoing is a hadronization vertex
         """
         return (any(v.colored for v in self.incoming) and 
