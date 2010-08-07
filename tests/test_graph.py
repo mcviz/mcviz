@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from MCViz import EventGraph
+from mcviz import EventGraph
 from copy import deepcopy
 import sys
 sys.setrecursionlimit(10000)
