@@ -18,7 +18,7 @@ check: inputs/pythia01.referencedot inputs/pythia01.testdot
 	time python2.6 bin/mcviz.py -c kinks $< > $@
 
 %.ps: %.dot
-	time fdp -Tps -o $@ $<$<
+	time fdp -Tps -o $@ $<$< 2> /dev/null
 
 %.tex: %.dot
 	time dot2tex -s -c -t raw --prog fdp $< > $@
@@ -27,19 +27,19 @@ check: inputs/pythia01.referencedot inputs/pythia01.testdot
 	time pdflatex -output-directory $(dir $@) $<
 
 %.png: %.dot
-	time fdp -Tpng -o $@ $<
+	time fdp -Tpng -o $@ $< 2> /dev/null
 
 %.svg: %.dot
-	time fdp -Tsvg -o $@ $<
+	time fdp -Tsvg -o $@ $< 2> /dev/null
 	
 %.sfdpsvg: %.dot
-	time fdp -Tsvg -o $@ $<
+	time fdp -Tsvg -o $@ $< 2> /dev/null
 
 %.dotsvg: %.dot
-	time dot -Tsvg -o $@ $<
+	time dot -Tsvg -o $@ $< 2> /dev/null
 	
 %.dotpng: %.dot
-	time dot -Tpng -o $@ $<
+	time dot -Tpng -o $@ $< 2> /dev/null
 
 test:
 	nosetests tests/
