@@ -15,15 +15,15 @@ def make_properties_string(**properties):
 
     return " [%s]" % ", ".join(propgen)
 
-def print_node(name, comment="", **properties):
+def make_node(name, comment="", **properties):
     properties = make_properties_string(**properties)
     if comment: comment = " // %s" % comment 
-    print("%s%s%s" % (name, properties, comment))
+    return "%s%s%s" % (name, properties, comment)
     
-def print_edge(from_, to_, comment="", directed=True, **properties):
+def make_edge(from_, to_, comment="", directed=True, **properties):
     properties = make_properties_string(**properties)
     if comment: comment = " // %s" % comment 
     if directed: link = "->"
     else: link = "--"
-    print("%s %s %s%s%s" % (from_, link, to_, properties, comment))
+    return "%s %s %s%s%s" % (from_, link, to_, properties, comment)
 
