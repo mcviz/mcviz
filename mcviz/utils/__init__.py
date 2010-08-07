@@ -7,6 +7,8 @@ import sys
 from cStringIO import StringIO
 from contextlib import contextmanager
 
+from .orderedset import OrderedSet
+
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
     if x == "lamda": return "lambda"
