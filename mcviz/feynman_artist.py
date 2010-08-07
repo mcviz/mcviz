@@ -32,6 +32,7 @@ class FeynmanArtist(object):
         size = 0.1
         fillcolor = "black"
         color_mechanism = self.options.color_mechanism
+        thickness = self.options.line_thickness
         
         if vertex.hadronization:
             # Big white hardronization vertices
@@ -76,9 +77,11 @@ class FeynmanArtist(object):
                     style = "decorate, decoration=snake, draw=red"
                     dir = "none"
 
+                penwidth = log10(out_particle.pt+1)*thickness + 1
+
                 going, coming = vertex.vno, out_particle.vertex_out.vno
                 edge = make_edge(going, coming, label=label, color=color,
-                                 penwidth=log10(out_particle.pt+1)*1 + 1,
+                                 penwidth=penwidth,
                                  weight=log10(out_particle.e+1)*0.1 + 1,
                                  arrowsize=arrowsize,
                                  style=style,

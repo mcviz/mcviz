@@ -21,6 +21,9 @@ def get_option_parser():
     o("-w", "--pen-width", choices=["pt", "off"], default="off")
     o("-W", "--edge-weight", choices=["e", "off"], default="off")
     
+    o("-t", "--line-thickness", type=float, default=1.,
+      help="Controls the thickness of the graph edges")
+    
     o("-I", "--show-id", action="store_true",
       help="Controls labelling particle ids")
     
