@@ -6,6 +6,7 @@ from sys import argv, stderr
 
 from .particle import Particle
 from .vertex import Vertex
+from .options import parse_options
 
 FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
     "-------------------------------------------------------------------")
@@ -17,9 +18,9 @@ class EventGraph(object):
         """
         `records`: A list containing many particles
         """
-        self.options = options
+        options = self.options = options if options else parse_options()
         
-        if options and options.limit is not None:
+        if options.limit is not None:
             # Limit the number of records used to generate the graph
             records = records[:options.limit]
         
@@ -93,10 +94,10 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
         
-        if options and "gluballs" in options.contract:
+        if "gluballs" in options.contract:
             self.contract_gluons()
             
-        if options and "kinks" in options.contract:
+        if "kinks" in options.contract:
             self.contract()
     
     def contract_particle(self, particle):
