@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 
 from mcviz import EventGraph, parse_options
+from mcviz.utils import replace_stdout
 from mcviz.feynman_artist import FeynmanArtist
 from mcviz.dual_artist import DualArtist
-from sys import argv
+from sys import argv, stderr
 
 def main():
     options, args = parse_options(argv)
@@ -22,8 +23,13 @@ def main():
         artist = DualArtist(options)
     else:
         artist = FeynmanArtist(options)
-
-    artist.draw(event)
+        
+    with replace_stdout() as stdout:
+        artist.draw(event)
+    
+    result = stdout.getvalue()
+    print result
+    print >>stderr, "Hash of result: 0x%-09x" % hash(result)
 
 if __name__ == "__main__":
     """

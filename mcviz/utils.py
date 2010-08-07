@@ -2,6 +2,10 @@
 
 import re
 import unicodedata as UD
+import sys
+
+from cStringIO import StringIO
+from contextlib import contextmanager
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
@@ -67,7 +71,16 @@ def make_unicode_name(name):
         name = name.replace(what, replacement)
         
     return name.encode("UTF-8")
-    
+
+@contextmanager
+def replace_stdout(what=None):
+    old_stdout = sys.stdout
+    sys.stdout = what if what else StringIO()
+    try:
+        yield sys.stdout
+    finally:
+        sys.stdout = old_stdout
+
 def test():
     print latexize_particle_name(r"I am the alpha0 and the Zeta etabar")
 
