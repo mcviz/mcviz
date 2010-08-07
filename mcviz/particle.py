@@ -44,6 +44,12 @@ class Particle(object):
             particle.tags.add(what)
         return tag
     
+    @classmethod
+    def attr_setter(self, what, value):
+        def dosetattr(particle):
+            setattr(particle, what, value)
+        return dosetattr
+    
     def get_color(self, default, mechanism="color_charge"):
         
         if mechanism == "color_charge":
