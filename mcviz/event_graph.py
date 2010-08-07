@@ -44,7 +44,6 @@ class EventGraph(object):
             particle.mothers.discard(particle)
             particle.daughters.discard(particle)
 
-
         # TODO: Johannes: Please explain!
         self.vertices = dict()
         vno = 0
@@ -99,8 +98,7 @@ class EventGraph(object):
             
         if options and "kinks" in options.contract:
             self.contract()
-     
-
+    
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
         it attaches all particles that are attached to the particle start vertex
@@ -109,34 +107,25 @@ class EventGraph(object):
         v_in = particle.vertex_in
         v_out = particle.vertex_out
 
-        v_out.incoming.update(v_in.incoming)
-        for p in v_in.incoming:
-            p.vertex_out = v_out
-        v_out.outgoing.update(v_in.outgoing)
-        for p in v_in.outgoing:
-            p.vertex_in = v_out
+        # Eliminate vertex_in
+        # Attach all of v_in's particles to v_out
+        v_in.transplant_particles(v_out)
+        del self.vertices[v_in.vno]
 
         # remove occurred loops:
-        loops = v_out.incoming.intersection(v_out.outgoing)
-        for p in loops:
-            if not p == particle:
-                v_out.incoming.discard(p)
-                v_out.outgoing.discard(p)
-                del self.particles[p.no]
-
-        # remove the particle itself
+        removed = v_out.remove_loops()
+        for p_no in removed:
+            del self.particles[p_no]
+        
+        # remove the particle being contracted
         v_out.incoming.discard(particle)
         v_out.outgoing.discard(particle)
-
-        # update mother/daughter list of 
+        
+        # update daughter/mother list of the incoming/outgoing particles
         for p in v_out.incoming:
-            p.daughters = set(v_out.outgoing)
+            p.daughters = v_out.outgoing
         for p in v_out.outgoing:
-            p.mothers = set(v_out.incoming)
-
-        # now there should be no more reference to v_in
-        del self.vertices[v_in.vno]
-        del self.particles[particle.no]
+            p.mothers = v_out.incoming
 
     def contract_incoming_vertices(self, vertex):
         """Contracts all incoming vertices around this vertex into this one"""
@@ -152,14 +141,14 @@ class EventGraph(object):
             nr_vertices = len(self.vertices)
             for no in self.vertices.keys():
                 # Continue if this vertex is already removed
-                if not no in self.vertices:
+                if no not in self.vertices:
                     continue
                 vertex = self.vertices[no]
                 if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
                     incoming = list(vertex.incoming)[0]
                     outgoing = list(vertex.outgoing)[0]    
                     if (incoming.pdgid == outgoing.pdgid and 
-                        incoming.vertex_in and outgoing.vertex_out):
+                        not (incoming.initial_state or outgoing.final_state)):
                         self.contract_particle(outgoing)
 
     def contract_gluons(self):
@@ -168,15 +157,18 @@ class EventGraph(object):
         """
         # TODO: Pw->Je: 1) Why not for particle in particles? 
         #               2) Isn't "if no in self.particles.keys" redundent?
-        for no in self.particles.keys():
-            if no in self.particles.keys() and self.particles[no].pdgid == 21 and all(m.pdgid == 21 for m in self.particles[no].mothers):
+        for no in list(self.particles):
+            if no not in self.particles: continue
+            particle = self.particles[no]
+            if particle.gluon and all(m.gluon for m in particle.mothers):
                 self.contract_particle(self.particles[no])
 
     def contract_to_final(self):
-        for no in self.particles.keys():
-            if no in self.particles.keys() and not self.particles[no].initial_state and not self.particles[no].final_state:
-                self.contract_particle(self.particles[no])
-                    
+        for no in list(self.particles):
+            if no not in self.particles: continue
+            particle = self.particles[no]
+            if not (particle.initial_state or particle.final_state):
+                self.contract_particle(particle)
     
     @classmethod
     def from_hepmc(cls, filename):
