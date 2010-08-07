@@ -15,7 +15,7 @@ def get_option_parser():
     o("-D", "--debug", action="store_true",
       help="Drop to ipython shell on exception")
     
-    o("-L", "--limit", action="store", type=int, default=None,
+    o("-L", "--limit", type=int, default=None,
       help="Limit number of particles made")
     
     o("-w", "--pen-width", choices=["pt", "off"], default="off")
@@ -26,6 +26,10 @@ def get_option_parser():
     
     o("-c", "--contract", action="append", type=str, default=[],
       help="Particle graph contraction. Value: 'gluballs', 'kinks'")
+
+    o("-C", "--color-mechanism", default="color_charge",
+      help="Changes the way particles are colored. "
+           "Possible values: color_charge, ascendents.")
 
     return p
     

@@ -31,6 +31,7 @@ class FeynmanArtist(object):
         style = "filled"
         size = 0.1
         fillcolor = "black"
+        color_mechanism = self.options.color_mechanism
         
         if vertex.hadronization:
             # Big white hardronization vertices
@@ -53,14 +54,14 @@ class FeynmanArtist(object):
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
-                color = out_particle.get_color("black")
+                color = out_particle.get_color("black", color_mechanism)
                 
                 # Halfsize arrows for final vertices
                 arrowsize = 1.0 if not out_particle.final_state else 0.5
                 
                 # Greek-character-ize names.
                 name = latexize_particle_name(out_particle.name)
-                if self.options and self.options.show_id:
+                if self.options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:
                     label = name
