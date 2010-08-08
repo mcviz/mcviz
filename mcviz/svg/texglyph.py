@@ -188,13 +188,17 @@ class TexGlyph(object):
         self.formula = formula
         self.name = name
 
-    def get_svg(self):
+    def get_svg(self, use_pdf = True):
         base_dir = tempfile.mkdtemp("", "glyphsvg-");
         latex_file = os.path.join(base_dir, "eq.tex")
         aux_file = os.path.join(base_dir, "eq.aux")
         log_file = os.path.join(base_dir, "eq.log")
-        ps_file = os.path.join(base_dir, "eq.ps")
-        dvi_file = os.path.join(base_dir, "eq.dvi")
+        if use_pdf:
+            texout_file = os.path.join(base_dir, "eq.pdf")
+            ps_file = texout_file
+        else:
+            texout_file = os.path.join(base_dir, "eq.dvi")
+            ps_file = os.path.join(base_dir, "eq.ps")
         svg_file = os.path.join(base_dir, "eq.svg")
         out_file = os.path.join(base_dir, "eq.out")
         err_file = os.path.join(base_dir, "eq.err")
@@ -203,18 +207,19 @@ class TexGlyph(object):
             rmtree(base_dir)
 
         self.create_equation_tex(latex_file)
-        os.system('latex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
-                  % (base_dir, latex_file, out_file))
+        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
+                  % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
                   
         try:
-            os.stat(dvi_file)
+            os.stat(texout_file)
         except OSError:
             print >>sys.stderr, "invalid LaTeX input:"
             print >>sys.stderr, self.formula
             print >>sys.stderr, "temporary files were left in:", base_dir
             raise
 
-        os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, dvi_file))
+        if not use_pdf:
+            os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, texout_file))
 
         # cd to base_dir is necessary, because pstoedit writes
         # temporary files to cwd and needs write permissions
