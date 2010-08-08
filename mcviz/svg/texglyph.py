@@ -33,6 +33,7 @@ import sys
 from xml.dom import minidom
 from shutil import rmtree
 from textwrap import dedent
+from cPickle import dumps, loads
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
@@ -53,7 +54,6 @@ BAR_FINDER = re.compile(r"([^\s]+?)(?<!\\)bar(.*)")
 #PARTICLES_GREEK = re.compile(r"(\~?)" + GREEK_ALTERNATES + r"(\*?)(_[A-Za-z]*|_[0-9]*)?(bar)?(\+\+|--|\+|-|0)?(\([0-9]*\))?([^\s]+?)")
 #PARTICLES_GREEK = re.compile(r"(\~?)([A-Za-z]*)(\*)?(_[A-Za-z]*|_[0-9]*)?(bar)?(++|--|+|-|0)?(\([0-9]*\))?([^\s]+?)")
 
-
 grp_susy = r"(?P<susy>\~)?"
 grp_name = r"(?P<name>[A-Za-z8/]+?)"
 grp_star = r"(?P<star>\*)?"
@@ -70,14 +70,20 @@ grp_end = r"$"
 re_groups = [grp_susy, grp_name, grp_star, grp_prime, grp_sub, grp_mass, grp_bar, grp_charge, grp_techni, grp_2s, grp_extra, grp_alt, grp_end]
 PARTICLE_MATCH = re.compile(r"".join(re_groups))
 
+glyph_library = None
+
+
 def get_particle_db():
     particles = {}
     particle_data = minidom.parse("mcviz/svg/ParticleData.xml")
     for particle in particle_data.getElementsByTagName("particle"):
-        for name in (particle.getAttribute("name"), particle.getAttribute("antiName")):
-            if name:
-                gd = PARTICLE_MATCH.match(name).groupdict()
-                particles[name] = gd
+        name = particle.getAttribute("name")
+        antiName = particle.getAttribute("antiName")
+        pdgid = int(particle.getAttribute("id"))
+        if name:
+            particles[pdgid] = (pdgid, name, PARTICLE_MATCH.match(name).groupdict())
+        if antiName:
+            particles[-pdgid] = (-pdgid, antiName, PARTICLE_MATCH.match(antiName).groupdict())
     return particles
 
 def test_particle_data():
@@ -88,9 +94,9 @@ def test_particle_data():
         s.append("-"*80)
         s.append("    " + key)
         s.append("-"*80)
-        for name, gd in sorted(db.iteritems()):
+        for pdgid, label, gd in sorted(db.values()):
             if gd[key]:
-                s.append("%20s | %s" % (name, gd[key]))
+                s.append("%20s | %s" % (label, gd[key]))
     return "\n".join(s)
 
 def particle_to_latex(gd):
@@ -102,14 +108,11 @@ def particle_to_latex(gd):
         rep.append(r"\overline{")
     if gd["susy"]:
         rep.append(r"\tilde{")
-
     rep.append(gd["name"])
     if gd["susy"]:
         rep.append(r"}")
     if gd["bar"]:
         rep.append(r"}")
-
-
 
     if gd["sub"] or gd["techni"]:
         rep.append(r"_{")
@@ -147,18 +150,38 @@ def particle_to_latex(gd):
 def test_particle_display():
     res = []
     db = get_particle_db()
-    for name, gd in sorted(db.iteritems()):
+    for pdgid, label, gd in sorted(db.values()):
         res.append(particle_to_latex(gd))
     return "\\\\\n".join(res)
 
-def glyph_library():
+def make_glyph_library():
+    print >> sys.stderr, "Creating glyph library..."
     res = {}
     db = get_particle_db()
-    for name, gd in sorted(db.iteritems()):
-        print name
-        res[name] = TexGlyph(particle_to_latex(gd), name).get_svg().toprettyxml()
-
+    for pdgid, label, gd in sorted(db.values()):
+        print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
+        res[pdgid] = TexGlyph(particle_to_latex(gd), "pdg%i"%pdgid).get_def()
     return res
+
+def get_glyph_library():
+    global glyph_library
+    if not glyph_library:
+        try:
+            glyph_library = loads(file("mcviz/svg/texglyph.cache.bz2").read().decode("bz2"))
+        except IOError:
+            glyph_library = make_glyph_library()
+            with file("mcviz/svg/texglyph.cache.bz2", "w") as f:
+                f.write(dumps(glyph_library).encode("bz2"))
+    return glyph_library
+
+def get_glyph_dom(pdgid):
+    return get_glyph_library()[pdgid]
+
+def get_glyph_xml(pdgid):
+    return get_glyph_library()[pdgid].toprettyxml()
+
+def glyph_ids():
+    return get_glyph_library().keys()
 
 class TexGlyph(object):
     def __init__(self, formula, name):
@@ -230,7 +253,9 @@ class TexGlyph(object):
 
                 \thispagestyle{empty}
                 \begin{document}
+                \begin{center}
                 %s
+                \end{center}
                 \end{document}
             """ % self.formula).strip())
 
@@ -282,13 +307,19 @@ if __name__ == '__main__':
     #e = TexGlyph(formula, "test")
     #e.create_equation_tex('test.tex')
     #e.get_svg().toprettyxml()
-    lib = glyph_library()
-
-
-lib = glyph_library()
-    
-    
-
-
+    #lib = get_glyph_library()
+    for pdgid in sorted(glyph_ids()):
+        with file("pdg%i.svg"%pdgid, "w") as f:
+            f.write('<?xml version="1.0" standalone="no"?>\n')
+            f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
+            f.write(' <defs>\n')
+            f.write(get_glyph_xml(pdgid))
+            f.write(' </defs>\n')
+            f.write('<use x = "0" y = "0" xlink:href = "#pdg%s" />\n' % pdgid)
+            baseline = 20
+            midpoint = 42.5
+            f.write('<circle cx = "%.3f" cy = "%.3f" r = "1" fill = "red" stroke ="none" />\n' % (midpoint, baseline))
+            f.write('<path d="M 0 %s H 100" fill = "none" stroke ="red" />\n' % baseline)
+            f.write('</svg>')
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 encoding=utf-8 textwidth=99
