@@ -357,9 +357,9 @@ if __name__ == '__main__':
                 f.write(' <defs>\n')
                 f.write(get_glyph_xml(pdgid))
                 f.write(' </defs>\n')
-                f.write('<use x = "0" y = "0" xlink:href = "#pdg%s" />\n' % pdgid)
-                baseline = 0
-                midpoint = 0
+                f.write('<use x = "50" y = "50" xlink:href = "#pdg%s" />\n' % pdgid)
+                baseline = 50
+                midpoint = 50
                 f.write('<circle cx = "%.3f" cy = "%.3f" r = "1" fill = "red" stroke ="none" />\n' % (midpoint, baseline))
                 f.write('<path d="M 0 %s H 100" fill = "none" stroke ="red" />\n' % baseline)
                 f.write('</svg>')
