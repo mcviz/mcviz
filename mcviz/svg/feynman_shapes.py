@@ -122,7 +122,7 @@ def gluon(energy, length = None, spline = None, n_max = 11, n_min = 1):
         return pathdata_from_splines(get_gluon_splines(length, amplitude, n))
 
 if __name__=="__main__":
-    from Spline import Spline, Splines
+    from spline import Spline, Splines
     
     spline1 = Spline(5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
     spline2 = Spline(40, 10, 65, -10, 60, 30, 80, 20)
