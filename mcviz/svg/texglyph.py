@@ -183,6 +183,35 @@ def get_glyph_xml(pdgid):
 def glyph_ids():
     return get_glyph_library().keys()
 
+def relativize_path_data(d):
+    cmds = []
+    for cmdstr in d.strip().split(" "):
+        if cmdstr[0] == "Z":
+            numbers = []
+        else:
+            numbers = map(float, cmdstr[1:].split(","))
+        cmds.append((cmdstr[0], numbers))
+    assert cmds[0][0] == "M"
+    x0, y0 = cmds[0][1]
+    out = ["M%.2f,%.2f" % (x0, y0)]
+    for cmd, numbers in cmds[1:]:
+        if cmd == "H":
+            numbers[0] -= x0
+            x0 += numbers[0]
+        elif cmd == "V":
+            numbers[0] -= y0
+            y0 += numbers[0]
+        else:
+            for i in range(len(numbers)/2):
+                numbers[2*i] -= x0
+                numbers[2*i+1] -= y0
+            if numbers:
+                x0 += numbers[-2]
+                y0 += numbers[-1]
+        nstr = (",".join(["%.2f"]*len(numbers))) % tuple(numbers)
+        out.append("%s%s" % (cmd.lower(),nstr))
+    return " ".join(out)
+
 class TexGlyph(object):
     def __init__(self, formula, name):
         self.formula = formula
@@ -281,17 +310,18 @@ class TexGlyph(object):
                 node_out.setAttribute("version", "1.1")
 
             for c in node_in.childNodes:
-                c_tag = c.nodeName
-                if c_tag not in ('g', 'path', 'polyline', 'polygon'):
+                if c.nodeName not in ('g', 'path', 'polyline', 'polygon'):
                     continue
                     
                 child = clone_and_rewrite(self, c)
-                if c_tag == 'g':
+                if c.nodeName == 'g':
                     matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeW/7., -doc_sizeH/7., 
                                                           -doc_sizeW*43.7, doc_sizeH*101.35)
                     child.setAttribute('transform', matrix)
                     child.setAttribute('id', self.name)
-                    
+                elif c.nodeName == 'path':
+                    data = c.getAttribute('d')
+                    child.setAttribute('d', relativize_path_data(data))
                 node_out.appendChild(child)
                 
             return node_out
