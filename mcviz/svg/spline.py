@@ -107,6 +107,14 @@ class Spline(object):
         s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
 
+    @property
+    def svg_path_data(self):
+        return ("M %.5f %.5f C " + "%.f "*6) % reduce(tuple.__add__, self.points)
+
+    def __str__(self):
+        return "spline; start %s; control points %s; %s; end %s" % self.points
+
+
 class SplineLine(object):
     def __init__(self, splines):
         self.splines = splines
@@ -117,9 +125,6 @@ class SplineLine(object):
         for spline in self.splines:
             cum.append(cum[-1] + spline.length)
 
-    @property
-    def length(self):
-        return sum(s.length for s in self.splines)
 
     def find_spline_at(self, s):
         if not self.cumulative:
@@ -143,8 +148,20 @@ class SplineLine(object):
         s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
 
+    @property
+    def length(self):
+        return sum(s.length for s in self.splines)
+
+    @property
+    def svg_path_data(self):
+        return " ".join(s.svg_path_data for s in self.splines)
+
+    def __str__(self):
+        start, end = self.splines[0].points[0], self.splines[-1].points[-1]
+        return "splineline; start %s; end %s" % (start, end)
+
+
 if __name__=="__main__":
-    #s = Spline(55.000, -9.722, 60.000, -9.722, 60.000, 10.000, 65.000, 10.000)
     s = Spline(5.0, -10, 20.000, -10, 20.0, 10.000, 40.0, 10.000)
     lx, ly = 0, 0
     for i in range(500):
