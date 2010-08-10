@@ -4,6 +4,9 @@ from spline import Spline
 
 max_amp = 10
 
+def set_width(width):
+    global max_amp
+    max_amp = width
 
 def get_photon_splines(length, amplitude, n_waves, power = 5):
     N = n_waves * 2

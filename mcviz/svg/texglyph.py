@@ -183,18 +183,51 @@ def get_glyph_xml(pdgid):
 def glyph_ids():
     return get_glyph_library().keys()
 
+def relativize_path_data(d):
+    cmds = []
+    for cmdstr in d.strip().split(" "):
+        if cmdstr[0] == "Z":
+            numbers = []
+        else:
+            numbers = map(float, cmdstr[1:].split(","))
+        cmds.append((cmdstr[0], numbers))
+    assert cmds[0][0] == "M"
+    x0, y0 = cmds[0][1]
+    out = ["M%.2f,%.2f" % (x0, y0)]
+    for cmd, numbers in cmds[1:]:
+        if cmd == "H":
+            numbers[0] -= x0
+            x0 += numbers[0]
+        elif cmd == "V":
+            numbers[0] -= y0
+            y0 += numbers[0]
+        else:
+            for i in range(len(numbers)/2):
+                numbers[2*i] -= x0
+                numbers[2*i+1] -= y0
+            if numbers:
+                x0 += numbers[-2]
+                y0 += numbers[-1]
+        nstr = (",".join(["%.2f"]*len(numbers))) % tuple(numbers)
+        out.append("%s%s" % (cmd.lower(),nstr))
+    return " ".join(out)
+
 class TexGlyph(object):
     def __init__(self, formula, name):
         self.formula = formula
         self.name = name
 
-    def get_svg(self):
+    def get_svg(self, use_pdf = True):
         base_dir = tempfile.mkdtemp("", "glyphsvg-");
         latex_file = os.path.join(base_dir, "eq.tex")
         aux_file = os.path.join(base_dir, "eq.aux")
         log_file = os.path.join(base_dir, "eq.log")
-        ps_file = os.path.join(base_dir, "eq.ps")
-        dvi_file = os.path.join(base_dir, "eq.dvi")
+        if use_pdf:
+            texout_file = os.path.join(base_dir, "eq.pdf")
+            ps_file = texout_file
+        else:
+            texout_file = os.path.join(base_dir, "eq.dvi")
+            ps_file = os.path.join(base_dir, "eq.ps")
         svg_file = os.path.join(base_dir, "eq.svg")
         out_file = os.path.join(base_dir, "eq.out")
         err_file = os.path.join(base_dir, "eq.err")
@@ -203,18 +236,19 @@ class TexGlyph(object):
             rmtree(base_dir)
 
         self.create_equation_tex(latex_file)
-        os.system('latex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
-                  % (base_dir, latex_file, out_file))
+        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
+                  % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
                   
         try:
-            os.stat(dvi_file)
+            os.stat(texout_file)
         except OSError:
             print >>sys.stderr, "invalid LaTeX input:"
             print >>sys.stderr, self.formula
             print >>sys.stderr, "temporary files were left in:", base_dir
             raise
 
-        os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, dvi_file))
+        if not use_pdf:
+            os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, texout_file))
 
         # cd to base_dir is necessary, because pstoedit writes
         # temporary files to cwd and needs write permissions
@@ -253,15 +287,13 @@ class TexGlyph(object):
 
                 \thispagestyle{empty}
                 \begin{document}
-                \begin{center}
-                %s
-                \end{center}
+                \begin{center}%s\end{center}
                 \end{document}
             """ % self.formula).strip())
 
     def svg_open(self, filename):
-        doc_sizeH = 100
-        doc_sizeW = 100
+        doc_sizeH = 10
+        doc_sizeW = 10
 
         def clone_and_rewrite(self, node_in):
             in_tag = node_in.nodeName
@@ -278,17 +310,18 @@ class TexGlyph(object):
                 node_out.setAttribute("version", "1.1")
 
             for c in node_in.childNodes:
-                c_tag = c.nodeName
-                if c_tag not in ('g', 'path', 'polyline', 'polygon'):
+                if c.nodeName not in ('g', 'path', 'polyline', 'polygon'):
                     continue
                     
                 child = clone_and_rewrite(self, c)
-                if c_tag == 'g':
-                    matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeH/700., -doc_sizeH/700., 
-                                                          -doc_sizeH*0.25,  doc_sizeW*0.75)
+                if c.nodeName == 'g':
+                    matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeW/7., -doc_sizeH/7., 
+                                                          -doc_sizeW*43.7, doc_sizeH*101.35)
                     child.setAttribute('transform', matrix)
                     child.setAttribute('id', self.name)
-                    
+                elif c.nodeName == 'path':
+                    data = c.getAttribute('d')
+                    child.setAttribute('d', relativize_path_data(data))
                 node_out.appendChild(child)
                 
             return node_out
@@ -304,22 +337,31 @@ if __name__ == '__main__':
     #print e.get_def().toprettyxml()
     #print test_particle_data()
     #formula = test_particle_display()
-    #e = TexGlyph(formula, "test")
-    #e.create_equation_tex('test.tex')
+
     #e.get_svg().toprettyxml()
     #lib = get_glyph_library()
-    for pdgid in sorted(glyph_ids()):
-        with file("pdg%i.svg"%pdgid, "w") as f:
-            f.write('<?xml version="1.0" standalone="no"?>\n')
-            f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
-            f.write(' <defs>\n')
-            f.write(get_glyph_xml(pdgid))
-            f.write(' </defs>\n')
-            f.write('<use x = "0" y = "0" xlink:href = "#pdg%s" />\n' % pdgid)
-            baseline = 20
-            midpoint = 42.5
-            f.write('<circle cx = "%.3f" cy = "%.3f" r = "1" fill = "red" stroke ="none" />\n' % (midpoint, baseline))
-            f.write('<path d="M 0 %s H 100" fill = "none" stroke ="red" />\n' % baseline)
-            f.write('</svg>')
+    if False:
+        db = get_particle_db()
+        for pdgid, label, gd in sorted(db.values()):
+            if pdgid == 21:
+                print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
+                res = TexGlyph(particle_to_latex(gd), "pdg%i"%pdgid)
+                res.create_equation_tex('test.tex')
+                file("test.svg","w").write(res.get_svg().toprettyxml())
+
+    if True:
+        for pdgid in sorted(glyph_ids()):
+            with file("pdg%i.svg"%pdgid, "w") as f:
+                f.write('<?xml version="1.0" standalone="no"?>\n')
+                f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
+                f.write(' <defs>\n')
+                f.write(get_glyph_xml(pdgid))
+                f.write(' </defs>\n')
+                f.write('<use x = "50" y = "50" xlink:href = "#pdg%s" />\n' % pdgid)
+                baseline = 50
+                midpoint = 50
+                f.write('<circle cx = "%.3f" cy = "%.3f" r = "1" fill = "red" stroke ="none" />\n' % (midpoint, baseline))
+                f.write('<path d="M 0 %s H 100" fill = "none" stroke ="red" />\n' % baseline)
+                f.write('</svg>')
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 encoding=utf-8 textwidth=99
