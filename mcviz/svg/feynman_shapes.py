@@ -124,6 +124,31 @@ def boson_data(energy, length = None, spline = None, n_max = 2, n_min = 2):
     a = default_amp / 3
     return photon_data(energy, length, spline, n_max, n_min, power = None, amp = a)
 
+def svg_group(content, kwds)
+    kwdstr = " ".join('%s="%s"' % (k,v) for k,v in kwds.iteritems())
+    path = '<path d="%s" />\n' % (photon_data(energy, spline))
+    s = "<g %s>\n %s\n </g>\n" % (kwdstr, path)
+
+# Get SVG fragments
+def photon(energy, spline = None, **kwds):
+    """Get an SVG fragment for a photon along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    path = '<path d="%s" />\n' % (photon_data(energy, spline))
+    return svg_group(path, kwds)
+
+def gluon(energy, spline = None, **kwds):
+    """Get an SVG fragment for a photon along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    path = '<path d="%s" />\n' % (gluon_data(energy, spline))
+    return svg_group(path, kwds)
+
+def boson(energy, spline = None, **kwds):
+    """Get an SVG fragment for a photon along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    path = '<path d="%s" />\n' % (boson_data(energy, spline))
+    return svg_group(path, kwds)
+
+
 if __name__=="__main__":
     from spline import Spline, SplineLine
     
