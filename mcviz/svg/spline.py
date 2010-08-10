@@ -12,7 +12,6 @@ class Spline(object):
         self.sampled = False
         self._functionals = None
 
-
     def calculate_functionals(self):
         # calculate functional parameters of the spline
         p = self.points
@@ -138,7 +137,6 @@ class SplineLine(object):
         cum = self.cumulative = [0]
         for spline in self.splines:
             cum.append(cum[-1] + spline.length)
-
 
     def find_spline_at(self, s):
         if not self.cumulative:

@@ -72,7 +72,7 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
         splines.append(Spline(op, cp1, cp2, dp))
         sgn = -sgn
     return splines
-    
+
 def pathdata_from_splines(splines, trafo_spline = None):
     if trafo_spline:
         splines = [trafo_spline.transform_spline(s) for s in splines]
@@ -80,7 +80,6 @@ def pathdata_from_splines(splines, trafo_spline = None):
     for s in splines:
         data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (s.points[1] + s.points[2] + s.points[3]))
     return "".join(data)
-
 
 # Functions to get SVN path data for objects
 # contain some policy
