@@ -171,7 +171,7 @@ def get_glyph_library():
         except IOError:
             glyph_library = make_glyph_library()
             with file("mcviz/svg/texglyph.cache.bz2", "w") as f:
-                f.write(dumps(glyph_library).encode("bz2"))
+                f.write(dumps(glyph_library, 2).encode("bz2"))
     return glyph_library
 
 def get_glyph_dom(pdgid):
