@@ -58,3 +58,12 @@ class Vertex(object):
         """
         return (any(v.colored for v in self.incoming) and 
                 any(not v.colored for v in self.outgoing))
+                
+    @property
+    def connecting(self):
+        """
+        A connecting vertex is one which connects the two initial states 
+        together.
+        """        
+        return (any(p.decends_one  for p in self.incoming) and 
+                all(p.decends_both for p in self.outgoing))

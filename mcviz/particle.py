@@ -30,6 +30,11 @@ class Particle(object):
     @property
     def decends_both(self):
         return self.decends(1) and self.decends(2)
+    
+    @property
+    def decends_one(self):
+        return ((self.decends(1) or self.decends(2)) 
+                and not (self.decends(1) and self.decends(2)))
         
     def decends(self, n):
         assert n == 1 or n == 2, "Only supported for initial particles"
