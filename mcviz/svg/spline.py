@@ -160,6 +160,9 @@ class SplineLine(object):
         start, end = self.splines[0].points[0], self.splines[-1].points[-1]
         return "splineline; start %s; end %s" % (start, end)
 
+def Line(Spline):
+    def __init__(self, p0, p1):
+        super(Line, self).__init__(p0, p0, p1, p1)
 
 if __name__=="__main__":
     s = Spline(5.0, -10, 20.000, -10, 20.0, 10.000, 40.0, 10.000)
