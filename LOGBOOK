@@ -1,5 +1,3 @@
-
-
 Interesting Attributes in Dot:
 * graph: splines --> 
 * group attribute
@@ -7,3 +5,13 @@ Interesting Attributes in Dot:
 * pos
 * nodesep!
 * seed
+
+
+Inputs needed for own SVG renderer:
+spline {
+    colour
+    type (photon, gluon, fermion, boson)
+    energy (photon, gluon)
+    
+}
+vertex 
