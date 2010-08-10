@@ -8,3 +8,6 @@
 *.fdpsvg
 *.pdf
 *.png
+*.aux
+*.log
+*.tex
