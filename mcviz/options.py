@@ -18,8 +18,11 @@ def get_option_parser():
     o("-L", "--limit", type=int, default=None,
       help="Limit number of particles made")
     
-    o("-w", "--pen-width", choices=["pt", "off"], default="off")
-    o("-W", "--edge-weight", choices=["e", "off"], default="off")
+    o("-w", "--penwidth", choices=["pt", "off"], default="off", help="Not implemented")
+    o("-W", "--edge-weight", choices=["e", "off"], default="off", help="Not implemented")
+    
+    o("-t", "--line-thickness", type=float, default=1.,
+      help="Controls the thickness of the graph edges")
     
     o("-I", "--show-id", action="store_true",
       help="Controls labelling particle ids")

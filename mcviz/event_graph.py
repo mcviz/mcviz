@@ -105,11 +105,25 @@ class EventGraph(object):
         # Remove system vertex
         del self.particles[0]
         
+        self.tag_by_progenitors()
+        self.tag_by_hadronization_vertex()
+        
+    def tag_by_progenitors(self):
+        """
+        Tag decendents of the initial particles
+        """
         assert len(self.initial_particles) == 2
         p1, p2 = self.initial_particles
         self.walk(p1, Particle.tagger("decendent_of_p1"))
         self.walk(p2, Particle.tagger("decendent_of_p2"))
-        
+    
+    def tag_by_hadronization_vertex(self):
+        had_vertices = [v for v in self.vertices.values() if v.hadronization]
+        for i, vertex in enumerate(had_vertices):
+            for particle in vertex.outgoing:    
+                self.walk(particle, Particle.tagger("after_hadronization"))
+                self.walk(particle, Particle.attr_setter("had_idx", i))
+    
     def walk(self, particle, 
              walk_action=lambda x:None, loop_action=lambda x:None, 
              completed_walks=None, uncompleted_walks=None):

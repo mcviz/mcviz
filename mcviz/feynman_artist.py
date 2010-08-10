@@ -14,16 +14,37 @@ class FeynmanArtist(object):
         print("edge [labelangle=90, fontsize=12]")
         print("ratio=1")
 
-        edges = self.draw_vertices(graph.vertices)
+        subgraphs = dict(one=[], two=[], both=[])
+        other, connecting, initial = [], [], []
+        for vertex in graph.vertices.values():
+            if vertex.is_initial:
+                initial.append(vertex)
+            elif vertex.connecting:
+                connecting.append(vertex)
+            else:
+                other.append(vertex)                
+        
+        edges = set()
+        
+        edges.update(self.draw_vertices_cluster("initial", initial, "rank=source;"))
+        edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;style=filled;fillcolor=grey;'))
+        edges.update(self.draw_vertices(other))
         
         for edge in sorted(edges):
             print edge
 
         print("}")
-        
+    
+    def draw_vertices_cluster(self, subgraph, vertices, style=""):
+        print("subgraph %s {" % subgraph)
+        print(style)
+        edges = self.draw_vertices(vertices)
+        print("}")
+        return edges
+    
     def draw_vertices(self, vertices):
         edges = set()
-        for vertex in sorted(vertices.itervalues()):
+        for vertex in sorted(vertices):
             edges.update(self.draw_vertex(vertex))
         return edges
 
@@ -32,6 +53,7 @@ class FeynmanArtist(object):
         size = 0.1
         fillcolor = "black"
         color_mechanism = self.options.color_mechanism
+        thickness = self.options.line_thickness
         
         if vertex.hadronization:
             # Big white hardronization vertices
@@ -47,7 +69,7 @@ class FeynmanArtist(object):
 
         node = make_node(vertex.vno, height=size, width=size, label="", 
                          color="black", fillcolor=fillcolor, style=style)
-            
+        
         print node
             
         edges = set()
@@ -76,13 +98,16 @@ class FeynmanArtist(object):
                     style = "decorate, decoration=snake, draw=red"
                     dir = "none"
 
+                penwidth = log10(out_particle.pt+1)*thickness + 1
+
                 going, coming = vertex.vno, out_particle.vertex_out.vno
                 edge = make_edge(going, coming, label=label, color=color,
-                                 penwidth=log10(out_particle.pt+1)*1 + 1,
+                                 penwidth=penwidth,
                                  weight=log10(out_particle.e+1)*0.1 + 1,
                                  arrowsize=arrowsize,
                                  style=style,
-                                 dir=dir)
+                                 dir=dir,
+                                 )#constraint=not out_particle.decends_one)
                                  
                 edges.add(edge)
                 
