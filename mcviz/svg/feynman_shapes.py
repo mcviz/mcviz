@@ -2,13 +2,15 @@ from __future__ import division
 
 from spline import Spline
 
-max_amp = 10
+default_amp = 8
 
 def set_width(width):
     global max_amp
     max_amp = width
 
-def get_photon_splines(length, amplitude, n_waves, power = 5):
+# Functions to get photon splines
+
+def get_photon_splines(length, amplitude, n_waves, power, amp):
     N = n_waves * 2
     wavelength = length / N
     cntrl_strength = wavelength / 2
@@ -41,7 +43,7 @@ def get_photon_splines(length, amplitude, n_waves, power = 5):
         sgn = -sgn
     return splines
 
-def get_gluon_splines(length, amplitude, n_waves):
+def get_gluon_splines(length, amplitude, n_waves, amp): 
     loopyness = 0.7
     init_length = 2
 
@@ -79,8 +81,13 @@ def pathdata_from_splines(splines, trafo_spline = None):
         data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (s.points[1] + s.points[2] + s.points[3]))
     return "".join(data)
 
-def photon(energy, length = None, spline = None, n_max = 10, n_min = 3, power = 10):
-    """Get the SVG path data for a photon.
+
+# Functions to get SVN path data for objects
+# contain some policy
+
+def photon_data(energy, length = None, spline = None, n_max = 10, n_min = 3,
+                power = 10, amp = default_amp):
+    """Get the SVG path data for a photon. 
     energy must be between 0 and 1
     either length or spline must be given."""
     assert length or spline and not (length and spline)
@@ -88,12 +95,14 @@ def photon(energy, length = None, spline = None, n_max = 10, n_min = 3, power = 
         length = spline.length
     # Here are parametrizations:
     energy = min(1, max(0,energy))
-    amplitude = (0.5 + 0.5*energy) * max_amp
+    amplitude = (0.5 + 0.5*energy) * amp
     n_per_50 = n_min + energy * (n_max - n_min)
     n = max(2, int(n_per_50 * length / 50))
-    return pathdata_from_splines(get_photon_splines(length, amplitude, n, power), trafo_spline = spline)
+    splines = get_photon_splines(length, amplitude, n, power, amp)
+    return pathdata_from_splines(splines, trafo_spline = spline)
 
-def gluon(energy, length = None, spline = None, n_max = 11, n_min = 1):
+def gluon_data(energy, length = None, spline = None, n_max = 11, n_min = 1, 
+               amp = default_amp):
     """Get the SVG path data for a gluon.
     energy must be between 0 and 1
     either length or spline must be given."""
@@ -102,32 +111,32 @@ def gluon(energy, length = None, spline = None, n_max = 11, n_min = 1):
         length = spline.length
     # Here are parametrizations:
     energy = min(1, max(0,energy))
-    amplitude = (1 - 0.3*energy) * max_amp
+    amplitude = (1 - 0.3*energy) * amp
     n_per_50 = n_min + energy * (n_max - n_min)
     n = max(1, int(n_per_50 * length / 50))
-    return pathdata_from_splines(get_gluon_splines(length, amplitude, n), trafo_spline = spline)
+    splines = get_gluon_splines(length, amplitude, n, amp)
+    return pathdata_from_splines(splines, trafo_spline = spline)
 
-def boson(energy, length = None, spline = None, n_max = 3, n_min = 3):
+def boson_data(energy, length = None, spline = None, n_max = 2, n_min = 2):
     """Get the SVG path data for a boson.
     energy must be between 0 and 1
     either length or spline must be given."""
-    return photon(energy, length, spline, n_max, n_min, power = None)
+    a = default_amp / 3
+    return photon_data(energy, length, spline, n_max, n_min, power = None, amp = a)
 
 if __name__=="__main__":
     from spline import Spline, SplineLine
     
     spline1 = Spline((5.0, -10), (20.000, -10), (15.0, 30.000), (40.0, 10.000))
     spline2 = Spline((40, 10), (65, -10), (60, 30), (80, 20))
-    dat1 = ("M %.5f %.5f C " + "%.f "*6) % (5.0, -10, 20.000, -10, 15.0, 30.000, 40.0, 10.000)
-    dat2 = ("M %.5f %.5f C " + "%.f "*6) % (40, 10, 65, -10, 60, 30, 80, 20)
     spline = SplineLine((spline1, spline2))
     print spline.length
 
 
     s = ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">\n']
 
-    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, dat1))
-    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, dat2))
+    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, spline.svg_path_data))
+    #s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, dat2))
 
 
     n = 10
@@ -135,21 +144,21 @@ if __name__=="__main__":
         x = 10
         y = 40 + i*25
         e = i/n
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon(e, spline.length)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (100+x, y, photon(e, spline = spline)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (200+x, y, gluon(e, spline.length)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (300+x, y, gluon(e, spline = spline)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (400+x, y, boson(e, spline.length)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (500+x, y, boson(e, spline = spline)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon_data(e, spline.length)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (100+x, y, photon_data(e, spline = spline)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (200+x, y, gluon_data(e, spline.length)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (300+x, y, gluon_data(e, spline = spline)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (400+x, y, boson_data(e, spline.length)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (500+x, y, boson_data(e, spline = spline)))
 
     for i in range(n+1):
         x = 10
         y = 400 + i*25
         e = 0.6
         l = (i + 0.5) / n * 180
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon(e, l)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (250+x, y, gluon(e, l)))
-        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (500+x, y, boson(e, l)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (x, y, photon_data(e, l)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (250+x, y, gluon_data(e, l)))
+        s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (500+x, y, boson_data(e, l)))
 
     #s.append('<path transform="translate(10,10)" fill="none" stroke="red" id="u" d="%s" />\n' % (gluon(0.5, 200)))
 
