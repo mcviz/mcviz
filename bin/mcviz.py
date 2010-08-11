@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2.6
 
 from mcviz import EventGraph, parse_options
 from mcviz.utils import replace_stdout
