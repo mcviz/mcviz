@@ -29,7 +29,8 @@ def main():
         artist.draw(event)
         dot = our_stdout.getvalue()
         if options.layout_engine:
-            gv_output, gv_errors = run_graphviz(options.layout_engine, dot)
+            gv_output, gv_errors = run_graphviz(options.layout_engine, dot,
+                                                options.extra_gv_options)
             result = gv_output
         else:
             result = dot

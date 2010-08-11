@@ -1,7 +1,7 @@
 from subprocess import Popen, PIPE
 
 def run_graphviz(layout_engine, input_dot, options=[]):
-    p = Popen([layout_engine, "-Tplain"] + options, 
+    p = Popen([layout_engine] + options, 
               stdin=PIPE, stdout=PIPE, stderr=PIPE)
     gv_output, gv_errors = p.communicate(input_dot)
     #print >>stderr, repr(gv_stdout)

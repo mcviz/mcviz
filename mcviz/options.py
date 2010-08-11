@@ -47,6 +47,14 @@ def parse_options(argv=None):
     if argv is None:
         argv = sys.argv
 
+    if "--" in argv:
+        extraopts_index = argv.index("--")
+        extra_gv_options = argv[extraopts_index+1:]
+        argv = argv[:extraopts_index]
+    else:
+        extra_gv_options = ["-Tplain"]
+
     result = options, args = p.parse_args(argv)
-    
+    options.extra_gv_options = extra_gv_options
+        
     return result
