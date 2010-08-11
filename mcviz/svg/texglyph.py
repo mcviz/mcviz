@@ -174,7 +174,7 @@ def get_glyph_library():
                 f.write(dumps(glyph_library, 2).encode("bz2"))
     return glyph_library
 
-def get_glyph_dom(pdgid):
+def get_glyph(pdgid):
     return get_glyph_library()[pdgid]
 
 def get_glyph_xml(pdgid):
