@@ -122,7 +122,7 @@ class Spline(object):
 
     @property
     def svg_path_data(self):
-        return ("M %.5f %.5f C " + "%.f "*6) % reduce(tuple.__add__, self.points)
+        return ("M %.2f %.2f C " + "%.2f "*6) % reduce(tuple.__add__, self.points)
 
     def __str__(self):
         return "spline; start %s; control points %s; %s; end %s" % self.points

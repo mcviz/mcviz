@@ -79,9 +79,9 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
 def pathdata_from_splines(splines, trafo_spline = None):
     if trafo_spline:
         splines = [trafo_spline.transform_spline(s) for s in splines]
-    data = ["M %.5f %.5f\n" % splines[0].points[0]]
+    data = ["M%.2f %.2f" % splines[0].points[0]]
     for s in splines:
-        data.append('C %.5f %.5f %.5f %.5f %.5f %.5f\n' % (s.points[1] + s.points[2] + s.points[3]))
+        data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % (s.points[1] + s.points[2] + s.points[3]))
     return "".join(data)
 
 # Functions to get SVN path data for objects
@@ -129,9 +129,9 @@ def fermion_arrow_data(size, spline):
     tail2 = spline.transform_x_point(mid, (mid - size*0.5, - width))
     control1 = spline.transform_x_point(mid, (mid - size*0.4, width*0.5))
     control2 = spline.transform_x_point(mid, (mid - size*0.4, - width*0.5))
-    data = ["M %.5f %.5f" % tip]
-    data.append("L %.5f %.5f" % tail1)
-    data.append("C %.5f %.5f %.5f %.5f %.5f %.5f" % (control1 + control2 + tail2))
+    data = ["M%.2f %.2f" % tip]
+    data.append("L%.2f %.2f" % tail1)
+    data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1 + control2 + tail2))
     data.append("Z")
     return "".join(data)
 
