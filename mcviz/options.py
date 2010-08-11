@@ -33,7 +33,10 @@ def get_option_parser():
     o("-C", "--color-mechanism", default="color_charge",
       help="Changes the way particles are colored. "
            "Possible values: color_charge, ascendents.")
-
+           
+    o("-S", "--strip-outer-nodes", type=int, default=0, metavar="N",
+      help="Removes the outer N nodes from the edge of the graph")
+    
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"])
     
     return p

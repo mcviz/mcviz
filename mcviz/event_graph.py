@@ -108,6 +108,23 @@ class EventGraph(object):
         self.tag_by_progenitors()
         self.tag_by_hadronization_vertex()
         
+        print >>stderr, "Does the graph have loops?", self.has_loop
+        
+        for i in xrange(options.strip_outer_nodes):
+            print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
+            #print >>stderr, "  depth before", self.depth
+            #stripped = 
+            self.strip_outer_nodes()
+            #all_particles = set(self.particles)
+            #for strip in stripped:
+            #    assert strip.no not in all_particles
+            #del stripped
+            #print >>stderr, stripped
+            #print >>stderr, "  depth after", self.depth
+    
+        #from .tests.test_graph import graph_is_consistent
+        #graph_is_consistent(self)
+    
     @property
     def has_loop(self):
         class Store:
@@ -126,7 +143,7 @@ class EventGraph(object):
         for particle in self.particles.values():
             if particle.final_state:
                 result.append(particle)
-                self.contract_particle(particle)
+                self.drop_particle(particle)
         return result
         
     def tag_by_progenitors(self):
@@ -210,6 +227,25 @@ class EventGraph(object):
             self.walk(particle, walker)
         
         return Store.maxdepth
+        
+    def drop_particle(self, particle):
+    
+        particle.vertex_in.outgoing.discard(particle)
+        for p in particle.vertex_in.incoming:
+            p.daughters.discard(particle)
+        
+        particle.vertex_out.incoming.discard(particle)
+        for p in particle.vertex_out.outgoing:
+            p.mothers.discard(particle)
+        
+        if particle.vertex_in.is_dangling:
+            del self.vertices[particle.vertex_in.vno]
+        
+        if particle.vertex_out.is_dangling:
+            del self.vertices[particle.vertex_out.vno]
+            
+        del self.particles[particle.no]
+        
     
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
