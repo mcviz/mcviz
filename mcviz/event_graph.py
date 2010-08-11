@@ -108,6 +108,27 @@ class EventGraph(object):
         self.tag_by_progenitors()
         self.tag_by_hadronization_vertex()
         
+    @property
+    def has_loop(self):
+        class Store:
+            result = False
+        
+        def found_loop(particle, depth):
+            Store.result = True
+        
+        for particle in self.initial_particles:
+            self.walk(particle, loop_action=found_loop)
+        
+        return Store.result
+        
+    def strip_outer_nodes(self):
+        result = []
+        for particle in self.particles.values():
+            if particle.final_state:
+                result.append(particle)
+                self.contract_particle(particle)
+        return result
+        
     def tag_by_progenitors(self):
         """
         Tag decendents of the initial particles
@@ -171,6 +192,24 @@ class EventGraph(object):
         completed_walks.add(particle)
         uncompleted_walks.discard(particle)
         return completed_walks
+    
+    @property
+    def depth(self):
+        """
+        Returns the maximum depth of the graph, and sets .depth attributes on 
+        all of the particles.
+        """
+        class Store:
+            maxdepth = 0
+            
+        def walker(particle, depth):
+            particle.depth = depth
+            Store.maxdepth = max(depth, Store.maxdepth)
+        
+        for particle in self.initial_particles:
+            self.walk(particle, walker)
+        
+        return Store.maxdepth
     
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
@@ -245,7 +284,7 @@ class EventGraph(object):
     
     @property
     def initial_particles(self):
-        return set(p for p in self.particles.values() if p.initial_state)
+        return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
     def from_hepmc(cls, filename):
