@@ -125,8 +125,8 @@ class EventGraph(object):
                 self.walk(particle, Particle.attr_setter("had_idx", i))
     
     def walk(self, particle, 
-             walk_action=lambda x:None, loop_action=lambda x:None, 
-             completed_walks=None, uncompleted_walks=None):
+             walk_action=lambda p, d:None, loop_action=lambda p, d:None, 
+             completed_walks=None, uncompleted_walks=None, depth=0):
         """
         Walk the particle graph.
         
@@ -138,7 +138,7 @@ class EventGraph(object):
         if completed_walks is None: completed_walks = OrderedSet()
         if uncompleted_walks is None: uncompleted_walks = OrderedSet()
         
-        walk_action(particle)
+        walk_action(particle, depth)
         
         uncompleted_walks.add(particle)
         
@@ -157,13 +157,16 @@ class EventGraph(object):
                                      
                     looping_particles = list(lps) + [daughter]
                     
-                    for looping_particle in looping_particles:
-                        loop_action(looping_particle)
-                        
+                    # -1 because a single particle loop should be at the same
+                    # depth as the self.walk() call.
+                    n_lp = len(looping_particles) - 1
+                    for i, looping_particle in enumerate(looping_particles):
+                        loop_action(looping_particle, depth - n_lp + i + 1)
+                         
                 else:
                     # Not circular, so walk it.
                     self.walk(daughter, walk_action, loop_action, 
-                              completed_walks, uncompleted_walks)
+                              completed_walks, uncompleted_walks, depth+1)
         
         completed_walks.add(particle)
         uncompleted_walks.discard(particle)
