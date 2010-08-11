@@ -328,9 +328,9 @@ class TexGlyph(object):
 
     def svg_open(self, filename):
         doc_sizeH, doc_sizeW = 100, 100
-        scale = 1
-        shiftx = -304.16 - 1.06281144781
-        shifty = 708.5 + 1.25414141414
+        scale = 10
+        shiftx = -305.22
+        shifty = 709.75
 
         class Store:
             xmax, xmin = None, None
