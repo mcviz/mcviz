@@ -1,5 +1,8 @@
 from __future__ import division
 
+from xml.dom.minidom import getDOMImplementation
+svgxml = getDOMImplementation().createDocument(None, "svg", None)
+
 from spline import Spline
 
 default_amp = 8
@@ -132,35 +135,55 @@ def fermion_arrow_data(size, spline):
     data.append("Z")
     return "".join(data)
 
-def svg_group(content, kwds):
-    kwdstr = " ".join('%s="%s"' % (k,v) for k,v in kwds.iteritems())
-    return "<g %s>\n%s\n </g>\n" % (kwdstr, content)
+def svg_group(kwds):
+    grp = svgxml.createElement("g")
+    for kw, val in kwds.iteritems():
+        grp.setAttribute(kw, val)
+    return grp
 
 # Get SVG fragments
 def photon(energy, spline, **kwds):
     """Get an SVG fragment for a photon along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
-    path = '<path d="%s" />\n' % (photon_data(energy, spline))
-    return svg_group(path, kwds)
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", photon_data(energy, spline))
+    grp = svg_group(kwds)
+    grp.appendChild(path)
+    return grp
 
 def gluon(energy, spline, **kwds):
     """Get an SVG fragment for a photon along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
-    path = '<path d="%s" />\n' % (gluon_data(energy, spline))
-    return svg_group(path, kwds)
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", gluon_data(energy, spline))
+    grp = svg_group(kwds)
+    grp.appendChild(path)
+    return grp
 
 def boson(energy, spline, **kwds):
     """Get an SVG fragment for a photon along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
-    path = '<path d="%s" />\n' % (boson_data(energy, spline))
-    return svg_group(path, kwds)
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", boson_data(energy, spline))
+    grp = svg_group(kwds)
+    grp.appendChild(path)
+    return grp
 
 def fermion(energy, spline, **kwds):
-    path = '<path d="%s" fill="none"/>\n' % spline.svg_path_data
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", spline.svg_path_data)
     arrowsize = 2 + 10*energy
-    arrowdata = fermion_arrow_data(arrowsize, spline)
-    arrow = '<path d="%s" stroke="none"/>\n' % arrowdata
-    return svg_group("".join((path,arrow)), kwds)
+    arrow = svgxml.createElement("path")
+    arrow.setAttribute("stroke", "none")
+    arrow.setAttribute("d", fermion_arrow_data(arrowsize, spline))
+    grp = svg_group(kwds)
+    grp.appendChild(path)
+    grp.appendChild(arrow)
+    return grp
 
 if __name__=="__main__":
     from spline import Spline, SplineLine, Line
@@ -170,41 +193,49 @@ if __name__=="__main__":
     spline = SplineLine((spline1, spline2))
     line = Line((0,0),(spline.length,0))
 
-    s = ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">\n']
+    doc = svgxml.createElement("svg") 
+    doc.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+    doc.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
+    doc.setAttribute("viewBox", "0 0 1000 1000")
 
-    s.append('<path transform="translate(%i,%i)" fill="none" stroke="red" id="u" d="%s" />\n' % (10, 10, spline.svg_path_data))
+    spath = svgxml.createElement("path")
+    spath.setAttribute("d", spline.svg_path_data)
+    spath.setAttribute("transform", "translate(%i,%i)" % (10, 10))
+    spath.setAttribute("fill", "none")
+    spath.setAttribute("stroke", "red")
+    doc.appendChild(spath)
+
+    args = {"fill":"none", "stroke":"blue"}
+    fargs = {"fill":"blue", "stroke":"blue"}
 
     n = 10
     for i in range(n+1):
         x = 10
         y = 40 + i*25
         e = i/n
-        s.append(photon(e, line, transform="translate(%i,%i)" % (x, y), fill="none", stroke="blue"))    
-        s.append(photon(e, spline, transform="translate(%i,%i)" % (x+100, y), fill="none", stroke="blue"))
-        s.append(gluon(e, line, transform="translate(%i,%i)" % (x+200, y), fill="none", stroke="blue"))    
-        s.append(gluon(e, spline, transform="translate(%i,%i)" % (x+300, y), fill="none", stroke="blue"))
-        s.append(boson(e, line, transform="translate(%i,%i)" % (x+400, y), fill="none", stroke="blue"))    
-        s.append(boson(e, spline, transform="translate(%i,%i)" % (x+500, y), fill="none", stroke="blue"))
-        s.append(fermion(e, line, transform="translate(%i,%i)" % (x+600, y), fill="blue", stroke="blue"))    
-        s.append(fermion(e, spline, transform="translate(%i,%i)" % (x+700, y), fill="blue", stroke="blue"))
+        doc.appendChild(photon(e, line, transform="translate(%i,%i)" % (x, y),**args)).toprettyxml() 
+        doc.appendChild(photon(e, spline, transform="translate(%i,%i)" % (x+100, y),**args)).toprettyxml()
+        doc.appendChild(gluon(e, line, transform="translate(%i,%i)" % (x+200, y),**args)).toprettyxml()    
+        doc.appendChild(gluon(e, spline, transform="translate(%i,%i)" % (x+300, y),**args)).toprettyxml()
+        doc.appendChild(boson(e, line, transform="translate(%i,%i)" % (x+400, y),**args)).toprettyxml()    
+        doc.appendChild(boson(e, spline, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
+        doc.appendChild(fermion(e, line, transform="translate(%i,%i)" % (x+600, y),**fargs)).toprettyxml()    
+        doc.appendChild(fermion(e, spline, transform="translate(%i,%i)" % (x+700, y),**fargs)).toprettyxml()
 
     for i in range(n+1):
         x = 10
         y = 400 + i*25
         e = 0.6
         l = Line((0,0),((i + 0.5) / n * 180, 10))
-        s.append(photon(e, l, transform="translate(%i,%i)" % (x, y), fill="none", stroke="blue"))
-        s.append(gluon(e, l, transform="translate(%i,%i)" % (x+250, y), fill="none", stroke="blue"))
-        s.append(boson(e, l, transform="translate(%i,%i)" % (x+500, y), fill="none", stroke="blue"))
-        s.append(fermion(e, l, transform="translate(%i,%i)" % (x+750, y), fill="blue", stroke="blue"))
+        doc.appendChild(photon(e, l, transform="translate(%i,%i)" % (x, y),**args)).toprettyxml()
+        doc.appendChild(gluon(e, l, transform="translate(%i,%i)" % (x+250, y),**args)).toprettyxml()
+        doc.appendChild(boson(e, l, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
+        doc.appendChild(fermion(e, l, transform="translate(%i,%i)" % (x+750, y),**fargs)).toprettyxml()
 
     #s.append('<path transform="translate(10,10)" fill="none" stroke="red" id="u" d="%s" />\n' % (gluon(0.5, 200)))
 
-    s.append('" />\n')
-    s.append('</svg>\n')
-
     f = file("feynman_shapes.svg","w")
-    f.write("".join(s))
+    f.write(doc.toprettyxml())
     f.close()
 
     print "Written feynman_shapes.svg."
