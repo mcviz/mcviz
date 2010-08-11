@@ -34,6 +34,8 @@ def get_option_parser():
       help="Changes the way particles are colored. "
            "Possible values: color_charge, ascendents.")
 
+    o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"])
+    
     return p
     
 def parse_options(argv=None):
