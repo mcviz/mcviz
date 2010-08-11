@@ -34,8 +34,14 @@ def main():
         else:
             result = dot
     
-    print result
-    #print >>stderr, "Hash of graphviz output: 0x%-09x" % hash(gv_output)
+    try:
+        print result
+    except IOError, e:
+        if e.errno == 32:
+            # Ignore broken pipes, just means we used head or somesuch tool
+            pass
+        else:
+            raise
 
 if __name__ == "__main__":
     """
