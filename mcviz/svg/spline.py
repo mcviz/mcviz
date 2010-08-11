@@ -46,10 +46,10 @@ class Spline(object):
         d = sqrt(dx**2 + dy**2)
         if d/self.length < 1e-8:
             if t < 0.5:
-                print "t = ", t, "increased"
+                #print "t = ", t, "increased"
                 return self.get_point_perp(t + 0.001)
             else:
-                print "t = ", t, "decreased"
+                #print "t = ", t, "decreased"
                 return self.get_point_perp(t - 0.001)
         return x, y, -dy/d, dx/d
 
@@ -62,10 +62,10 @@ class Spline(object):
         d = sqrt(dx**2 + dy**2)
         if d/self.length < 1e-8:
             if t < 0.5:
-                print "t = ", t, "increased"
+                #print "t = ", t, "increased"
                 return self.get_point_tan_perp(t + 0.001)
             else:
-                print "t = ", t, "decreased"
+                #print "t = ", t, "decreased"
                 return self.get_point_tan_perp(t - 0.001)
         return x, y, dx/d, dy/d, -dy/d, dx/d
 
