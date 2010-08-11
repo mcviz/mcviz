@@ -49,6 +49,10 @@ class Vertex(object):
     @property    
     def is_final(self):
         return not self.outgoing
+    
+    @property
+    def is_dangling(self):
+        return self.is_initial and self.is_final
 
     @property
     def hadronization(self):

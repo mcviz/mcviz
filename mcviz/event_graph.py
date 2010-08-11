@@ -108,6 +108,44 @@ class EventGraph(object):
         self.tag_by_progenitors()
         self.tag_by_hadronization_vertex()
         
+        print >>stderr, "Does the graph have loops?", self.has_loop
+        
+        for i in xrange(options.strip_outer_nodes):
+            print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
+            #print >>stderr, "  depth before", self.depth
+            #stripped = 
+            self.strip_outer_nodes()
+            #all_particles = set(self.particles)
+            #for strip in stripped:
+            #    assert strip.no not in all_particles
+            #del stripped
+            #print >>stderr, stripped
+            #print >>stderr, "  depth after", self.depth
+    
+        #from .tests.test_graph import graph_is_consistent
+        #graph_is_consistent(self)
+    
+    @property
+    def has_loop(self):
+        class Store:
+            result = False
+        
+        def found_loop(particle, depth):
+            Store.result = True
+        
+        for particle in self.initial_particles:
+            self.walk(particle, loop_action=found_loop)
+        
+        return Store.result
+        
+    def strip_outer_nodes(self):
+        result = []
+        for particle in self.particles.values():
+            if particle.final_state:
+                result.append(particle)
+                self.drop_particle(particle)
+        return result
+        
     def tag_by_progenitors(self):
         """
         Tag decendents of the initial particles
@@ -125,8 +163,8 @@ class EventGraph(object):
                 self.walk(particle, Particle.attr_setter("had_idx", i))
     
     def walk(self, particle, 
-             walk_action=lambda x:None, loop_action=lambda x:None, 
-             completed_walks=None, uncompleted_walks=None):
+             walk_action=lambda p, d:None, loop_action=lambda p, d:None, 
+             completed_walks=None, uncompleted_walks=None, depth=0):
         """
         Walk the particle graph.
         
@@ -138,7 +176,7 @@ class EventGraph(object):
         if completed_walks is None: completed_walks = OrderedSet()
         if uncompleted_walks is None: uncompleted_walks = OrderedSet()
         
-        walk_action(particle)
+        walk_action(particle, depth)
         
         uncompleted_walks.add(particle)
         
@@ -157,17 +195,57 @@ class EventGraph(object):
                                      
                     looping_particles = list(lps) + [daughter]
                     
-                    for looping_particle in looping_particles:
-                        loop_action(looping_particle)
-                        
+                    # -1 because a single particle loop should be at the same
+                    # depth as the self.walk() call.
+                    n_lp = len(looping_particles) - 1
+                    for i, looping_particle in enumerate(looping_particles):
+                        loop_action(looping_particle, depth - n_lp + i + 1)
+                         
                 else:
                     # Not circular, so walk it.
                     self.walk(daughter, walk_action, loop_action, 
-                              completed_walks, uncompleted_walks)
+                              completed_walks, uncompleted_walks, depth+1)
         
         completed_walks.add(particle)
         uncompleted_walks.discard(particle)
         return completed_walks
+    
+    @property
+    def depth(self):
+        """
+        Returns the maximum depth of the graph, and sets .depth attributes on 
+        all of the particles.
+        """
+        class Store:
+            maxdepth = 0
+            
+        def walker(particle, depth):
+            particle.depth = depth
+            Store.maxdepth = max(depth, Store.maxdepth)
+        
+        for particle in self.initial_particles:
+            self.walk(particle, walker)
+        
+        return Store.maxdepth
+        
+    def drop_particle(self, particle):
+    
+        particle.vertex_in.outgoing.discard(particle)
+        for p in particle.vertex_in.incoming:
+            p.daughters.discard(particle)
+        
+        particle.vertex_out.incoming.discard(particle)
+        for p in particle.vertex_out.outgoing:
+            p.mothers.discard(particle)
+        
+        if particle.vertex_in.is_dangling:
+            del self.vertices[particle.vertex_in.vno]
+        
+        if particle.vertex_out.is_dangling:
+            del self.vertices[particle.vertex_out.vno]
+            
+        del self.particles[particle.no]
+        
     
     def contract_particle(self, particle):
         """Contracts a particle in the graph, 
@@ -242,7 +320,7 @@ class EventGraph(object):
     
     @property
     def initial_particles(self):
-        return set(p for p in self.particles.values() if p.initial_state)
+        return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
     def from_hepmc(cls, filename):

@@ -45,13 +45,13 @@ class Particle(object):
         """
         Return a function which tags particles with `what`
         """
-        def tag(particle):
+        def tag(particle, depth):
             particle.tags.add(what)
         return tag
     
     @classmethod
     def attr_setter(self, what, value):
-        def dosetattr(particle):
+        def dosetattr(particle, depth):
             setattr(particle, what, value)
         return dosetattr
     
