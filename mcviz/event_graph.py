@@ -96,11 +96,7 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
         
-        if "gluballs" in options.contract:
-            self.contract_gluons()
-            
-        if "kinks" in options.contract:
-            self.contract()
+        self.do_contractions(options)
             
         # Remove system vertex
         del self.particles[0]
@@ -108,22 +104,25 @@ class EventGraph(object):
         self.tag_by_progenitors()
         self.tag_by_hadronization_vertex()
         
-        print >>stderr, "Does the graph have loops?", self.has_loop
+        #print >>stderr, "Does the graph have loops?", self.has_loop
         
         for i in xrange(options.strip_outer_nodes):
-            print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
-            #print >>stderr, "  depth before", self.depth
-            #stripped = 
+            #print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
             self.strip_outer_nodes()
-            #all_particles = set(self.particles)
-            #for strip in stripped:
-            #    assert strip.no not in all_particles
-            #del stripped
-            #print >>stderr, stripped
-            #print >>stderr, "  depth after", self.depth
+            self.do_contractions(options)
     
-        #from .tests.test_graph import graph_is_consistent
-        #graph_is_consistent(self)
+        # Graph consistency checks
+        from .tests.test_graph import graph_is_consistent
+        graph_is_consistent(self)
+    
+    def do_contractions(self, options):
+        
+        all_ = "all" in options.contract
+        if all_ or "gluballs" in options.contract:
+            self.contract_gluons()
+            
+        if all_ or "kinks" in options.contract:
+            self.contract()
     
     @property
     def has_loop(self):
