@@ -102,6 +102,10 @@ class Particle(object):
         return self.pdgid == 22
 
     @property
+    def boson(self):
+        return 21 <= self.pdgid <= 25 or 32 <= self.pdgid <= 37
+
+    @property
     def quark(self):
         return 1 <= abs(self.pdgid) <= 8
     
