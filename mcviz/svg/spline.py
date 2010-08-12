@@ -5,8 +5,9 @@ from bisect import bisect_left, bisect_right
 
 class Spline(object):
     def __init__(self, p0, p1, p2, p3, N = 100):
-        """ Create a spline given the start point,
+        """ Create a spline given the start point, 
         two control points and the end point"""
+        assert not (p0 == p1 == p2 == p3)
         self.points = (p0, p1, p2, p3)
         self.N = N
         self.sampled = False
@@ -119,7 +120,16 @@ class Spline(object):
         s1T = self.transform_x_point(spline.points[0][0],spline.points[1])
         s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
-
+    
+    def get_clipped(self, clip_length):
+        x = self.length - clip_length
+        p0, p1 = self.points[0], self.points[1]
+        p2 = list(self.points[2])
+        p3 = self.transform_point((x, 0))
+        for i in (0,1):
+            p2[i] += p3[i] - self.points[3][i]
+        return Spline(p0, p1, tuple(p2), p3, self.N)
+        
     @property
     def svg_path_data(self):
         return ("M %.2f %.2f C " + "%.2f "*6) % reduce(tuple.__add__, self.points)
@@ -167,6 +177,10 @@ class SplineLine(object):
     @property
     def svg_path_data(self):
         return " ".join(s.svg_path_data for s in self.splines)
+
+    def get_clipped(self, clip_length):
+        splines = self.splines[:-1] + [self.splines[-1].get_clipped(clip_length)]
+        return SplineLine(splines)
 
     def __str__(self):
         start, end = self.splines[0].points[0], self.splines[-1].points[-1]
