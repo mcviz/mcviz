@@ -1,13 +1,13 @@
 from .graphviz import make_node, make_edge
 from .utils import latexize_particle_name
 
-class DualArtist(object):
+class DualLayout(object):
 
     def __init__(self, graph, options):
         self.graph = graph
         self.options = options
 
-    def draw(self, graph):
+    def layout(self, graph):
         print("strict digraph pythia {")
         print("node [style=filled, shape=oval]")
         for particle in graph.particles.itervalues():

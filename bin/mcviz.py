@@ -3,8 +3,8 @@
 from mcviz import EventGraph, parse_options
 from mcviz.graphviz import run_graphviz
 from mcviz.utils import replace_stdout
-from mcviz.feynman_artist import FeynmanArtist
-from mcviz.dual_artist import DualArtist
+from mcviz.feynman_layout import FeynmanLayout
+from mcviz.dual_layout import DualLayout
 from sys import argv, stdout, stderr
 
 def main():
@@ -21,12 +21,12 @@ def main():
     event = EventGraph.from_pythia_log(args[1], options)
     
     if options.dual:
-        artist = DualArtist(options)
+        layout = DualLayout(options)
     else:
-        artist = FeynmanArtist(options)
+        layout = FeynmanLayout(options)
     
     with replace_stdout() as our_stdout:
-        artist.draw(event)
+        layout.layout(event)
         dot = our_stdout.getvalue()
         if options.layout_engine:
             gv_output, gv_errors = run_graphviz(options.layout_engine, dot,

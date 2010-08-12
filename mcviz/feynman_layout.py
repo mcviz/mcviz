@@ -3,12 +3,12 @@ from .utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
-class FeynmanArtist(object):
+class FeynmanLayout(object):
 
     def __init__(self, options):
         self.options = options
 
-    def draw(self, graph):
+    def layout(self, graph):
         print("strict digraph pythia {")
         print(self.options.extra_dot)
         if self.options.fix_initial:
