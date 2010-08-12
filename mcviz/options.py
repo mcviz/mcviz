@@ -61,6 +61,9 @@ def get_option_parser():
       help="Ranges from 0 to width/2. 0 pulls the initial particles apart the "
            "furthest.")
     
+    o("-U", "--use-unicode", action="store_true",
+      help="Use unicode for labels. (Default False)")
+    
     return p
     
 def parse_options(argv=None):

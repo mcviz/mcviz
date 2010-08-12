@@ -1,5 +1,5 @@
 from .graphviz import make_node, make_edge
-from .utils import latexize_particle_name
+from .utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
@@ -103,7 +103,11 @@ class FeynmanArtist(object):
                 arrowsize = 1.0 if not out_particle.final_state else 0.5
                 
                 # Greek-character-ize names.
-                name = latexize_particle_name(out_particle.name)
+                if self.options.use_unicode:
+                    name = make_unicode_name(out_particle.name)
+                else:
+                    name = latexize_particle_name(out_particle.name)
+                    
                 if self.options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:
