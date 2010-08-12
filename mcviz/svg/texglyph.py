@@ -174,8 +174,6 @@ def make_glyph_library():
         ymins += gi.ymin
         res[pdgid] = gi
     N = len(db.values())
-    print xmins/N, xmaxs/N, xmins/N + xmaxs/N
-    print ymins/N, ymaxs/N, ymins/N + ymaxs/N
     return res
 
 def get_glyph_library():
@@ -197,9 +195,9 @@ def glyph_ids():
 
 def glyph_dimensions(pdgid):
     """Returns width and height of glyph"""
-    glyph = get_glyph(pdgid)
+    glyph = get_glyph_library()[pdgid]
     xwidth = max(abs(glyph.xmin), abs(glyph.xmax))
-    ywidth = max(abs(glyph.ymin), abs(glyph.ymay))
+    ywidth = max(abs(glyph.ymin), abs(glyph.ymax))
     return xwidth, ywidth
 
 def process_path_data(d, scale, shift_x, shift_y):
