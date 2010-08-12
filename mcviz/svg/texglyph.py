@@ -404,10 +404,10 @@ if __name__ == '__main__':
     #formula = test_particle_display()
 
     #lib = get_glyph_library()
-    if False:
+    if True:
         db = get_particle_db()
         for pdgid, label, gd in sorted(db.values()):
-            if pdgid == 130:
+            if pdgid == 4424:
                 print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
                 res = TexGlyph(particle_to_latex(gd), "pdg%i"%pdgid)
                 res.create_equation_tex('test.tex')
