@@ -42,9 +42,17 @@ def get_option_parser():
     o("-x", "--extra-dot", default="",
       help="Additional information to be inserted into the graph properties")
     
+    o("--ratio", default="0.5", 
+      help="Ratio of output graph")
+      
     o("-F", "--fix-initial", action="store_true",
       help="Fix the initial vertex positions.")
       
+    # These two only have an effect if fix_initial is on.
+    o("--width", default=100, help="Arbitrary units.")
+    o("--stretch", default=20,
+      help="Ranges from 0 to width/2. 0 pulls the initial particles apart the "
+           "furthest.")
     
     return p
     

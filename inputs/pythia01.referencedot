@@ -1,15 +1,27 @@
 strict digraph pythia {
+
+ratio=0.5;
 node [style=filled, shape=oval]
 edge [labelangle=90, fontsize=12]
-ratio=1
+subgraph initial_nodes {
 2 [color="black", fillcolor="red", height=1.000, label="", style="filled", width=1.000]
 3 [color="black", fillcolor="red", height=1.000, label="", style="filled", width=1.000]
+}
+subgraph connecting {
+rank=same;style=filled;fillcolor=grey;
+129 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
+735 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
+814 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
+823 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
+882 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
+907 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
+910 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
+}
 5 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 12 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 94 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 101 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 105 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
-129 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 139 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 141 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 202 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
@@ -25,7 +37,6 @@ ratio=1
 537 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 721 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 728 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
-735 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 745 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 762 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 778 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
@@ -33,15 +44,10 @@ ratio=1
 789 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 794 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 801 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
-814 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
-823 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 840 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 856 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 878 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
-882 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 904 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
-907 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
-910 [color="black", fillcolor="white", height=1.000, label="", style="filled", width=1.000]
 911 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 912 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]
 913 [color="black", fillcolor="black", height=0.100, label="", style="filled", width=0.100]

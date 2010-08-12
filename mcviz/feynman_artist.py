@@ -12,10 +12,13 @@ class FeynmanArtist(object):
         print("strict digraph pythia {")
         print(self.options.extra_dot)
         if self.options.fix_initial:
-            print('size="100,50!";')
+            width = self.options.width
+            height = width * float(self.options.ratio)
+            stretch = self.options.stretch
+            print('size="%s,%s!";' % (width, height))
+        print("ratio=%s;" % self.options.ratio)
         print("node [style=filled, shape=oval]")
         print("edge [labelangle=90, fontsize=12]")
-        print("ratio=1")
 
         subgraphs = dict(one=[], two=[], both=[])
         other, connecting, initial = [], [], []
@@ -34,7 +37,8 @@ class FeynmanArtist(object):
         print("subgraph initial_nodes {")
         p1, p2 = initial
         if self.options.fix_initial:
-            p1_options, p2_options = dict(pos="20,25!"), dict(pos="80,25!")
+            p1_options = dict(pos="%s,%s!" % (stretch,         height/2))
+            p2_options = dict(pos="%s,%s!" % (width - stretch, height/2))
         else:
             p1_options = p2_options = {}
         edges.update(self.draw_vertex(p1, p1_options))
