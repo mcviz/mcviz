@@ -11,6 +11,8 @@ class FeynmanArtist(object):
     def draw(self, graph):
         print("strict digraph pythia {")
         print(self.options.extra_dot)
+        if self.options.fix_initial:
+            print('size="100,50!";')
         print("node [style=filled, shape=oval]")
         print("edge [labelangle=90, fontsize=12]")
         print("ratio=1")
@@ -27,7 +29,18 @@ class FeynmanArtist(object):
         
         edges = set()
         
-        edges.update(self.draw_vertices_cluster("initial", initial, "rank=source;"))
+        #edges.update(self.draw_vertices_cluster("initial", initial, "rank=source;"))
+        
+        print("subgraph initial_nodes {")
+        p1, p2 = initial
+        if self.options.fix_initial:
+            p1_options, p2_options = dict(pos="20,25!"), dict(pos="80,25!")
+        else:
+            p1_options = p2_options = {}
+        edges.update(self.draw_vertex(p1, p1_options))
+        edges.update(self.draw_vertex(p2, p2_options))
+        print("}")
+        
         edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;style=filled;fillcolor=grey;'))
         edges.update(self.draw_vertices(other))
         
@@ -49,7 +62,9 @@ class FeynmanArtist(object):
             edges.update(self.draw_vertex(vertex))
         return edges
 
-    def draw_vertex(self, vertex):
+    def draw_vertex(self, vertex, node_style=None):
+        if node_style is None:
+            node_style = {}
         style = "filled"
         size = 0.1
         fillcolor = "black"
@@ -69,7 +84,8 @@ class FeynmanArtist(object):
             style = "invis"
 
         node = make_node(vertex.vno, height=size, width=size, label="", 
-                         color="black", fillcolor=fillcolor, style=style)
+                         color="black", fillcolor=fillcolor, style=style,
+                         **node_style)
         
         print node
             

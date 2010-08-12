@@ -42,6 +42,9 @@ def get_option_parser():
     o("-x", "--extra-dot", default="",
       help="Additional information to be inserted into the graph properties")
     
+    o("-F", "--fix-initial", action="store_true",
+      help="Fix the initial vertex positions.")
+      
     
     return p
     
