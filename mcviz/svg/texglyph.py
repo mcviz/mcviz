@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: cp1252 -*-
 """
-eqtexsvg.py
+texglyph.py
 functions for converting LaTeX equation string into SVG path
 This extension need, to work properly:
     - a TeX/LaTeX distribution (MiKTeX ...)
     - pstoedit software: <http://www.pstoedit.net/pstoedit>
 
-Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
-Heavily modified 2010 Johannes Ebke <ebke@cern.ch>
+Parts of this file Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
+Copyright (C) 2010 Johannes Ebke <ebke@cern.ch>; Peter Waller
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,9 +32,6 @@ from xml.dom import minidom
 from shutil import rmtree
 from textwrap import dedent
 from cPickle import dumps, loads
-from collections import namedtuple
-
-GlyphInfo = namedtuple("GlyphInfo", "dom xmin xmax ymin ymax")
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
@@ -47,15 +42,9 @@ GREEK_RANGE = xrange(0x3b1, 0x3ca)
 GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
 GREEK_NAME = lambda l: fixup_unicodedata_name(UD.name(l).split()[-1].lower())
 GREEK_NAMECHARS = [(GREEK_NAME(l), l) for l in GREEK_LETTERS]
-GREEK_UNAMECHARS = [(g.capitalize(), l.upper()) for g, l in GREEK_NAMECHARS]
 GREEK_ALTERNATES = "(%s)" % "|".join("[%c%c]%s" % (g[0].upper(), g[0], g[1:])
                                      for g, c in GREEK_NAMECHARS)
 GREEK_FINDER = re.compile(GREEK_ALTERNATES)
-BAR_FINDER = re.compile(r"([^\s]+?)(?<!\\)bar(.*)")
-
-
-#PARTICLES_GREEK = re.compile(r"(\~?)" + GREEK_ALTERNATES + r"(\*?)(_[A-Za-z]*|_[0-9]*)?(bar)?(\+\+|--|\+|-|0)?(\([0-9]*\))?([^\s]+?)")
-#PARTICLES_GREEK = re.compile(r"(\~?)([A-Za-z]*)(\*)?(_[A-Za-z]*|_[0-9]*)?(bar)?(++|--|+|-|0)?(\([0-9]*\))?([^\s]+?)")
 
 grp_susy = r"(?P<susy>\~)?"
 grp_name = r"(?P<name>[A-Za-z8/]+?)"
@@ -73,10 +62,7 @@ grp_end = r"$"
 re_groups = [grp_susy, grp_name, grp_star, grp_prime, grp_sub, grp_mass, grp_bar, grp_charge, grp_techni, grp_2s, grp_extra, grp_alt, grp_end]
 PARTICLE_MATCH = re.compile(r"".join(re_groups))
 
-glyph_library = None
-
-
-def get_particle_db():
+def read_pythia_particle_db():
     particles = {}
     particle_data = minidom.parse("mcviz/svg/ParticleData.xml")
     for particle in particle_data.getElementsByTagName("particle"):
@@ -84,13 +70,15 @@ def get_particle_db():
         antiName = particle.getAttribute("antiName")
         pdgid = int(particle.getAttribute("id"))
         if name:
-            particles[pdgid] = (pdgid, name, PARTICLE_MATCH.match(name).groupdict())
+            groupdict = PARTICLE_MATCH.match(name).groupdict()
+            particles[pdgid] = (pdgid, name, groupdict)
         if antiName:
-            particles[-pdgid] = (-pdgid, antiName, PARTICLE_MATCH.match(antiName).groupdict())
+            groupdict = PARTICLE_MATCH.match(antiName).groupdict()
+            particles[-pdgid] = (-pdgid, antiName, groupdict)
     return particles
 
 def test_particle_data():
-    db = get_particle_db()
+    db = read_pythia_particle_db()
     keys = ['star', 'extra', 'sub', 'techni', 'susy', 'alt', 'prime', 'bar', 'name', 'state', 'charge', 'mass']
     s = []
     for key in keys:
@@ -152,53 +140,10 @@ def particle_to_latex(gd):
 
 def test_particle_display():
     res = []
-    db = get_particle_db()
+    db = read_pythia_particle_db()
     for pdgid, label, gd in sorted(db.values()):
         res.append(particle_to_latex(gd))
     return "\\\\\n".join(res)
-
-def make_glyph_library():
-    print >> sys.stderr, "Creating glyph library..."
-    res = {}
-    db = get_particle_db()
-    xmaxs, xmins, ymaxs, ymins = 0,0,0,0
-    for pdgid, label, gd in sorted(db.values()):
-        print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
-        gi = TexGlyph(particle_to_latex(gd), "pdg%i"%pdgid).get_glyph_info()
-        print >> sys.stderr, " length = %.1f kb " % (len(gi.dom.toxml())/1024.0),
-        print >> sys.stderr, "bounding box: X %.1f to %.1f / Y %.1f to %.1f" % \
-                (gi.xmin, gi.xmax, gi.ymin, gi.ymax)
-        xmaxs += gi.xmax
-        xmins += gi.xmin
-        ymaxs += gi.ymax
-        ymins += gi.ymin
-        res[pdgid] = gi
-    N = len(db.values())
-    return res
-
-def get_glyph_library():
-    global glyph_library
-    if not glyph_library:
-        try:
-            glyph_library = loads(file("mcviz/svg/texglyph.cache.bz2").read().decode("bz2"))
-        except IOError:
-            glyph_library = make_glyph_library()
-            with file("mcviz/svg/texglyph.cache.bz2", "w") as f:
-                f.write(dumps(glyph_library, 2).encode("bz2"))
-    return glyph_library
-
-def get_glyph(pdgid):
-    return get_glyph_library()[pdgid].dom
-
-def glyph_ids():
-    return get_glyph_library().keys()
-
-def glyph_dimensions(pdgid):
-    """Returns width and height of glyph"""
-    glyph = get_glyph_library()[pdgid]
-    xwidth = max(abs(glyph.xmin), abs(glyph.xmax))
-    ywidth = max(abs(glyph.ymin), abs(glyph.ymax))
-    return xwidth, ywidth
 
 def process_path_data(d, scale, shift_x, shift_y):
     x_positions = []
@@ -232,8 +177,6 @@ def process_path_data(d, scale, shift_x, shift_y):
             numbers = map(float, cmdstr[1:].split(","))
         cmds.append((cmdstr[0], numbers))
 
-
-
     # Trace the pen and relativize svg
     x0, y0 = tf_x(cmds[0][1][0]), tf_y(cmds[0][1][1])
 
@@ -263,12 +206,54 @@ def process_path_data(d, scale, shift_x, shift_y):
     return " ".join(out), min(x_positions), max(x_positions), min(y_positions), max(y_positions)
 
 class TexGlyph(object):
-    def __init__(self, formula, name):
-        self.formula = formula
-        self.name = name
+    library = None
 
-    def get_glyph_info(self, use_pdf = True):
-        base_dir = tempfile.mkdtemp("", "glyphsvg-");
+    @classmethod
+    def make_library(cls):
+        print >> sys.stderr, "Creating TexGlyph library..."
+        cls.library = {}
+        db = read_pythia_particle_db()
+        for pdgid, label, gd in sorted(db.values()):
+            print >> sys.stderr, "Processing %s (PDG ID %i)" % (label, pdgid)
+            glyph = TexGlyph(particle_to_latex(gd), pdgid)
+            print >> sys.stderr, " box: X %.1f to %.1f / Y %.1f to %.1f" % \
+                    (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax)
+            cls.library[pdgid] = glyph
+        avg_height = cls.get_average_dimensions()[1]
+        for glyph in cls.library.values():
+            glyph.default_scale = 1.0 / avg_height
+
+    @classmethod
+    def get_library(cls):
+        fn = "mcviz/svg/texglyph.cache.bz2"
+        if not cls.library:
+            try:
+                cls.library = loads(file(fn).read().decode("bz2"))
+            except IOError:
+                cls.make_library()
+                with file(fn, "w") as f:
+                    f.write(dumps(cls.library, 2).encode("bz2"))
+        return cls.library
+
+    @classmethod
+    def from_pdgid(cls, pdgid):
+        return cls.get_library()[pdgid]
+
+    @classmethod
+    def pdgids(cls):
+        cls.get_library().keys()
+
+    def __init__(self, formula, pdgid):
+        self.formula = formula
+        self.pdgid = pdgid
+        self.xmin, self.xmax = None, None
+        self.ymin, self.ymax = None, None
+        self.dom = None
+        self.default_scale = 1
+        self.build_svg()
+
+    def build_svg(self, use_pdf = True):
+        base_dir = tempfile.mkdtemp("", "texglyph-");
         latex_file = os.path.join(base_dir, "eq.tex")
         aux_file = os.path.join(base_dir, "eq.aux")
         log_file = os.path.join(base_dir, "eq.log")
@@ -285,7 +270,7 @@ class TexGlyph(object):
         def clean():
             rmtree(base_dir)
 
-        self.create_equation_tex(latex_file)
+        self.write_tex_file(latex_file)
         os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
                   % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
                   
@@ -316,13 +301,11 @@ class TexGlyph(object):
                     sys.stderr.write(line + '\n')
             err_stream.close()
  
-        glyphinfo = self.svg_open(svg_file)
+        self.process_svg_file(svg_file)
 
         clean()
 
-        return glyphinfo
-
-    def create_equation_tex(self, filename):
+    def write_tex_file(self, filename):
         with open(filename, "w") as fd:
             fd.write(dedent(r"""
                 %% processed with eqtexsvg.py
@@ -337,43 +320,31 @@ class TexGlyph(object):
                 \end{document}
             """ % self.formula).strip())
 
-    def svg_open(self, filename):
-        doc_sizeH, doc_sizeW = 100, 100
+    def process_svg_file(self, filename):
+        # scale set to 10 to avoid resolution effects with %.2f
         scale = 10
+        # constants derived from experience
         shiftx = -305.22
         shifty = 709.75
 
-        class Store:
-            xmax, xmin = None, None
-            ymax, ymin = None, None
-
-
-        def clone_and_rewrite(self, node_in, store):
+        def clone_and_rewrite(self, node_in):
             in_tag = node_in.nodeName
             if in_tag != 'svg':
                 node_out = minidom.Element(in_tag)
                 for name, value in node_in.attributes.items():
                     node_out.setAttribute(name, value)
-                    
             else:
                 node_out = minidom.Element("svg")
-                node_out.setAttribute("viewBox","0 0 %s %s" % (doc_sizeH, doc_sizeW))
-                node_out.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-                node_out.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
-                node_out.setAttribute("version", "1.1")
 
             for c in node_in.childNodes:
                 if c.nodeName not in ('g', 'path', 'polyline', 'polygon'):
                     continue
                     
-                child = clone_and_rewrite(self, c, store)
+                child = clone_and_rewrite(self, c)
                 
                 if c.nodeName == 'g':
-                    #matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeW/7., -doc_sizeH/7., 
-                    #                                      -doc_sizeW*43.7, doc_sizeH*101.35)
-                    #child.setAttribute('transform', matrix)
                     child.removeAttribute("transform")
-                    child.setAttribute('id', self.name)
+                    child.setAttribute('id', "pdg%i" % self.pdgid)
                 elif c.nodeName == 'path' or c.nodeName == 'polygon':
                     if c.nodeName == 'path':
                         data_attr = "d"
@@ -381,12 +352,12 @@ class TexGlyph(object):
                         data_attr = "points"
                     data = c.getAttribute(data_attr)
                     d, x0, x1, y0, y1 = process_path_data(data, scale, shiftx, shifty)
-                    if store.xmin is None:
-                        store.xmin, store.xmax = x0, x1
-                        store.ymin, store.ymax = y0, y1
+                    if self.xmin is None:
+                        self.xmin, self.xmax = x0, x1
+                        self.ymin, self.ymax = y0, y1
                     else:
-                        store.xmin, store.xmax = min(x0, store.xmin), max(x1, store.xmax)
-                        store.ymin, store.ymax = min(y0, store.ymin), max(y1, store.ymax)
+                        self.xmin, self.xmax = min(x0, self.xmin), max(x1, self.xmax)
+                        self.ymin, self.ymax = min(y0, self.ymin), max(y1, self.ymax)
 
                     child.setAttribute(data_attr, d)
                 node_out.appendChild(child)
@@ -395,35 +366,47 @@ class TexGlyph(object):
 
         doc = minidom.parse(filename)
         svg = [cn for cn in doc.childNodes if cn.childNodes][0]
-        group = clone_and_rewrite(self, svg, Store).childNodes[0]
-        return GlyphInfo(group, Store.xmin, Store.xmax, Store.ymin, Store.ymax)
+        self.dom = clone_and_rewrite(self, svg).childNodes[0]
+    
+    @property
+    def dimensions(self):
+        """Returns width and height of glyph"""
+        xwidth = max(abs(self.xmin), abs(self.xmax))
+        ywidth = max(abs(self.ymin), abs(self.ymax))
+        return xwidth, ywidth
+
+    @classmethod
+    def get_average_dimensions(cls):
+        w_sum, h_sum = 0, 0
+        dimensions = [glyph.dimensions for glyph in cls.get_library().values()]
+        w = sum(d[0] for d in dimensions)/len(dimensions)
+        h = sum(d[1] for d in dimensions)/len(dimensions)
+        return w, h
 
 if __name__ == '__main__':
-    #e = TexGlyph(r"$\bar{K}^{++}$", "barKpp")
-    #print test_particle_data()
-    #formula = test_particle_display()
+    print test_particle_data()
+    print test_particle_display()
 
-    #lib = get_glyph_library()
-    if True:
-        db = get_particle_db()
+    if False:
+        db = read_pythia_particle_db()
         for pdgid, label, gd in sorted(db.values()):
             if pdgid == 4424:
                 print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
-                res = TexGlyph(particle_to_latex(gd), "pdg%i"%pdgid)
-                res.create_equation_tex('test.tex')
+                res = TexGlyph(particle_to_latex(gd), pdgid)
+                res.write_tex_file('test.tex')
                 with file("test.svg", "w") as f:
                     f.write('<?xml version="1.0" standalone="no"?>\n')
                     f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
-                    f.write(res.get_glyph_info().dom.toprettyxml())
+                    f.write(res.dom.toprettyxml())
                     f.write('</svg>')
 
     else:
-        for pdgid in sorted(glyph_ids()):
+        for pdgid in sorted(TexGlyph.pdgids()):
             with file("pdg%i.svg"%pdgid, "w") as f:
                 f.write('<?xml version="1.0" standalone="no"?>\n')
                 f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
                 f.write(' <defs>\n')
-                f.write(get_glyph(pdgid).toxml())
+                f.write(TexGlyph.from_pdgid(pdgid).dom.toxml())
                 f.write(' </defs>\n')
                 f.write('<use x = "50" y = "50" xlink:href = "#pdg%s" />\n' % pdgid)
                 baseline = 50

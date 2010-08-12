@@ -3,7 +3,7 @@ from .utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
-from svg import glyph_dimensions
+from svg import TexGlyph
 
 class FeynmanLayout(object):
 
@@ -46,8 +46,8 @@ class FeynmanLayout(object):
         edges.update(self.draw_vertex(p2, p2_options))
         print("}")
         
-        #edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
-        edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
+        edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
+       # edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
         
         for edge in sorted(edges):
@@ -96,14 +96,18 @@ class FeynmanLayout(object):
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
-                w, h = glyph_dimensions(out_particle.pdgid)
+                w, h = TexGlyph.from_pdgid(out_particle.pdgid).dimensions
+                w *= self.options.label_size
+                h *= self.options.label_size
                 table = '<<table border="1" cellborder="0"><tr>%s</tr></table>'
                 td = '<td height="%.2f" width="%.2f">.</td>' % (h, w)
                 if self.options.show_id:
                     td += "<td>(%i)</td>" % (out_particle.no)
-
                 label = table % td
-                style = ""
+                if out_particle.gluon or out_particle.photon:
+                    label = ""
+
+                style = str(out_particle.no)
                 going, coming = vertex.vno, out_particle.vertex_out.vno
                 edge = make_edge(going, coming, label=label,
                                  weight=log10(out_particle.e+1)*0.1 + 1,
