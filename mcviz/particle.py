@@ -19,6 +19,7 @@ class Particle(object):
         self.tags = set()
         self.vertex_in = None
         self.vertex_out = None
+        self.contraction_count = 0
     
     def __repr__(self):
         return "<Particle id=%i name=%s>" % (self.no, self.name)

@@ -105,9 +105,11 @@ class FeynmanArtist(object):
                 # Greek-character-ize names.
                 if self.options.use_unicode:
                     name = make_unicode_name(out_particle.name)
+                    name += " (%i)" % out_particle.contraction_count
                 else:
                     name = latexize_particle_name(out_particle.name)
                     
+                
                 if self.options.show_id:
                     label = "%s (%i)" % (name, out_particle.no)
                 else:

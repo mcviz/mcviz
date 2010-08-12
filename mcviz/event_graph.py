@@ -301,6 +301,7 @@ class EventGraph(object):
                 vertex = self.vertices[no]
                 if vertex.is_kink and vertex.inp_is_outp and not vertex.edge:
                     (incoming,), (outgoing,) = vertex.incoming, vertex.outgoing
+                    incoming.contraction_count += outgoing.contraction_count + 1
                     self.contract_particle(outgoing)
 
     def contract_gluons(self):
