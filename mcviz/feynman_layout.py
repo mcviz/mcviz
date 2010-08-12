@@ -3,6 +3,8 @@ from .utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
+from svg import glyph_dimensions
+
 class FeynmanLayout(object):
 
     def __init__(self, options):
@@ -17,8 +19,6 @@ class FeynmanLayout(object):
             stretch = self.options.stretch
             print('size="%s,%s!";' % (width, height))
         print("ratio=%s;" % self.options.ratio)
-        #print("node [style=filled, shape=oval]")
-        print("node")
         print("edge [labelangle=90, fontsize=12]")
 
         subgraphs = dict(one=[], two=[], both=[])
@@ -46,7 +46,8 @@ class FeynmanLayout(object):
         edges.update(self.draw_vertex(p2, p2_options))
         print("}")
         
-        edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;style=filled;fillcolor=grey;'))
+        #edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
+        edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
         
         for edge in sorted(edges):
@@ -70,26 +71,23 @@ class FeynmanLayout(object):
     def draw_vertex(self, vertex, node_style=None):
         if node_style is None:
             node_style = {}
-        style = "filled"
+        style = ""
         size = 0.1
-        fillcolor = "black"
-        color_mechanism = self.options.color_mechanism
-        thickness = self.options.line_thickness
         
         if vertex.hadronization:
             # Big white hardronization vertices
-            size, fillcolor = 1.0, "white"
+            size = 1.0
             
         elif vertex.is_initial:
             # Big red initial vertices
-            size, fillcolor = 1.0, "red"
+            size = 1.0
             
         elif vertex.is_final:
             # Don't show final particle vertices
             style = "invis"
 
         node = make_node(vertex.vno, height=size, width=size, label="", 
-                         color="black", fillcolor=fillcolor, style=style,
+                         style=style,
                          **node_style)
         
         print node
@@ -98,43 +96,19 @@ class FeynmanLayout(object):
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
-                color = out_particle.get_color("black", color_mechanism)
-                
-                # Halfsize arrows for final vertices
-                arrowsize = 1.0 if not out_particle.final_state else 0.5
-                
-                # Greek-character-ize names.
-                if self.options.use_unicode:
-                    name = make_unicode_name(out_particle.name)
-                    name += " (%i)" % out_particle.contraction_count
-                else:
-                    name = latexize_particle_name(out_particle.name)
-                    
-                
+                w, h = glyph_dimensions(out_particle.pdgid)
+                table = '<<table border="1" cellborder="0"><tr>%s</tr></table>'
+                td = '<td height="%.2f" width="%.2f">.</td>' % (h, w)
                 if self.options.show_id:
-                    label = "%s (%i)" % (name, out_particle.no)
-                else:
-                    label = name
+                    td += "<td>(%i)</td>" % (out_particle.no)
 
+                label = table % td
                 style = ""
-                dir = "forward"
-                if out_particle.gluon:
-                    label = ""
-                    style = "decorate, draw=green, decoration={coil,amplitude=4pt, segment length=5pt}"
-                elif out_particle.photon:
-                    label = ""
-                    style = "decorate, decoration=snake, draw=red"
-                    dir = "none"
-
-                penwidth = log10(out_particle.pt+1)*thickness + 1
-
                 going, coming = vertex.vno, out_particle.vertex_out.vno
-                edge = make_edge(going, coming, label=label, color=color,
-                                 penwidth=penwidth,
+                edge = make_edge(going, coming, label=label,
                                  weight=log10(out_particle.e+1)*0.1 + 1,
-                                 arrowsize=arrowsize,
                                  style=style,
-                                 dir=dir,
+                                 arrowhead="none"
                                  )#constraint=not out_particle.decends_one)
                                  
                 edges.add(edge)
