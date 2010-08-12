@@ -51,6 +51,9 @@ def get_option_parser():
 
     o("--svg", action="store_true",
       help="create an SVG from the layout using the internal SVG painter")
+
+    o("--label-size", type=float, default=1.,
+      help="scale of the labels in the output SVG file")
     
     o("-x", "--extra-dot", default="",
       help="Additional information to be inserted into the graph properties")
