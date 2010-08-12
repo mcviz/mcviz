@@ -39,6 +39,10 @@ def get_option_parser():
     
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"])
     
+    o("-x", "--extra-dot", default="",
+      help="Additional information to be inserted into the graph properties")
+    
+    
     return p
     
 def parse_options(argv=None):

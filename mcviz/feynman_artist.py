@@ -10,6 +10,7 @@ class FeynmanArtist(object):
 
     def draw(self, graph):
         print("strict digraph pythia {")
+        print(self.options.extra_dot)
         print("node [style=filled, shape=oval]")
         print("edge [labelangle=90, fontsize=12]")
         print("ratio=1")
