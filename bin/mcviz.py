@@ -38,7 +38,7 @@ def main():
             result = dot
     
     if options.svg:
-        result = paint_svg(result, event)
+        result = paint_svg(result, event, options)
 
 
     try:
