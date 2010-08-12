@@ -1,10 +1,10 @@
 
 # classes that 
-from splines import Spline, SplineLine, Line
+from .spline import Spline, SplineLine, Line
 
 # functions returning glyph minidomsi
-from texglyph import glyph_ids, get_glyph, glyph_dimensions
+from .texglyph import glyph_ids, get_glyph, glyph_dimensions
 
 # functions returning minidom elements
-from feynman_shapes import photon, gluon, boson, fermion
+from .feynman_shapes import photon, gluon, boson, fermion
 

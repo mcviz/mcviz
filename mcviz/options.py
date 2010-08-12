@@ -39,12 +39,18 @@ def get_option_parser():
            
     o("-S", "--strip-outer-nodes", type=int, default=0, metavar="N",
       help="Performs outer node stripping N times.")
+
+
+    
     
     #
     # Presentation
     #
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],
       help="If specified, pipes output through specified graphviz engine")
+
+    o("--svg", action="store_true",
+      help="create an SVG from the layout using the internal SVG painter")
     
     o("-x", "--extra-dot", default="",
       help="Additional information to be inserted into the graph properties")
@@ -81,5 +87,8 @@ def parse_options(argv=None):
 
     result = options, args = p.parse_args(argv)
     options.extra_gv_options = extra_gv_options
+
+    if options.svg and not options.layout_engine:
+        options.layout_engine = "dot"
         
     return result

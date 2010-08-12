@@ -17,7 +17,8 @@ class FeynmanLayout(object):
             stretch = self.options.stretch
             print('size="%s,%s!";' % (width, height))
         print("ratio=%s;" % self.options.ratio)
-        print("node [style=filled, shape=oval]")
+        #print("node [style=filled, shape=oval]")
+        print("node")
         print("edge [labelangle=90, fontsize=12]")
 
         subgraphs = dict(one=[], two=[], both=[])

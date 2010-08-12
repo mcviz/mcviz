@@ -5,6 +5,7 @@ from mcviz.graphviz import run_graphviz
 from mcviz.utils import replace_stdout
 from mcviz.feynman_layout import FeynmanLayout
 from mcviz.dual_layout import DualLayout
+from mcviz.svg_painter import paint_svg
 from sys import argv, stdout, stderr
 
 def main():
@@ -36,6 +37,10 @@ def main():
         else:
             result = dot
     
+    if options.svg:
+        result = paint_svg(result, event)
+
+
     try:
         print result
     except IOError, e:
