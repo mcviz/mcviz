@@ -56,8 +56,8 @@ def get_option_parser():
       help="Fix the initial vertex positions.")
       
     # These two only have an effect if fix_initial is on.
-    o("--width", default=100, help="Arbitrary units.")
-    o("--stretch", default=20,
+    o("--width", default=100, type=float, help="Arbitrary units.")
+    o("--stretch", default=20, type=float,
       help="Ranges from 0 to width/2. 0 pulls the initial particles apart the "
            "furthest.")
     
