@@ -32,6 +32,7 @@ def main():
             gv_output, gv_errors = run_graphviz(options.layout_engine, dot,
                                                 options.extra_gv_options)
             result = gv_output
+            # TODO: check gv_errors
         else:
             result = dot
     

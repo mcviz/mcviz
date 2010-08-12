@@ -228,7 +228,9 @@ class EventGraph(object):
         return Store.maxdepth
         
     def drop_particle(self, particle):
-    
+        """
+        Remove a particle from the graph only.
+        """
         particle.vertex_in.outgoing.discard(particle)
         for p in particle.vertex_in.incoming:
             p.daughters.discard(particle)
@@ -247,9 +249,11 @@ class EventGraph(object):
         
     
     def contract_particle(self, particle):
-        """Contracts a particle in the graph, 
-        it attaches all particles that are attached to the particle start vertex
-        to the particle end vertex"""
+        """
+        Contracts a particle in the graph.
+        It attaches all particles that are attached to the particle start vertex
+        to the particle end vertex.
+        """
 
         v_in = particle.vertex_in
         v_out = particle.vertex_out
@@ -275,7 +279,9 @@ class EventGraph(object):
             p.mothers = v_out.incoming
 
     def contract_incoming_vertices(self, vertex):
-        """Contracts all incoming vertices around this vertex into this one"""
+        """
+        Contracts all incoming vertices around this vertex into this one
+        """
         for p in list(vertex.incoming):
             self.contract_particle(p)
     
@@ -311,6 +317,9 @@ class EventGraph(object):
                 self.contract_particle(self.particles[no])
 
     def contract_to_final(self):
+        """
+        JPE. (or delete)
+        """
         for no in list(self.particles):
             if no not in self.particles: continue
             particle = self.particles[no]

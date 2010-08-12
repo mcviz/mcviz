@@ -6,11 +6,14 @@ def get_option_parser():
     
     p = OptionParser()
     o = p.add_option
+    #
+    # Program control
+    #
     o("-m", "--method", choices=["pt", "eta", "generations"], default="pt",
-      help="Specify a method")
+      help="Specify a method [not implemented]")
 
     o("-d", "--dual", action="store_true",
-      help="Draw the dual of the Feynman graph")
+      help="Draw the dual of the Feynman graph [long untested]")
 
     o("-D", "--debug", action="store_true",
       help="Drop to ipython shell on exception")
@@ -18,8 +21,8 @@ def get_option_parser():
     o("-L", "--limit", type=int, default=None,
       help="Limit number of particles made")
     
-    o("-w", "--penwidth", choices=["pt", "off"], default="off", help="Not implemented")
-    o("-W", "--edge-weight", choices=["e", "off"], default="off", help="Not implemented")
+    o("-w", "--penwidth", choices=["pt", "off"], default="off", help="[not implemented]")
+    o("-W", "--edge-weight", choices=["e", "off"], default="off", help="[not implemented]")
     
     o("-t", "--line-thickness", type=float, default=1.,
       help="Controls the thickness of the graph edges")
@@ -35,9 +38,13 @@ def get_option_parser():
            "Possible values: color_charge, ascendents.")
            
     o("-S", "--strip-outer-nodes", type=int, default=0, metavar="N",
-      help="Removes the outer N nodes from the edge of the graph")
+      help="Performs outer node stripping N times.")
     
-    o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"])
+    #
+    # Presentation
+    #
+    o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],
+      help="If specified, pipes output through specified graphviz engine")
     
     o("-x", "--extra-dot", default="",
       help="Additional information to be inserted into the graph properties")
