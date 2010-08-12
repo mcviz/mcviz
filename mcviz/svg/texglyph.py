@@ -210,6 +210,19 @@ def process_path_data(d, scale, shift_x, shift_y):
         # This minus sign is here on purpose, the input svg is flipped
         return (- y + shift_y) * scale
 
+    # treat Polygon data here
+    if d[0] != "M":
+        new_points = []
+        for pt in d.split():
+            x, y = map(float, pt.split(","))
+            x = tf_x(x)
+            y = tf_y(y)
+            x_positions.append(x)
+            y_positions.append(y)
+            new_points.append("%.2f,%.2f" % (x, y))
+        return " ".join(new_points), min(x_positions), max(x_positions), \
+                                     min(y_positions), max(y_positions)
+
     # split and preprocess command strings
     cmds = []
     for cmdstr in d.strip().split(" "):
@@ -219,7 +232,7 @@ def process_path_data(d, scale, shift_x, shift_y):
             numbers = map(float, cmdstr[1:].split(","))
         cmds.append((cmdstr[0], numbers))
 
-    assert cmds[0][0] == "M"
+
 
     # Trace the pen and relativize svg
     x0, y0 = tf_x(cmds[0][1][0]), tf_y(cmds[0][1][1])
@@ -354,14 +367,19 @@ class TexGlyph(object):
                     continue
                     
                 child = clone_and_rewrite(self, c, store)
+                
                 if c.nodeName == 'g':
                     #matrix = 'matrix(%s,0,0,%s,%s,%s)' % ( doc_sizeW/7., -doc_sizeH/7., 
                     #                                      -doc_sizeW*43.7, doc_sizeH*101.35)
                     #child.setAttribute('transform', matrix)
                     child.removeAttribute("transform")
                     child.setAttribute('id', self.name)
-                elif c.nodeName == 'path':
-                    data = c.getAttribute('d')
+                elif c.nodeName == 'path' or c.nodeName == 'polygon':
+                    if c.nodeName == 'path':
+                        data_attr = "d"
+                    else:
+                        data_attr = "points"
+                    data = c.getAttribute(data_attr)
                     d, x0, x1, y0, y1 = process_path_data(data, scale, shiftx, shifty)
                     if store.xmin is None:
                         store.xmin, store.xmax = x0, x1
@@ -370,7 +388,7 @@ class TexGlyph(object):
                         store.xmin, store.xmax = min(x0, store.xmin), max(x1, store.xmax)
                         store.ymin, store.ymax = min(y0, store.ymin), max(y1, store.ymax)
 
-                    child.setAttribute('d', d)
+                    child.setAttribute(data_attr, d)
                 node_out.appendChild(child)
                 
             return node_out
