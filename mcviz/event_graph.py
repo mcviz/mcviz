@@ -291,18 +291,17 @@ class EventGraph(object):
         """
         nr_vertices = len(self.vertices) + 1
         while len(self.vertices) < nr_vertices:
+            # Repeat whilst the number of vertices changed
+            
             nr_vertices = len(self.vertices)
             for no in self.vertices.keys():
                 # Continue if this vertex is already removed
                 if no not in self.vertices:
                     continue
                 vertex = self.vertices[no]
-                if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
-                    incoming = list(vertex.incoming)[0]
-                    outgoing = list(vertex.outgoing)[0]    
-                    if (incoming.pdgid == outgoing.pdgid and 
-                        not (incoming.initial_state or outgoing.final_state)):
-                        self.contract_particle(outgoing)
+                if vertex.is_kink and vertex.inp_is_outp and not vertex.edge:
+                    (incoming,), (outgoing,) = vertex.incoming, vertex.outgoing
+                    self.contract_particle(outgoing)
 
     def contract_gluons(self):
         """

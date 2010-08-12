@@ -43,6 +43,17 @@ class Vertex(object):
         return not self.incoming or not self.outgoing
 
     @property
+    def is_kink(self):
+        return len(self.incoming) == 1 and len(self.outgoing) == 1
+        
+    @property
+    def inp_is_outp(self):
+        assert self.is_kink, "This function is only intended for kinks"
+        incoming, = self.incoming
+        outgoing, = self.outgoing
+        return incoming.pdgid == outgoing.pdgid
+
+    @property
     def is_initial(self):
         return not self.incoming
     
