@@ -4,7 +4,7 @@ from sys import stderr
 
 from svg import SVGDocument
 from svg import Spline, SplineLine, Line
-from svg import photon, gluon, boson, fermion, hadron, vertex
+from svg import photon, final_photon, gluon, boson, fermion, hadron, vertex
 
 def paint_svg(plain, event, options):
     data = PlainOutput(plain)
@@ -29,7 +29,10 @@ def paint_svg(plain, event, options):
             display_func = gluon
             args["stroke"] = "green"
         elif particle.photon:
-            display_func = photon
+            if particle.final_state:
+                display_func = final_photon
+            else:
+                display_func = photon
             args["stroke"] = "orange"
         elif particle.quark:
             display_func = fermion
