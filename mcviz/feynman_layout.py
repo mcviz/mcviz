@@ -99,8 +99,8 @@ class FeynmanLayout(object):
                 w, h = TexGlyph.from_pdgid(out_particle.pdgid).dimensions
                 w *= self.options.label_size
                 h *= self.options.label_size
-                table = '<<table border="1" cellborder="0"><tr>%s</tr></table>'
-                td = '<td height="%.2f" width="%.2f">.</td>' % (h, w)
+                table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
+                td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
                 if self.options.show_id:
                     td += "<td>(%i)</td>" % (out_particle.no)
                 label = table % td

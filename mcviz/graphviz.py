@@ -15,7 +15,10 @@ def run_graphviz(layout_engine, input_dot, options=[]):
 def pretty_value(value):
     "If the type is a string, quote it, if it is a float, strip to 3 sig. fig."
     if isinstance(value, basestring):
-        return '"%s"' % value
+        if value and value[0] == "<" and value[-1] == ">":
+            return value
+        else:
+            return '"%s"' % value
     elif isinstance(value, float):
         return "%.3f" % value
     return value
