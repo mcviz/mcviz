@@ -103,7 +103,7 @@ class Particle(object):
 
     @property
     def boson(self):
-        return 21 <= self.pdgid <= 25 or 32 <= self.pdgid <= 37
+        return 21 <= abs(self.pdgid) <= 25 or 32 <= abs(self.pdgid) <= 37
 
     @property
     def quark(self):
