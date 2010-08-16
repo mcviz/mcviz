@@ -173,7 +173,10 @@ def process_path_data(d, tf_x, tf_y):
         cmds.append((cmdstr[0], numbers))
 
     # Trace the pen and relativize svg
-    x0, y0 = tf_x(cmds[0][1][0]), tf_y(cmds[0][1][1])
+    x0, y0 = cmds[0][1][0], cmds[0][1][1]
+    x0, y0 = tf_x(x0), tf_y(y0)
+    x_positions.append(x0)
+    y_positions.append(y0)
 
     out = ["M%.2f,%.2f" % (x0, y0)]
     for cmd, numbers in cmds[1:]:
@@ -192,8 +195,8 @@ def process_path_data(d, tf_x, tf_y):
                 numbers[2*i] = tf_x(numbers[2*i]) - x0
                 numbers[2*i+1] = tf_y(numbers[2*i + 1]) - y0
             if numbers:
-                x_positions.append(numbers[-2])
-                y_positions.append(numbers[-1])
+                x_positions.append(numbers[-2] + x0)
+                y_positions.append(numbers[-1] + y0)
                 x0 += numbers[-2]
                 y0 += numbers[-1]
         nstr = (",".join(["%.2f"]*len(numbers))) % tuple(numbers)
@@ -328,6 +331,20 @@ class TexGlyph(object):
             # This minus sign is here on purpose, the input svg is flipped
             return (- y + shift_y) * scale
 
+        def report_x(x):
+            if self.xmin is None:
+                self.xmin = x
+            if self.xmax is None:
+                self.xmax = x
+            self.xmin, self.xmax = min(x, self.xmin), max(x, self.xmax)
+
+        def report_y(y):
+            if self.ymin is None:
+                self.ymin = y
+            if self.ymax is None:
+                self.ymax = y
+            self.ymin, self.ymax = min(y, self.ymin), max(y, self.ymax)
+
         def clone_and_rewrite(self, node_in):
             in_tag = node_in.nodeName
             if in_tag != 'svg':
@@ -353,21 +370,21 @@ class TexGlyph(object):
                         data_attr = "points"
                     data = c.getAttribute(data_attr)
                     d, x0, x1, y0, y1 = process_path_data(data, tf_x, tf_y)
-                    if self.xmin is None:
-                        self.xmin, self.xmax = x0, x1
-                        self.ymin, self.ymax = y0, y1
-                    else:
-                        self.xmin, self.xmax = min(x0, self.xmin), max(x1, self.xmax)
-                        self.ymin, self.ymax = min(y0, self.ymin), max(y1, self.ymax)
                     child.setAttribute(data_attr, d)
+                    report_x(x0)
+                    report_x(x1)
+                    report_y(y0)
+                    report_y(y1)
                 elif c.nodeName == 'line':
-                    for attr in ("x1", "x2"):
-                        new_x = "%.2f" % tf_x(float(child.getAttribute(attr)))
-                        child.setAttribute(attr, new_x)
-                    for attr in ("y1", "y2"):
-                        new_y = "%.2f" % tf_y(float(child.getAttribute(attr)))
-                        child.setAttribute(attr, new_y)
                     width = float(child.getAttribute("stroke-width")) * scale
+                    for attr in ("x1", "x2"):
+                        x = tf_x(float(child.getAttribute(attr)))
+                        report_x(x)
+                        child.setAttribute(attr, "%.2f" % x)
+                    for attr in ("y1", "y2"):
+                        y = tf_y(float(child.getAttribute(attr)))
+                        report_y(y)
+                        child.setAttribute(attr, "%.2f" % y)
                     child.setAttribute("stroke-width", "%.2f" % width)
 
                 node_out.appendChild(child)
@@ -381,8 +398,8 @@ class TexGlyph(object):
     @property
     def dimensions(self):
         """Returns width and height of glyph"""
-        xwidth = max(abs(self.xmin), abs(self.xmax))
-        ywidth = max(abs(self.ymin), abs(self.ymax))
+        xwidth = self.xmax - self.xmin
+        ywidth = self.ymax - self.ymin
         return xwidth, ywidth
 
     @classmethod

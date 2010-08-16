@@ -26,33 +26,30 @@ class SVGDocument(Document):
 
     def add_glyph(self, pdgid, x, y, font_size):
         glyph = TexGlyph.from_pdgid(pdgid)
-        glyph_scale = glyph.default_scale * font_size
-        #glyph.dom.setAttribute("transform", "scale(%.5f)" % (glyph_scale))
+        glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
         if not glyph.dom in self.defs.childNodes:
             self.defs.appendChild(glyph.dom)
 
+        if False: #options.debug_labels:
+            wx, wy = glyph.dimensions
+            wx *= font_size * glyph.default_scale
+            wy *= font_size * glyph.default_scale
 
-        wx, wy = glyph.dimensions
-        wx *= glyph_scale
-        wy *= glyph_scale
+            box = self.doc.createElement("rect")
+            box.setAttribute("x", "%.3f" % (x - wx/2))
+            box.setAttribute("y", "%.3f" % (y - wy/2))
+            box.setAttribute("width", "%.3f" % wx)
+            box.setAttribute("height", "%.3f" % wy)
+            box.setAttribute("fill", "red")
+            self.svg.appendChild(box)
 
-        box = self.doc.createElement("rect")
-        box.setAttribute("x", "%.2f" % (x - wx/2))
-        box.setAttribute("y", "%.2f" % (y - wy/2))
-        box.setAttribute("width", "%.2f" % wx)
-        box.setAttribute("height", "%.2f" % wy)
-        box.setAttribute("fill", "red")
-        self.svg.appendChild(box)
-
-        x -= (glyph.xmin + glyph.xmax) * glyph_scale
-        y -= (glyph.ymin + glyph.ymax) * glyph_scale
+        x -= 0.5 * (glyph.xmin + glyph.xmax) * font_size * glyph.default_scale
+        y -= 0.5 * (glyph.ymin + glyph.ymax) * font_size * glyph.default_scale
 
         use = self.doc.createElement("use")
-        use.setAttribute("x", "%.2f" % x)
-        use.setAttribute("y", "%.2f" % y)
-        use.setAttribute("x", "0")
-        use.setAttribute("y", "0")
-        use.setAttribute("transform", "scale(%.5f) translate(%.2f,%.2f)" % (glyph_scale, x/glyph_scale, y/glyph_scale))
+        use.setAttribute("x", "%.3f" % (x/font_size))
+        use.setAttribute("y", "%.3f" % (y/font_size))
+        use.setAttribute("transform", "scale(%.3f)" % (font_size))
         use.setAttribute("xlink:href", "#pdg%i"%pdgid)
         self.svg.appendChild(use)
 
