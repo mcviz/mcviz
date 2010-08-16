@@ -11,7 +11,7 @@ class FeynmanLayout(object):
         self.options = options
 
     def layout(self, graph):
-        print("strict digraph pythia {")
+        print("digraph pythia {")
         print(self.options.extra_dot)
         if self.options.fix_initial:
             width = self.options.width
