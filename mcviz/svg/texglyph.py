@@ -145,15 +145,10 @@ def test_particle_display():
         res.append(particle_to_latex(gd))
     return "\\\\\n".join(res)
 
-def process_path_data(d, scale, shift_x, shift_y):
+def process_path_data(d, tf_x, tf_y):
     x_positions = []
     y_positions = []
 
-    def tf_x(x):
-        return (  x + shift_x) * scale
-    def tf_y(y):
-        # This minus sign is here on purpose, the input svg is flipped
-        return (- y + shift_y) * scale
 
     # treat Polygon data here
     if d[0] != "M":
@@ -324,8 +319,14 @@ class TexGlyph(object):
         # scale set to 10 to avoid resolution effects with %.2f
         scale = 10
         # constants derived from experience
-        shiftx = -305.22
-        shifty = 709.75
+        shift_x = -305.22
+        shift_y = 709.75
+
+        def tf_x(x):
+            return (  x + shift_x) * scale
+        def tf_y(y):
+            # This minus sign is here on purpose, the input svg is flipped
+            return (- y + shift_y) * scale
 
         def clone_and_rewrite(self, node_in):
             in_tag = node_in.nodeName
@@ -337,7 +338,7 @@ class TexGlyph(object):
                 node_out = minidom.Element("svg")
 
             for c in node_in.childNodes:
-                if c.nodeName not in ('g', 'path', 'polyline', 'polygon'):
+                if c.nodeName not in ('g', 'path', 'polyline', 'polygon', 'line'):
                     continue
                     
                 child = clone_and_rewrite(self, c)
@@ -351,15 +352,24 @@ class TexGlyph(object):
                     else:
                         data_attr = "points"
                     data = c.getAttribute(data_attr)
-                    d, x0, x1, y0, y1 = process_path_data(data, scale, shiftx, shifty)
+                    d, x0, x1, y0, y1 = process_path_data(data, tf_x, tf_y)
                     if self.xmin is None:
                         self.xmin, self.xmax = x0, x1
                         self.ymin, self.ymax = y0, y1
                     else:
                         self.xmin, self.xmax = min(x0, self.xmin), max(x1, self.xmax)
                         self.ymin, self.ymax = min(y0, self.ymin), max(y1, self.ymax)
-
                     child.setAttribute(data_attr, d)
+                elif c.nodeName == 'line':
+                    for attr in ("x1", "x2"):
+                        new_x = "%.2f" % tf_x(float(child.getAttribute(attr)))
+                        child.setAttribute(attr, new_x)
+                    for attr in ("y1", "y2"):
+                        new_y = "%.2f" % tf_y(float(child.getAttribute(attr)))
+                        child.setAttribute(attr, new_y)
+                    width = float(child.getAttribute("stroke-width")) * scale
+                    child.setAttribute("stroke-width", "%.2f" % width)
+
                 node_out.appendChild(child)
                 
             return node_out
