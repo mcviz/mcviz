@@ -30,6 +30,23 @@ class SVGDocument(Document):
         #glyph.dom.setAttribute("transform", "scale(%.5f)" % (glyph_scale))
         if not glyph.dom in self.defs.childNodes:
             self.defs.appendChild(glyph.dom)
+
+
+        wx, wy = glyph.dimensions
+        wx *= glyph_scale
+        wy *= glyph_scale
+
+        box = self.doc.createElement("rect")
+        box.setAttribute("x", "%.2f" % (x - wx/2))
+        box.setAttribute("y", "%.2f" % (y - wy/2))
+        box.setAttribute("width", "%.2f" % wx)
+        box.setAttribute("height", "%.2f" % wy)
+        box.setAttribute("fill", "red")
+        self.svg.appendChild(box)
+
+        x -= (glyph.xmin + glyph.xmax) * glyph_scale
+        y -= (glyph.ymin + glyph.ymax) * glyph_scale
+
         use = self.doc.createElement("use")
         use.setAttribute("x", "%.2f" % x)
         use.setAttribute("y", "%.2f" % y)
