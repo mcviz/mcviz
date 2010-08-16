@@ -14,21 +14,46 @@ def paint_svg(plain, event, options):
     t0 = time()
     for no, spline in data.edge_lines.iteritems():
         particle = event.particles[no]
-        gluon_args = {"stroke" : "green", "stroke-width" : 0.02, "scale": 0.4}
-        photon_args = {"stroke" : "red", "stroke-width" : 0.1, "scale" : 0.2}
-        fermi_args = {"fill" : "blue", "stroke":"blue", "stroke-width": 0.1, "scale" : 0.2}
-        boson_args = {"stroke" : "blue", "stroke-width": 0.1, "scale" : 0.2}
-        hadron_args = {"fill" : "red", "stroke":"red", "stroke-width": 0.1, "scale" : 0.2}
+
+        # set garish defaults args to make oversights obvious
+        display_func = hadron
+        args = {}
+        args["energy"] = 0.2
+        args["stroke"] = "pink"
+        args["fill"] = "pink"
+        args["stroke-width"] = 0.05
+        args["scale"] = 0.1
+
+        # colouring
         if particle.gluon:
-            doc.add_object(gluon(0.2, spline, **gluon_args))
+            display_func = gluon
+            args["stroke"] = "green"
         elif particle.photon:
-            doc.add_object(photon(0.2, spline, **photon_args))
-        elif particle.quark or particle.lepton:
-            doc.add_object(fermion(0.5, spline, **fermi_args))
+            display_func = photon
+            args["stroke"] = "orange"
+        elif particle.quark:
+            display_func = fermion
+            if particle.color:
+                args["stroke"] = "red"
+                args["fill"] = "red"
+            else:
+                args["stroke"] = "blue"
+                args["fill"] = "blue"
+        elif particle.lepton:
+            display_func = fermion
+            args["stroke"] = "black"
+            args["fill"] = "black"
         elif particle.boson:
-            doc.add_object(boson(0.5, spline, **boson_args))
+            display_func = boson
+            args["stroke"] = "black"
+            args["stroke"] = "black"
+            args["fill"] = "black"
         else:
-            doc.add_object(hadron(0.5, spline, **hadron_args))
+            display_func = hadron
+            args["stroke"] = "black"
+            args["fill"] = "black"
+        
+        doc.add_object(display_func(spline = spline, **args))
 
         if data.edge_label[no]:
             x, y = data.edge_label[no]
