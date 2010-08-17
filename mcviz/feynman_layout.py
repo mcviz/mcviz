@@ -38,6 +38,7 @@ class FeynmanLayout(object):
         print("subgraph initial_nodes {")
         p1, p2 = initial
         if self.options.fix_initial:
+            print('rank="source"')
             p1_options = dict(pos="%s,%s!" % (stretch,         height/2))
             p2_options = dict(pos="%s,%s!" % (width - stretch, height/2))
         else:
@@ -47,7 +48,6 @@ class FeynmanLayout(object):
         print("}")
         
         edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
-       # edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
         
         for edge in sorted(edges):
