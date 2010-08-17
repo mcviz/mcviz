@@ -101,8 +101,8 @@ class FeynmanLayout(object):
                 h *= self.options.label_size
                 table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
                 td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
-                if self.options.show_id:
-                    td += "<td>(%i)</td>" % (out_particle.no)
+                #if self.options.show_id:
+                #    td += "<td>(%i)</td>" % (out_particle.no)
                 label = table % td
                 if out_particle.gluon or out_particle.photon:
                     label = ""
