@@ -223,14 +223,17 @@ class TexGlyph(object):
 
     @classmethod
     def get_library(cls):
-        fn = "mcviz/svg/texglyph.cache.bz2"
+        fn = "mcviz/svg/texglyph.cache"
         if not cls.library:
             try:
-                cls.library = loads(file(fn).read().decode("bz2"))
+                if os.path.exists(fn + ".bz2"):
+                    cls.library = loads(file(fn+".bz2").read().decode("bz2"))
+                else:
+                    cls.library = loads(file(fn).read())
             except IOError:
                 cls.make_library()
                 with file(fn, "w") as f:
-                    f.write(dumps(cls.library, 2).encode("bz2"))
+                    f.write(dumps(cls.library, 2))
         return cls.library
 
     @classmethod
@@ -411,20 +414,30 @@ class TexGlyph(object):
         return w, h
 
 if __name__ == '__main__':
-    print test_particle_data()
-    print test_particle_display()
+    #print test_particle_data()
+    #print test_particle_display()
 
-    if False:
+    if True:
         db = read_pythia_particle_db()
         for pdgid, label, gd in sorted(db.values()):
-            if pdgid == 4424:
+            if pdgid == -211:
                 print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
-                res = TexGlyph(particle_to_latex(gd), pdgid)
-                res.write_tex_file('test.tex')
+                glyph = TexGlyph(particle_to_latex(gd), pdgid)
+                glyph.write_tex_file('test.tex')
                 with file("test.svg", "w") as f:
                     f.write('<?xml version="1.0" standalone="no"?>\n')
                     f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
-                    f.write(res.dom.toprettyxml())
+                    wx, wy = glyph.dimensions
+                    from xml.dom.minidom import getDOMImplementation
+                    svgxml = getDOMImplementation().createDocument(None, "svg", None)
+                    box = svgxml.createElement("rect")
+                    box.setAttribute("x", "%.3f" % (glyph.xmin))
+                    box.setAttribute("y", "%.3f" % (glyph.ymin))
+                    box.setAttribute("width", "%.3f" % wx)
+                    box.setAttribute("height", "%.3f" % wy)
+                    box.setAttribute("fill", "red")
+                    f.write(box.toprettyxml())
+                    f.write(glyph.dom.toprettyxml())
                     f.write('</svg>')
 
     else:
