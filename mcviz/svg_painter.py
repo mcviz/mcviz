@@ -68,11 +68,8 @@ def paint_svg(plain, event, style):
         if vx.is_final:
             continue
         vertex_args = {"stroke":"black", "fill":"none", "stroke-width" : "0.05"}
-        if vx.hadronization or vx.is_initial:
-            r = 0.5
-        else:
-            r = 0.1
-        doc.add_object(vertex(pt, r, **vertex_args))
+        doc.add_object(vertex(pt, vx.layout.r, **vertex_args))
+
 
     t1 = time()
     print >> stderr, t1-t0

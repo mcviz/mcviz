@@ -5,6 +5,8 @@ from math import log10
 
 from ..svg import TexGlyph
 
+from base import LayoutEdge, LayoutVertex
+
 class FeynmanLayout(object):
 
     def __init__(self, options):
@@ -85,6 +87,8 @@ class FeynmanLayout(object):
         elif vertex.is_final:
             # Don't show final particle vertices
             style = "invis"
+
+        vertex.layout = LayoutVertex(r = size/2)
 
         node = make_node(vertex.vno, height=size, width=size, label="", 
                          style=style,
