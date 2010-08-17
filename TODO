@@ -10,17 +10,20 @@ Urgent algorithmic problems:
     how graphviz behaves if things are presented in a different order each time.
     Currently I can't refactor without worry because I don't know if I changed 
     the behavior.
-    
-* Drawing algorithm needs improvements. Currently no obvious way to select things to draw.
 
+Release issues:
 
+* HEPMC
+* Styling
+* Present multiple views of event / meaningful displays
+ 
 Unit tests:
 
 * Nodes should only appear in one subgraph
 * Drawing individual subgraphs
-* Cycles
+. Cycles
 * Test on multiple pythia input examples
-* Is contraction really working correctly?
+. Is contraction really working correctly?
 . Momentum sum of final state particles
 . Check for coloured particles with no daughters
 . Check for vertices without mothers (listed as initial state)
@@ -29,12 +32,14 @@ Unit tests:
 
 Arrangement:
 
+* String ordering 
+* Provide views of the graph instead contracting
 * Subgraph class
     - requires a rewrite of the drawing algorithm. We need to walk the graph in
       a better way for drawing it, and so that we can switch parts off.
 * Final state particles in eta/phi/pt
-* Tag application
-* Subgraphs from tag heirarchies
+. Tag application
+. Subgraphs from tag heirarchies
 * "By whether or not the particle was visible to a detector"
     - Emphasis on detector observables
 * Chromatic lines
