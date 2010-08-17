@@ -34,7 +34,7 @@ def paint_svg(plain, event, style):
             else:
                 display_func = photon
             args["stroke"] = "orange"
-        elif particle.quark:
+        elif particle.colored:
             display_func = fermion
             if particle.color:
                 args["stroke"] = "red"
