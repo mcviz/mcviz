@@ -2,6 +2,9 @@
 from optparse import OptionParser
 import sys
 
+from mcviz.layout import list_layouts
+from mcviz.style import list_styles
+
 def get_option_parser():
     
     p = OptionParser()
@@ -9,11 +12,11 @@ def get_option_parser():
     #
     # Program control
     #
-    o("-m", "--method", choices=["pt", "eta", "generations"], default="pt",
-      help="Specify a method [not implemented]")
+    o("-l", "--layout", choices=list_layouts(),
+      help="Select the layout class used to layout the graph (%s)" % ", ".join(list_layouts()))
 
-    o("-d", "--dual", action="store_true",
-      help="Draw the dual of the Feynman graph [long untested]")
+    o("-s", "--style", choices=list_styles(),
+      help="Select the style class used to style the graph (%s)" % ", ".join(list_styles()))
 
     o("-D", "--debug", action="store_true",
       help="Drop to ipython shell on exception")

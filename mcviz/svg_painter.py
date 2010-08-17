@@ -7,7 +7,7 @@ from svg import photon, final_photon, gluon, boson, fermion, hadron, vertex
 
 from .graphviz import PlainOutput
 
-def paint_svg(plain, event, options):
+def paint_svg(plain, event, style):
     data = PlainOutput(plain)
     doc = SVGDocument(data.width, data.height, data.scale)
 
@@ -60,8 +60,8 @@ def paint_svg(plain, event, options):
 
         if data.edge_label[no]:
             x, y = data.edge_label[no]
-            pid = no if options.show_id else None
-            doc.add_glyph(particle.pdgid, x, y, options.label_size, pid)
+            pid = no if style.options.show_id else None
+            doc.add_glyph(particle.pdgid, x, y, style.options.label_size, pid)
 
     for vno, pt in data.nodes.iteritems():        
         vx = event.vertices[vno]

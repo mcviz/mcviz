@@ -3,8 +3,8 @@
 from mcviz import EventGraph, parse_options
 from mcviz.graphviz import run_graphviz
 from mcviz.utils import replace_stdout
-from mcviz.feynman_layout import FeynmanLayout
-from mcviz.dual_layout import DualLayout
+from mcviz.layout import get_layout
+from mcviz.style import get_style
 from mcviz.svg_painter import paint_svg
 from sys import argv, stdout, stderr
 
@@ -19,28 +19,28 @@ def main():
         print "Specify a pythia log file to run on"
         return -1
 
+    # step 1: get event graph representation
     event = EventGraph.from_pythia_log(args[1], options)
-    
-    if options.dual:
-        layout = DualLayout(options)
-    else:
-        layout = FeynmanLayout(options)
-    
+   
+    # step 2: layout event graph into a dot file
+    layout = get_layout(options.layout)(options)
     with replace_stdout() as our_stdout:
         layout.layout(event)
-        dot = our_stdout.getvalue()
-        if options.layout_engine:
-            gv_output, gv_errors = run_graphviz(options.layout_engine, dot,
-                                                options.extra_gv_options)
-            result = gv_output
-            # TODO: check gv_errors
-        else:
-            result = dot
+        result = our_stdout.getvalue()
+
+    # [step 3]: process layouted dot file with graphviz
+    if options.layout_engine:
+        gv_output, gv_errors = run_graphviz(options.layout_engine, result,
+                                            options.extra_gv_options)
+        result = gv_output
+        # TODO: check gv_errors
     
+    # [step 4]: create styled svg file from event graph + graphviz position
+    style = get_style(options.style)(options)
     if options.svg:
-        result = paint_svg(result, event, options)
+        result = paint_svg(result, event, style)
 
-
+    # step 5: print whatever result we get to stdout
     try:
         print result
     except IOError, e:

@@ -1,9 +1,9 @@
-from .graphviz import make_node, make_edge
-from .utils import latexize_particle_name, make_unicode_name
+from ..graphviz import make_node, make_edge
+from ..utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
-from svg import TexGlyph
+from ..svg import TexGlyph
 
 class FeynmanLayout(object):
 

@@ -1,5 +1,5 @@
-from .graphviz import make_node, make_edge
-from .utils import latexize_particle_name
+from ..graphviz import make_node, make_edge
+from ..utils import latexize_particle_name
 
 class DualLayout(object):
 
