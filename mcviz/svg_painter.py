@@ -8,7 +8,6 @@ from svg import photon, final_photon, gluon, boson, fermion, hadron, vertex
 
 def paint_svg(plain, event, options):
     data = PlainOutput(plain)
-    data.scale = 1
     doc = SVGDocument(data.width, data.height, data.scale)
 
     t0 = time()

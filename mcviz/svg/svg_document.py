@@ -3,7 +3,7 @@ from .texglyph import TexGlyph
 from xml.dom.minidom import getDOMImplementation, Document
 dom_impl = getDOMImplementation()
 
-class SVGDocument(Document):
+class SVGDocument(object):
     def __init__(self, wx, wy, scale = 1):
 
         self.doc = dom_impl.createDocument("http://www.w3.org/2000/svg", "svg", None)
