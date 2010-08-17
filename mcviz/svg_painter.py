@@ -49,7 +49,6 @@ def paint_svg(plain, event, style):
         elif particle.boson:
             display_func = boson
             args["stroke"] = "black"
-            args["stroke"] = "black"
             args["fill"] = "black"
         else:
             display_func = hadron
