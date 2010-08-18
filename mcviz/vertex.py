@@ -80,5 +80,5 @@ class Vertex(object):
         A connecting vertex is one which connects the two initial states 
         together.
         """        
-        return (any(p.decends_one  for p in self.incoming) and 
-                all(p.decends_both for p in self.outgoing))
+        return (any(p.descends_one  for p in self.incoming) and 
+                all(p.descends_both for p in self.outgoing))

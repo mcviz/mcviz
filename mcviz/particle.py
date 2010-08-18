@@ -29,17 +29,17 @@ class Particle(object):
         return self.no < rhs.no
         
     @property
-    def decends_both(self):
-        return self.decends(1) and self.decends(2)
+    def descends_both(self):
+        return self.descends(1) and self.descends(2)
     
     @property
-    def decends_one(self):
-        return ((self.decends(1) or self.decends(2)) 
-                and not (self.decends(1) and self.decends(2)))
+    def descends_one(self):
+        return ((self.descends(1) or self.descends(2)) 
+                and not (self.descends(1) and self.descends(2)))
         
-    def decends(self, n):
+    def descends(self, n):
         assert n == 1 or n == 2, "Only supported for initial particles"
-        return "decendent_of_p%i" % n in self.tags
+        return "descendant_of_p%i" % n in self.tags
     
     @classmethod
     def tagger(self, what):
@@ -68,11 +68,11 @@ class Particle(object):
             return default
             
         elif mechanism == "ascendents":
-            if self.decends_both:
+            if self.descends_both:
                 return "purple"
-            elif self.decends(1):
+            elif self.descends(1):
                 return "red"
-            elif self.decends(2):
+            elif self.descends(2):
                 return "blue"
             return default
         

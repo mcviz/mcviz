@@ -121,7 +121,7 @@ class FeynmanLayout(object):
                                  weight=log10(out_particle.e+1)*0.1 + 1,
                                  style=style,
                                  arrowhead="none"
-                                 )#constraint=not out_particle.decends_one)
+                                 )#constraint=not out_particle.descends_one)
                                  
                 edges.add(edge)
                 

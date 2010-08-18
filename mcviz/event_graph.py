@@ -147,12 +147,12 @@ class EventGraph(object):
         
     def tag_by_progenitors(self):
         """
-        Tag decendents of the initial particles
+        Tag descendants of the initial particles
         """
         assert len(self.initial_particles) == 2
         p1, p2 = self.initial_particles
-        self.walk(p1, Particle.tagger("decendent_of_p1"))
-        self.walk(p2, Particle.tagger("decendent_of_p2"))
+        self.walk(p1, Particle.tagger("descendant_of_p1"))
+        self.walk(p2, Particle.tagger("descendant_of_p2"))
     
     def tag_by_hadronization_vertex(self):
         had_vertices = [v for v in self.vertices.values() if v.hadronization]
