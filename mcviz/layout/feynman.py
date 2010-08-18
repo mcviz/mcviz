@@ -87,6 +87,10 @@ class FeynmanLayout(object):
         elif vertex.is_final:
             # Don't show final particle vertices
             style = "invis"
+        
+        else:
+            nr_particles = len(vertex.incoming) + len(vertex.outgoing)
+            size = nr_particles * 0.04
 
         vertex.layout = LayoutVertex(r = size/2)
 
