@@ -47,6 +47,7 @@ Arrangement:
 
 Other enhancements:
 
+* Graph label (e.g. "e+e- collision at 500GeV by mcviz, circa 2010 Je and Pw")
 * Make vertices a set or dict/enhance graph internal representation
 * Use triangle symbol for 1->2 vertices, square for 2->2 and * for N->N
 * Print statement writes to configurable fd
