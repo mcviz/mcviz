@@ -12,6 +12,7 @@ class FeynmanLayout(BaseLayout):
 
     def layout(self, graph):
         print("digraph pythia {")
+        print("ordering=in;")
         print(self.options.extra_dot)
         if self.options.fix_initial:
             width = self.options.width
@@ -53,10 +54,19 @@ class FeynmanLayout(BaseLayout):
         edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
         
-        for edge in sorted(edges):
-            print edge
+        self.print_edges(edges)
 
         print("}")
+    
+    def print_edges(self, edges):
+        
+        # Original ordering
+        # ordering = lambda (out_vertex_no, order, edge): edge
+        # Ordering by color
+        ordering = lambda x: x
+        
+        for out_vertex_no, order, edge in sorted(edges, key=ordering):
+            print edge
     
     def draw_vertices_cluster(self, subgraph, vertices, style=""):
         print("subgraph %s {" % subgraph)
@@ -111,14 +121,21 @@ class FeynmanLayout(BaseLayout):
                     label = ""
 
                 style = str(out_particle.no)
-                going, coming = vertex.vno, out_particle.vertex_out.vno
-                edge = make_edge(going, coming, label=label,
-                                 weight=log10(out_particle.e+1)*0.1 + 1,
-                                 style=style,
-                                 arrowhead="none"
-                                 )#constraint=not out_particle.descends_one)
-                                 
+                coming, going = vertex.vno, out_particle.vertex_out.vno
+                edge_text = make_edge(coming, going, label=label,
+                    weight=log10(out_particle.e+1)*0.1 + 1,
+                    style=style,
+                    arrowhead="none",
+                    #constraint=not out_particle.decends_one)
+                )
+                
+                order = (1 if out_particle.gluon else 
+                         0 if out_particle.color else 
+                         2 if out_particle.anticolor else None)
+                
+                edge = going, order, edge_text
+                
                 edges.add(edge)
                 
-        return edges
-        
+        return edges        
+    
