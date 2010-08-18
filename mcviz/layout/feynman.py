@@ -68,8 +68,32 @@ class FeynmanLayout(BaseLayout):
         return edges
 
     def draw_vertex(self, vertex, node_style=None):
+
+        vertex_text = get_vertex_text(vertex, node_style)
+
+        print vertex_text
+            
+        edges = set()
+        # Printing edges
+        for out_particle in sorted(vertex.outgoing):
+            if out_particle.vertex_out:
+
+                edge_text = self.get_particle_text(out_particle)
+                
+                order = (1 if out_particle.gluon else 
+                         0 if out_particle.color else 
+                         2 if out_particle.anticolor else None)
+                
+                edge = out_particle.vertex_out.vno, order, edge_text
+                
+                edges.add(edge)
+                
+        return edges        
+
+    def get_vertex_text(self, vertex, node_style=None):
         if node_style is None:
             node_style = {}
+
         style = ""
         width = height = 0.1
         
@@ -92,30 +116,11 @@ class FeynmanLayout(BaseLayout):
             width = height = nr_particles * 0.04
 
         vertex.layout = LayoutVertex(w = width/2, h = height/2)
+        label = ""
 
+        return make_node(vertex.vno, height=height, width=width,
+                label=label, style=style, **node_style)
 
-        node = make_node(vertex.vno, height=height, width=width, label="", 
-                         style=style,
-                         **node_style)
-        
-        print node
-            
-        edges = set()
-        # Printing edges
-        for out_particle in sorted(vertex.outgoing):
-            if out_particle.vertex_out:
-
-                edge_text = self.get_particle_text(out_particle)
-                
-                order = (1 if out_particle.gluon else 
-                         0 if out_particle.color else 
-                         2 if out_particle.anticolor else None)
-                
-                edge = out_particle.vertex_out.vno, order, edge_text
-                
-                edges.add(edge)
-                
-        return edges        
    
     def get_particle_text(self, particle):
         label = self.get_label_string(particle.pdgid)
