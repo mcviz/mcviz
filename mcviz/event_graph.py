@@ -16,6 +16,8 @@ START_COMPLETE = ("--------  "
 START_COMBINED = ("--------  "
     "PYTHIA Event Listing  (combination of several events)"
     "  ------------------------------------------------------------------")
+START_HARD = ("--------  PYTHIA Event Listing  (hard process)  -------------"
+    "----------------------------------------------------------------------")
 END_LIST = ("--------  End PYTHIA Event Listing  -----------------------------"
     "------------------------------------------------------------------")
 
@@ -351,6 +353,9 @@ class EventGraph(object):
             last = first + lines[first:].index(END_LIST) - 1
         elif START_COMBINED in lines:
             first = lines.index(START_COMBINED) + 2
+            last = first + lines[first:].index(END_LIST) - 1
+        elif START_HARD in lines:
+            first = lines.index(START_HARD) + 2
             last = first + lines[first:].index(END_LIST) - 1
         else:
             raise IOError("Failed to read pythia log file: "
