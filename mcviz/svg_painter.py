@@ -67,7 +67,7 @@ def paint_svg(plain, event, style):
         if vx.is_final:
             continue
         vertex_args = {"stroke":"black", "fill":"none", "stroke-width" : "0.05"}
-        doc.add_object(vertex(pt, vx.layout.r, **vertex_args))
+        doc.add_object(vertex(pt, vx.layout.w, vx.layout.h, **vertex_args))
 
 
     t1 = time()

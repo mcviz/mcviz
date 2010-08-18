@@ -75,27 +75,30 @@ class FeynmanLayout(BaseLayout):
         if node_style is None:
             node_style = {}
         style = ""
-        size = 0.1
+        width = height = 0.1
         
         if vertex.hadronization:
             # Big white hardronization vertices
-            size = 1.0
+            width = 20
+            height = 1
+
             
         elif vertex.is_initial:
             # Big red initial vertices
-            size = 1.0
-            
+            width = height = 1.0
+
         elif vertex.is_final:
             # Don't show final particle vertices
             style = "invis"
         
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
-            size = nr_particles * 0.04
+            width = height = nr_particles * 0.04
 
-        vertex.layout = LayoutVertex(r = size/2)
+        vertex.layout = LayoutVertex(w = width/2, h = height/2)
 
-        node = make_node(vertex.vno, height=size, width=size, label="", 
+
+        node = make_node(vertex.vno, height=height, width=width, label="", 
                          style=style,
                          **node_style)
         

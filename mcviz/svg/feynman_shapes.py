@@ -219,14 +219,15 @@ def hadron(energy, spline, scale = 1, **kwds):
     grp.appendChild(arrow)
     return grp
 
-def vertex(pt, r, **kwds):
-    circle = svgxml.createElement("circle")
-    circle.setAttribute("cx", "%.2f" % pt[0])
-    circle.setAttribute("cy", "%.2f" % pt[1])
-    circle.setAttribute("r", "%.2f" % r)
+def vertex(pt, rx, ry, **kwds):
+    ellipse = svgxml.createElement("ellipse")
+    ellipse.setAttribute("cx", "%.2f" % pt[0])
+    ellipse.setAttribute("cy", "%.2f" % pt[1])
+    ellipse.setAttribute("rx", "%.2f" % rx)
+    ellipse.setAttribute("ry", "%.2f" % ry)
     for kw, val in kwds.iteritems():
-        circle.setAttribute(kw, str(val))
-    return circle
+        ellipse.setAttribute(kw, str(val))
+    return ellipse
 
 if __name__=="__main__":
     from spline import Spline, SplineLine, Line

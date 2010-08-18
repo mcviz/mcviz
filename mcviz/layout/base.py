@@ -45,9 +45,10 @@ class LayoutEdge(object):
         self.label_pos = label_pos
 
 class LayoutVertex(object):
-    def __init__(self, x=None, y=None, r=None):
+    def __init__(self, x=None, y=None, w=None, h=None):
         self.x = x
         self.y = y
-        self.r = r
+        self.w = w
+        self.h = h
 
 
