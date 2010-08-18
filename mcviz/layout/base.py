@@ -25,7 +25,7 @@ class BaseLayout(object):
             label = "|%i|" % pdgid
         return label
 
-    def print_header(self):
+    def layout(self, graph):
         print("digraph pythia {")
         print(self.options.extra_dot)
         if self.options.fix_initial:
@@ -36,8 +36,12 @@ class BaseLayout(object):
         print("ratio=%s;" % self.options.ratio)
         print("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
 
-    def print_footer(self):
+        self.print_graph(graph)
+
         print("}")
+
+    def print_graph(self):
+        pass
 
 class LayoutEdge(object):
     def __init__(self, spline, label_pos=None):

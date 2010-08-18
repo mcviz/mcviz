@@ -1,7 +1,6 @@
 from __future__ import division
 
 from ..graphviz import make_node, make_edge
-from ..utils import latexize_particle_name, make_unicode_name
 
 from math import log10
 
@@ -10,8 +9,7 @@ from base import BaseLayout, LayoutEdge, LayoutVertex
 
 class FeynmanLayout(BaseLayout):
 
-    def layout(self, graph):
-        self.print_header()
+    def print_graph(self, graph):
         subgraphs = dict(one=[], two=[], both=[])
         other, connecting, initial = [], [], []
         for vertex in graph.vertices.values():
@@ -43,10 +41,8 @@ class FeynmanLayout(BaseLayout):
         #edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
         edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
-        
+       
         self.print_edges(edges)
-
-        self.print_footer()
     
     def print_edges(self, edges):
         
@@ -108,28 +104,33 @@ class FeynmanLayout(BaseLayout):
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
-                label = self.get_label_string(out_particle.pdgid)
 
-                if out_particle.gluon or out_particle.photon:
-                    label = ""
-
-                style = str(out_particle.no)
-                coming, going = vertex.vno, out_particle.vertex_out.vno
-                edge_text = make_edge(coming, going, label=label,
-                    weight=log10(out_particle.e+1)*0.1 + 1,
-                    style=style,
-                    arrowhead="none",
-                    # consider this for the future
-                    #constraint=not out_particle.decends_one)
-                )
+                edge_text = self.get_particle_text(out_particle)
                 
                 order = (1 if out_particle.gluon else 
                          0 if out_particle.color else 
                          2 if out_particle.anticolor else None)
                 
-                edge = going, order, edge_text
+                edge = out_particle.vertex_out.vno, order, edge_text
                 
                 edges.add(edge)
                 
         return edges        
-    
+   
+    def get_particle_text(self, particle):
+        label = self.get_label_string(particle.pdgid)
+        if particle.gluon or particle.photon:
+            label = ""
+
+        weight = log10(particle.e+1)*0.1 + 1
+
+        style = str(particle.no)
+        coming, going = particle.vertex_in.vno, particle.vertex_out.vno
+        edge_text = make_edge(coming, going, label=label,
+            weight=weight,
+            style=style,
+            arrowhead="none",
+            # consider this for the future
+            #constraint=not particle.decends_one)
+        )
+        return edge_text
