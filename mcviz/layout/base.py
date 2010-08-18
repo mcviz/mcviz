@@ -12,8 +12,8 @@ class BaseLayout(object):
     def __init__(self, options):
         self.options = options
 
-    def get_label_string(self, pdgid)
-        if TexGlyph.exists(pdgid):
+    def get_label_string(self, pdgid):
+        if self.options.svg and TexGlyph.exists(pdgid):
             w, h = TexGlyph.from_pdgid(pdgid).dimensions
             w *= self.options.label_size
             h *= self.options.label_size
@@ -23,6 +23,21 @@ class BaseLayout(object):
         else:
             # a pure number here leads graphviz to ignore the edge
             label = "|%i|" % pdgid
+        return label
+
+    def print_header(self):
+        print("digraph pythia {")
+        print(self.options.extra_dot)
+        if self.options.fix_initial:
+            width = self.options.width
+            height = width * float(self.options.ratio)
+            stretch = self.options.stretch
+            print('size="%s,%s!";' % (width, height))
+        print("ratio=%s;" % self.options.ratio)
+        print("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
+
+    def print_footer(self):
+        print("}")
 
 class LayoutEdge(object):
     def __init__(self, spline, label_pos=None):

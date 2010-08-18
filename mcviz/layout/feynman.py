@@ -11,17 +11,7 @@ from base import BaseLayout, LayoutEdge, LayoutVertex
 class FeynmanLayout(BaseLayout):
 
     def layout(self, graph):
-        print("digraph pythia {")
-        print("ordering=in;")
-        print(self.options.extra_dot)
-        if self.options.fix_initial:
-            width = self.options.width
-            height = width * float(self.options.ratio)
-            stretch = self.options.stretch
-            print('size="%s,%s!";' % (width, height))
-        print("ratio=%s;" % self.options.ratio)
-        print("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
-
+        self.print_header()
         subgraphs = dict(one=[], two=[], both=[])
         other, connecting, initial = [], [], []
         for vertex in graph.vertices.values():
@@ -56,7 +46,7 @@ class FeynmanLayout(BaseLayout):
         
         self.print_edges(edges)
 
-        print("}")
+        self.print_footer()
     
     def print_edges(self, edges):
         
@@ -126,6 +116,7 @@ class FeynmanLayout(BaseLayout):
                     weight=log10(out_particle.e+1)*0.1 + 1,
                     style=style,
                     arrowhead="none",
+                    # consider this for the future
                     #constraint=not out_particle.decends_one)
                 )
                 
