@@ -69,7 +69,7 @@ class FeynmanLayout(BaseLayout):
 
     def draw_vertex(self, vertex, node_style=None):
 
-        vertex_text = get_vertex_text(vertex, node_style)
+        vertex_text = self.get_vertex_text(vertex, node_style)
 
         print vertex_text
             
@@ -93,15 +93,19 @@ class FeynmanLayout(BaseLayout):
     def get_vertex_text(self, vertex, node_style=None):
         if node_style is None:
             node_style = {}
-
+            
+        label = ""
         style = ""
         width = height = 0.1
         
         if vertex.hadronization:
             # Big white hardronization vertices
-            width = 20
+            n_gluons_in = sum(1 for p in vertex.incoming if p.gluon)
+            width = 2 + n_gluons_in*0.5
             height = 1
-
+            
+            node_style["shape"] = "record"
+            label = " <left>|<middle>|<right>" 
             
         elif vertex.is_initial:
             # Big red initial vertices
@@ -116,11 +120,9 @@ class FeynmanLayout(BaseLayout):
             width = height = nr_particles * 0.04
 
         vertex.layout = LayoutVertex(w = width/2, h = height/2)
-        label = ""
 
         return make_node(vertex.vno, height=height, width=width,
                 label=label, style=style, **node_style)
-
    
     def get_particle_text(self, particle):
         label = self.get_label_string(particle.pdgid)
@@ -131,6 +133,15 @@ class FeynmanLayout(BaseLayout):
 
         style = str(particle.no)
         coming, going = particle.vertex_in.vno, particle.vertex_out.vno
+        
+        if particle.vertex_out.hadronization:
+            if particle.gluon:
+                going = "%s:middle" % going            
+            elif particle.color:
+                going = "%s:left" % going
+            elif particle.anticolor:
+                going = "%s:right" % going
+        
         edge_text = make_edge(coming, going, label=label,
             weight=weight,
             style=style,
