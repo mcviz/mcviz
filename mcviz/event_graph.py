@@ -10,10 +10,14 @@ from .vertex import Vertex
 from .options import parse_options
 from .utils import OrderedSet
 
-FIRST_LINE = ("--------  PYTHIA Event Listing  (complete event)  --------------"
-    "-------------------------------------------------------------------")
-LAST_LINE = ("--------  End PYTHIA Event Listing  -----------------------------"
-    "------------------------------------------------------------------")            
+START_COMPLETE = ("--------  "
+    "PYTHIA Event Listing  (complete event)  ---------"
+    "------------------------------------------------------------------------")
+START_COMBINED = ("--------  "
+    "PYTHIA Event Listing  (combination of several events)"
+    "  ------------------------------------------------------------------")
+END_LIST = ("--------  End PYTHIA Event Listing  -----------------------------"
+    "------------------------------------------------------------------")
 
 class EventGraph(object):
     def __init__(self, records, options=None):
@@ -149,10 +153,8 @@ class EventGraph(object):
         """
         Tag descendants of the initial particles
         """
-        assert len(self.initial_particles) == 2
-        p1, p2 = self.initial_particles
-        self.walk(p1, Particle.tagger("descendant_of_p1"))
-        self.walk(p2, Particle.tagger("descendant_of_p2"))
+        for i, p in enumerate(self.initial_particles):
+            self.walk(p, Particle.tagger("descendant_of_p%i" % (i+1)))
     
     def tag_by_hadronization_vertex(self):
         had_vertices = [v for v in self.vertices.values() if v.hadronization]
@@ -344,10 +346,15 @@ class EventGraph(object):
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
-        first = lines.index(FIRST_LINE) + 2
-        last = first + lines[first:].index(LAST_LINE) - 1
-
-        assert first > 0 and last > 0, "Pythia event section not found!"
+        if START_COMPLETE in lines:
+            first = lines.index(START_COMPLETE) + 2
+            last = first + lines[first:].index(END_LIST) - 1
+        elif START_COMBINED in lines:
+            first = lines.index(START_COMBINED) + 2
+            last = first + lines[first:].index(END_LIST) - 1
+        else:
+            raise IOError("Failed to read pythia log file: "
+                          "no complete event listing found")
 
         def maybe_num(s):
             try: return float(s)
@@ -355,5 +362,9 @@ class EventGraph(object):
                 return s
 
         records = [map(maybe_num, line.split()) for line in lines[first:last]]
+        # insert blank name if name is not specified
+        for particle in records:
+            if len(particle) == 14: 
+                particle.insert(2,"")
         return EventGraph(records, options)
 

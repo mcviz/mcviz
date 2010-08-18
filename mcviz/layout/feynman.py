@@ -1,3 +1,5 @@
+from __future__ import division
+
 from ..graphviz import make_node, make_edge
 from ..utils import latexize_particle_name, make_unicode_name
 
@@ -38,18 +40,21 @@ class FeynmanLayout(object):
         #edges.update(self.draw_vertices_cluster("initial", initial, "rank=source;"))
         
         print("subgraph initial_nodes {")
-        p1, p2 = initial
-        if self.options.fix_initial:
-            print('rank="source"')
-            p1_options = dict(pos="%s,%s!" % (stretch,         height/2))
-            p2_options = dict(pos="%s,%s!" % (width - stretch, height/2))
-        else:
-            p1_options = p2_options = {}
-        edges.update(self.draw_vertex(p1, p1_options))
-        edges.update(self.draw_vertex(p2, p2_options))
+        initial_pairs = len(initial) // 2
+        for i, p in enumerate(initial):
+            if self.options.fix_initial:
+                print('rank="source"')
+                pair = i // 2
+                yposition = (1 + pair) * height / (initial_pairs + 1)
+                xposition = stretch + (i % 2) * (width - 2 * stretch)
+                p_options = dict(pos="%s,%s!" % (xposition, yposition))
+            else:
+                p_options = {}
+            edges.update(self.draw_vertex(p, p_options))
         print("}")
         
-        edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
+        #edges.update(self.draw_vertices_cluster("connecting", connecting, 'rank=same;'))
+        edges.update(self.draw_vertices_cluster("connecting", connecting, ''))
         edges.update(self.draw_vertices(other))
         
         for edge in sorted(edges):
