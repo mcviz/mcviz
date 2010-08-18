@@ -241,6 +241,10 @@ class TexGlyph(object):
         return cls.get_library()[pdgid]
 
     @classmethod
+    def exists(cls, pdgid):
+        return pdgid in cls.get_library()
+
+    @classmethod
     def pdgids(cls):
         cls.get_library().keys()
 

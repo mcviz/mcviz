@@ -25,6 +25,10 @@ class SVGDocument(object):
         self.svg.appendChild(self.defs)
 
     def add_glyph(self, pdgid, x, y, font_size, pid = None):
+
+        if not TexGlyph.exists(pdgid):
+            return self.add_text_glyph(pdgid, x, y, font_size, pid)
+
         glyph = TexGlyph.from_pdgid(pdgid)
         glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
         if not glyph.dom in self.defs.childNodes:
@@ -54,12 +58,30 @@ class SVGDocument(object):
         self.svg.appendChild(use)
 
         if pid:
-            txt = self.doc.createElement("text")
-            txt.setAttribute("x", "%.3f" % (x + glyph.xmax * glyph.default_scale * font_size))
-            txt.setAttribute("y", "%.3f" % (y + glyph.ymax * glyph.default_scale * font_size))
-            txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
-            txt.appendChild(self.doc.createTextNode("%i" % pid))
-            self.svg.appendChild(txt)
+            x_pid = x + glyph.xmax * glyph.default_scale * font_size
+            y_pid = y + glyph.ymax * glyph.default_scale * font_size
+            self.add_pid(pid, x_pid, y_pid, font_size)
+
+    def add_text_glyph(self, pdgid, x, y, font_size, pid = None):
+        label = "%i" % pdgid
+        width_est = len(label) * font_size * 0.6
+        txt = self.doc.createElement("text")
+        txt.setAttribute("x", "%.3f" % (x - width_est / 2))
+        txt.setAttribute("y", "%.3f" % (y))
+        txt.setAttribute("font-size", "%.2f" % (font_size))
+        txt.appendChild(self.doc.createTextNode(label))
+        self.svg.appendChild(txt)
+
+        if pid:
+            self.add_pid(pid, x + width_est/2, y + font_size/3, font_size)
+
+    def add_pid(self, pid, x, y, font_size):
+        txt = self.doc.createElement("text")
+        txt.setAttribute("x", "%.3f" % (x))
+        txt.setAttribute("y", "%.3f" % (y))
+        txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
+        txt.appendChild(self.doc.createTextNode("%i" % pid))
+        self.svg.appendChild(txt)
 
     def add_object(self, element):
         self.svg.appendChild(element)

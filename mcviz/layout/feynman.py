@@ -23,7 +23,7 @@ class FeynmanLayout(object):
             stretch = self.options.stretch
             print('size="%s,%s!";' % (width, height))
         print("ratio=%s;" % self.options.ratio)
-        print("edge [labelangle=90, fontsize=12]")
+        print("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
 
         subgraphs = dict(one=[], two=[], both=[])
         other, connecting, initial = [], [], []
@@ -109,14 +109,19 @@ class FeynmanLayout(object):
         # Printing edges
         for out_particle in sorted(vertex.outgoing):
             if out_particle.vertex_out:
-                w, h = TexGlyph.from_pdgid(out_particle.pdgid).dimensions
-                w *= self.options.label_size
-                h *= self.options.label_size
-                table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
-                td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
-                #if self.options.show_id:
-                #    td += "<td>(%i)</td>" % (out_particle.no)
-                label = table % td
+                if TexGlyph.exists(out_particle.pdgid):
+                    w, h = TexGlyph.from_pdgid(out_particle.pdgid).dimensions
+                    w *= self.options.label_size
+                    h *= self.options.label_size
+                    table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
+                    td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
+                    #if self.options.show_id:
+                    #    td += "<td>(%i)</td>" % (out_particle.no)
+                    label = table % td
+                else:
+                    # a pure number here leads graphviz to ignore the edge
+                    label = "|%i|" % out_particle.pdgid
+                    
                 if out_particle.gluon or out_particle.photon:
                     label = ""
 
