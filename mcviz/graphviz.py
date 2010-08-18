@@ -56,6 +56,8 @@ class PlainOutput(object):
 
         for line in plain.split("\n"):
             tokens = line.strip().split()
+            if not tokens:
+                continue
             command = tokens[0]
             if command == "graph":
                 self.handle_graph(tokens[1:])
@@ -65,6 +67,7 @@ class PlainOutput(object):
                 self.handle_edge(tokens[1:])
             elif command == "stop":
                 break
+        assert self.scale, "No graph command in plain graphviz output!"
 
     def handle_graph(self, parameters):
         self.scale, self.width, self.height = map(float, parameters)

@@ -344,7 +344,10 @@ class EventGraph(object):
         with open(filename) as fd:
             lines = [line for line in (line.strip() for line in fd) if line]
 
-        first, last = lines.index(FIRST_LINE)+2, lines.index(LAST_LINE)-1
+        first = lines.index(FIRST_LINE) + 2
+        last = first + lines[first:].index(LAST_LINE) - 1
+
+        assert first > 0 and last > 0, "Pythia event section not found!"
 
         def maybe_num(s):
             try: return float(s)

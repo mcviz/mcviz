@@ -6,7 +6,7 @@ from mcviz.utils import replace_stdout
 from mcviz.layout import get_layout
 from mcviz.style import get_style
 from mcviz.svg_painter import paint_svg
-from sys import argv, stdout, stderr
+from sys import argv, stdout, stderr, exit
 
 def main():
     options, args = parse_options(argv)
@@ -32,9 +32,19 @@ def main():
     if options.layout_engine:
         gv_output, gv_errors = run_graphviz(options.layout_engine, result,
                                             options.extra_gv_options)
+        errors = map(str.strip, gv_errors.split("\n"))
+        errors = filter(lambda e : e and not "Warning: gvrender" in e, errors)
+        if errors:
+            print >> stderr, "********* GraphViz ERRORS **********"
+            print >> stderr, "\n".join(errors)
+            print >> stderr, "************************************"
+        if not gv_output.strip():
+            print >> stderr, "ERROR: No output from %s " % options.layout_engine
+            print >> stderr, "There may be too many constraints on the graph."
+            return -1
+
         result = gv_output
-        # TODO: check gv_errors
-    
+ 
     # [step 4]: create styled svg file from event graph + graphviz position
     style = get_style(options.style)(options)
     if options.svg:
@@ -55,4 +65,4 @@ if __name__ == "__main__":
     try:
         import 
     """
-    main()
+    exit(main())
