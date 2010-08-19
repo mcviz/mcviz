@@ -2,7 +2,6 @@
 
 from mcviz import EventGraph, parse_options
 from mcviz.graphviz import run_graphviz
-from mcviz.utils import replace_stdout
 from mcviz.layout import get_layout
 from mcviz.style import get_style
 from mcviz.svg_painter import paint_svg
@@ -23,10 +22,9 @@ def main():
     event = EventGraph.from_pythia_log(args[1], options)
    
     # step 2: layout event graph into a dot file
-    layout = get_layout(options.layout)(options)
-    with replace_stdout() as our_stdout:
-        layout.layout(event)
-        result = our_stdout.getvalue()
+    layout_class = get_layout(options.layout)
+    layout = layout_class(event, options)
+    result = layout.dot
 
     # [step 3]: process layouted dot file with graphviz
     if options.layout_engine:
@@ -44,6 +42,9 @@ def main():
             return -1
 
         result = gv_output
+
+        if "-Tplain" in options.extra_gv_options:
+            layout.update_from_plain(result)
  
     # [step 4]: create styled svg file from event graph + graphviz position
     style = get_style(options.style)(options)

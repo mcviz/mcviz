@@ -82,3 +82,7 @@ class Vertex(object):
         """        
         return (any(p.descends_one  for p in self.incoming) and 
                 all(p.descends_both for p in self.outgoing))
+
+    @property
+    def reference(self):
+        return "V%i" % self.vno

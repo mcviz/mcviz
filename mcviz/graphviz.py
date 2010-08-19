@@ -73,12 +73,12 @@ class PlainOutput(object):
         self.scale, self.width, self.height = map(float, parameters)
 
     def handle_node(self, parameters):
-        no = int(parameters[0])
+        node_ref = parameters[0]
         x, y = float(parameters[1]), self.height - float(parameters[2])
-        self.nodes[no] = (x,y)
+        self.nodes[node_ref] = (x,y)
 
     def handle_edge(self, parameters):
-        no_in, no_out = int(parameters[0]), int(parameters[1])
+        ref_in, ref_out = parameters[0], parameters[1]
 
         n_control_points = int(parameters[2])
         spline_parameters = parameters[3:(3 + 2 * n_control_points)]
@@ -105,10 +105,10 @@ class PlainOutput(object):
         else:
             label_position = None
 
-        no = int(remaining[0])
+        edge_ref = remaining[0]
 
-        self.edge_lines[no] = splineline
-        self.edge_label[no] = label_position
+        self.edge_lines[edge_ref] = splineline
+        self.edge_label[edge_ref] = label_position
 
     def get_splines(self, points):
         if len(points) == 2:

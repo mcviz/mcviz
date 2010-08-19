@@ -113,3 +113,7 @@ class Particle(object):
     @property
     def lepton(self):
         return 11 <= abs(self.pdgid) <= 18
+
+    @property
+    def reference(self):
+        return "P%i" % self.no
