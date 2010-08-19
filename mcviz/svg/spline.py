@@ -1,5 +1,6 @@
 from __future__ import division
 
+from copy import deepcopy
 from math import sqrt, hypot
 from bisect import bisect_left, bisect_right
 
@@ -38,10 +39,21 @@ class Spline(object):
         y = (((E*t) + F)*t + G)*t + H
         return x, y
 
+    def perturb(self, begin, amount):
+        """
+        Move the beginning or end of a line perpendicularly to its point.
+        TODO: maybe calculate amount to move by in splinelines.
+        """
+        t = 0 if begin else 1
+        x, y, dx, dy = self.get_point_perp(t)
+        newpoint = x + dx*amount, y + dy*amount
+        points = list(self.points)
+        points[0 if begin else 3] = newpoint
+        self.points = tuple(points)
+
     def get_point_perp(self, t):
         A, B, C, D, E, F, G, H = self.functionals
-        x = (((A*t) + B)*t + C)*t + D
-        y = (((E*t) + F)*t + G)*t + H
+        x, y = self.get_point(t)
         dx = 3*A*t**2 + 2*B*t + C
         dy = 3*E*t**2 + 2*F*t + G
         d = sqrt(dx**2 + dy**2)
@@ -133,7 +145,7 @@ class Spline(object):
         for i in (0,1):
             p2[i] += p3[i] - self.points[3][i]
         return Spline(p0, p1, tuple(p2), p3, self.N)
-        
+    
     @property
     def svg_path_data(self):
         data = ["M%.2f %.2f" % self.points[0]]
@@ -160,6 +172,26 @@ class SplineLine(object):
     def __init__(self, splines):
         self.splines = splines
         self.cumulative = None
+
+    def bifurcate(self, amount=1):
+        if len(self.splines) == 1:
+            # TODO. Somehow mess with the handles? Insert an inner control point
+            # and perturb that?
+            return self, self
+        spline1 = deepcopy(self).perturb("inward", amount)
+        spline2 = deepcopy(self).perturb("outward", amount)
+        return spline1, spline2
+    
+    def perturb(self, direction, amount):
+        "Perturb the middle of a line inward or outward."
+        amount = amount if direction == "inward" else -amount
+        
+        #self.splines[0].perturb(False, amount)
+        for spline in self.splines: #[1:-1]:
+            spline.perturb(True, amount)
+            spline.perturb(False, amount)        
+        #self.splines[-1].perturb(True, amount)
+        return self
 
     def cumulate(self):
         cum = self.cumulative = [0]

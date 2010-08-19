@@ -178,6 +178,18 @@ def gluon(energy, spline, scale = 1, **kwds):
     grp.appendChild(path)
     return grp
 
+def multigluon(energy, spline, scale=1, **kwds):
+    line1, line2 = spline.bifurcate(energy)
+    line1 = line1.svg_path_data
+    line2 = line2.svg_path_data
+    
+    path1 = svgxml.createElement("path"); path1.setAttribute("fill", "none"); path1.setAttribute("d", line1)
+    path2 = svgxml.createElement("path"); path2.setAttribute("fill", "none"); path2.setAttribute("d", line2)
+    grp = svg_group(kwds)
+    grp.appendChild(path1)
+    grp.appendChild(path2)
+    return grp
+
 def boson(energy, spline, scale = 1, **kwds):
     """Get an SVG fragment for a photon along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
@@ -260,6 +272,7 @@ if __name__=="__main__":
         doc.appendChild(boson(e, spline, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
         doc.appendChild(fermion(e, line, transform="translate(%i,%i)" % (x+600, y),**fargs)).toprettyxml()    
         doc.appendChild(fermion(e, spline, transform="translate(%i,%i)" % (x+700, y),**fargs)).toprettyxml()
+        doc.appendChild(multigluon(e, spline, transform="translate(%i,%i)" % (x+800, y),**args)).toprettyxml()    
 
     for i in range(n+1):
         x = 10
