@@ -2,6 +2,9 @@ CODE=mcviz/*.py Makefile bin/*.py
 
 EXTRAOPTS=-I -c kinks -c gluballs
 
+pyclean:
+	find . -iname "*.pyc" -exec rm {} \;
+
 all: inputs/pythia01.ps
 
 inputs/pythia01.referencedot: inputs/pythia01.out 
