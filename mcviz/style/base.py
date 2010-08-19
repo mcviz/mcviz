@@ -15,8 +15,14 @@ class StyleManager(object):
     """
 
 class Style(object):
-    def __init__(self, options):
+    def __init__(self, layout, options):
+        self.layout = layout
         self.options = options
+        self.width, self.height = layout.width, layout.height
+        self.scale = layout.scale
+
+    def paint(self):
+        pass
 
 class ObjectStyle(object):
     def __init__(self, **kwds):
@@ -48,6 +54,7 @@ class ObjectStyle(object):
                 continue
             style.append('%s="%s"' % (key.replace("_", "-"), value))
         return ";".join(style)
+
 class DefaultStyle(Style):
     energy = 0.2
     scale = 0.1

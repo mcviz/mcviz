@@ -24,10 +24,11 @@ class SVGDocument(object):
         self.defs = self.doc.createElement("defs")
         self.svg.appendChild(self.defs)
 
-    def add_glyph(self, pdgid, x, y, font_size, subscript = None):
+    def add_glyph(self, pdgid, center, font_size, subscript = None):
+        x, y = center
 
         if not TexGlyph.exists(pdgid):
-            return self.add_text_glyph(pdgid, x, y, font_size, subscript)
+            return self.add_text_glyph(pdgid, center, font_size, subscript)
 
         glyph = TexGlyph.from_pdgid(pdgid)
         glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
@@ -62,7 +63,8 @@ class SVGDocument(object):
             y_sub = y + glyph.ymax * glyph.default_scale * font_size
             self.add_subscript(subscript, x_sub, y_sub, font_size)
 
-    def add_text_glyph(self, pdgid, x, y, font_size, subscript = None):
+    def add_text_glyph(self, pdgid, center, font_size, subscript = None):
+        x, y = center
         label = "%i" % pdgid
         width_est = len(label) * font_size * 0.6
         txt = self.doc.createElement("text")
@@ -76,10 +78,10 @@ class SVGDocument(object):
             self.add_subscript(subscript, x + width_est/2, y + font_size/3, 
                                font_size)
 
-    def add_subscript(self, subscript, x, y, font_size):
+    def add_subscript(self, subscript, point, font_size):
         txt = self.doc.createElement("text")
-        txt.setAttribute("x", "%.3f" % (x))
-        txt.setAttribute("y", "%.3f" % (y))
+        txt.setAttribute("x", "%.3f" % (point[0]))
+        txt.setAttribute("y", "%.3f" % (point[1]))
         txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
         txt.appendChild(self.doc.createTextNode(subscript))
         self.svg.appendChild(txt)

@@ -4,7 +4,6 @@ from mcviz import EventGraph, parse_options
 from mcviz.graphviz import run_graphviz
 from mcviz.layout import get_layout
 from mcviz.style import get_style
-from mcviz.svg_painter import paint_svg
 from sys import argv, stdout, stderr, exit
 
 def main():
@@ -47,9 +46,12 @@ def main():
             layout.update_from_plain(result)
  
     # [step 4]: create styled svg file from event graph + graphviz position
-    style = get_style(options.style)(options)
+
     if options.svg:
-        result = paint_svg(result, event, style)
+        style_class = get_style(options.style)
+        style = style_class(layout, options)
+        result = style.paint()
+        #result = paint_svg(result, event, style)
 
     # step 5: print whatever result we get to stdout
     try:

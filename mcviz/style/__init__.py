@@ -1,8 +1,10 @@
 from base import Style
+from svg import SVGStyle
 
 styles = {}
 styles["base"] = Style
-default = "base"
+styles["svg"] = SVGStyle
+default = "svg"
 
 def list_styles():
     return sorted(styles.keys())
