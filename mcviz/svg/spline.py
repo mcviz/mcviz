@@ -136,17 +136,21 @@ class Spline(object):
         
     @property
     def svg_path_data(self):
-        return "".join(self.raw_svg_path_data)
-
-    @property
-    def raw_svg_path_data(self):
         data = ["M%.2f %.2f" % self.points[0]]
-        data.append("c")
-        for i in (1,2,3):
-            x = self.points[i][0] - self.points[0][0]
-            y = self.points[i][1] - self.points[0][1]
-            data.append("%.2f,%.2f " % (x, y))
-        return data
+        pts = (self.points[1] + self.points[2] + self.points[3])
+        data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
+        return "".join(data)
+        #return "".join(self.raw_svg_path_data)
+
+    #@property
+    #def raw_svg_path_data(self):
+    #    data = ["M%.2f %.2f" % self.points[0]]
+    #    data.append("c")
+    #    for i in (1,2,3):
+    #        x = self.points[i][0] - self.points[0][0]
+    #        y = self.points[i][1] - self.points[0][1]
+    #        data.append("%.3f,%.3f " % (x, y))
+    #    return data
 
     def __str__(self):
         return "spline; start %s; control points %s; %s; end %s" % self.points
@@ -194,15 +198,22 @@ class SplineLine(object):
 
     @property
     def svg_path_data(self):
-        #return " ".join(s.svg_path_data for s in self.splines)
-        data = [self.splines[0].svg_path_data]
-        for i in range(1, len(self.splines)):
-            s = self.splines[i]
-            if s.points[0] == self.splines[i-1].points[3]:
-                data.append("".join(s.raw_svg_path_data[1:]))
-            else:
-                data.append(s.svg_path_data)
+
+        data = ["M%.2f %.2f" % self.splines[0].points[0]]
+        for s in self.splines:
+            pts = (s.points[1] + s.points[2] + s.points[3])
+            data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
         return " ".join(data)
+
+        #return " ".join(s.svg_path_data for s in self.splines)
+        #data = [self.splines[0].svg_path_data]
+        #for i in range(1, len(self.splines)):
+        #    s = self.splines[i]
+        #    if s.points[0] == self.splines[i-1].points[3]:
+        #        data.append("".join(s.raw_svg_path_data[1:]))
+        #    else:
+        #        data.append(s.svg_path_data)
+        #return " ".join(data)
 
     def get_clipped(self, clip_length):
         splines = self.splines[:-1] + [self.splines[-1].get_clipped(clip_length)]
