@@ -11,7 +11,7 @@ class BaseLayout(object):
 
     def __init__(self, options):
         self.options = options
-
+            
     def get_label_string(self, pdgid):
         if self.options.svg and TexGlyph.exists(pdgid):
             w, h = TexGlyph.from_pdgid(pdgid).dimensions
@@ -26,6 +26,15 @@ class BaseLayout(object):
         return label
 
     def layout(self, graph):
+    
+        # Label particles by id if --show-id is on the command line.
+        if self.options.show_id:
+            def label_particle_no(particle):
+                if not particle.gluon:
+                    return particle.no
+                    
+            self.annotate_particles(graph.particles.values(), label_particle_no)
+    
         print("digraph pythia {")
         print(self.options.extra_dot)
         if self.options.fix_initial:
@@ -39,7 +48,17 @@ class BaseLayout(object):
         self.print_graph(graph)
 
         print("}")
-
+    
+    def annotate_particles(self, particles, annotate_function):
+        """
+        Add a subscript for all particles. annotate_function(particle) should
+        return a value to be added.
+        """
+        for particle in particles:
+            subscript = annotate_function(particle)
+            if subscript:
+                particle.subscripts.append(subscript)
+                
     def print_graph(self):
         pass
 

@@ -59,8 +59,8 @@ def paint_svg(plain, event, style):
 
         if data.edge_label[no]:
             x, y = data.edge_label[no]
-            pid = no if style.options.show_id else None
-            doc.add_glyph(particle.pdgid, x, y, style.options.label_size, pid)
+            doc.add_glyph(particle.pdgid, x, y, style.options.label_size, 
+                          ", ".join(map(str, particle.subscripts)))
 
     for vno, pt in data.nodes.iteritems():        
         vx = event.vertices[vno]
