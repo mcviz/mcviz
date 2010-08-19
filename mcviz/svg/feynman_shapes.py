@@ -3,7 +3,7 @@ from __future__ import division
 from xml.dom.minidom import getDOMImplementation
 svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
-from spline import Spline
+from spline import Spline, SplineLine
 
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
     N = n_waves * 2
@@ -28,7 +28,7 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
     splines = []
     sgn = 1
     for i in range(1, N + (1 if half_open else 2)): # STYLE HALF OPEN PHOTONS: Was N+2
-        op  = px[i-1], -sgn * px[i-1]
+        op  = px[i-1], -sgn * py[i-1]
         cp1 = px[i-1] + cntrl_strength, -sgn * py[i-1]
         cp2 = px[i] - cntrl_strength, sgn * py[i]
         dp  = px[i], sgn * py[i]
@@ -38,7 +38,7 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
             cp2 = dp
         splines.append(Spline(op, cp1, cp2, dp))
         sgn = -sgn
-    return splines
+    return SplineLine(splines)
 
 def get_gluon_splines(length, amplitude, n_waves, amp): 
     loopyness = 0.75 # TUNING PARAMETER
@@ -58,7 +58,7 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
     splines = []
     sgn = 1
     for i in range(1, N+2):
-        op  = px[i-1], -sgn * px[i-1]
+        op  = px[i-1], -sgn * py[i-1]
         cp1 = px[i-1] - sgn * (2 - sgn) * cntrl_strength, -sgn * py[i-1]
         cp2 = px[i] - sgn * (2 + sgn) * cntrl_strength, sgn * py[i]
         dp  = px[i], sgn * py[i]
@@ -68,16 +68,7 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
             cp2 = dp
         splines.append(Spline(op, cp1, cp2, dp))
         sgn = -sgn
-    return splines
-
-def pathdata_from_splines(splines, trafo_spline = None):
-    if trafo_spline:
-        splines = [trafo_spline.transform_spline(s) for s in splines]
-    data = ["M%.2f %.2f" % splines[0].points[0]]
-    for s in splines:
-        pts = (s.points[1] + s.points[2] + s.points[3])
-        data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
-    return "".join(data)
+    return SplineLine(splines)
 
 # Functions to get SVN path data for objects
 # contain some policy
@@ -92,8 +83,10 @@ def photon_data(energy, spline, n_max = 10, n_min = 3, power = 5, amp = 1, half_
     amplitude = (0.5 + 0.5*energy) * amp # TUNING FUNCTION
     n_per_10 = (n_min + energy * (n_max - n_min)) / amp
     n = max(2, int(n_per_10 * length / 10))
-    splines = get_photon_splines(length, amplitude, n, power, amplitude, half_open)
-    return pathdata_from_splines(splines, trafo_spline = spline)
+    splineline = get_photon_splines(length, amplitude, n, power, 
+                                    amplitude, half_open)
+    if spline: splineline = spline.transform_splineline(splineline)
+    return splineline.svg_path_data
 
 # TUNING DEFAULTS
 def gluon_data(energy, spline, n_max = 11, n_min = 1, amp = 1):
@@ -105,8 +98,9 @@ def gluon_data(energy, spline, n_max = 11, n_min = 1, amp = 1):
     amplitude = (1.5 - 1*energy) * amp # TUNING FUNCTION
     n_per_10 = (n_min + energy * (n_max - n_min)) / amp
     n = max(1, int(n_per_10 * length / 10))
-    splines = get_gluon_splines(length, amplitude, n, amplitude)
-    return pathdata_from_splines(splines, trafo_spline = spline)
+    splineline = get_gluon_splines(length, amplitude, n, amplitude)
+    if spline: splineline = spline.transform_splineline(splineline)
+    return splineline.svg_path_data
 
 # TUNING DEFAULTS
 def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
@@ -148,6 +142,7 @@ def pointed_arrow_data(size, spline):
 
 def svg_group(kwds):
     grp = svgxml.createElement("g")
+    grp.setAttribute("stroke-linecap","round")
     for kw, val in kwds.iteritems():
         grp.setAttribute(kw, str(val))
     return grp

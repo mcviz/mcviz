@@ -121,6 +121,10 @@ class Spline(object):
         s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
     
+    def transform_splineline(self, splineline):
+        new_splines = [self.transform_spline(s) for s in splineline.splines]
+        return SplineLine(new_splines)
+    
     def get_clipped(self, clip_length):
         x = self.length - clip_length
         p0, p1 = self.points[0], self.points[1]
@@ -132,7 +136,17 @@ class Spline(object):
         
     @property
     def svg_path_data(self):
-        return ("M %.2f %.2f C " + "%.2f "*6) % reduce(tuple.__add__, self.points)
+        return "".join(self.raw_svg_path_data)
+
+    @property
+    def raw_svg_path_data(self):
+        data = ["M%.2f %.2f" % self.points[0]]
+        data.append("c")
+        for i in (1,2,3):
+            x = self.points[i][0] - self.points[0][0]
+            y = self.points[i][1] - self.points[0][1]
+            data.append("%.2f,%.2f " % (x, y))
+        return data
 
     def __str__(self):
         return "spline; start %s; control points %s; %s; end %s" % self.points
@@ -170,13 +184,25 @@ class SplineLine(object):
         s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
 
+    def transform_splineline(self, splineline):
+        new_splines = [self.transform_spline(s) for s in splineline.splines]
+        return SplineLine(new_splines)
+
     @property
     def length(self):
         return sum(s.length for s in self.splines)
 
     @property
     def svg_path_data(self):
-        return " ".join(s.svg_path_data for s in self.splines)
+        #return " ".join(s.svg_path_data for s in self.splines)
+        data = [self.splines[0].svg_path_data]
+        for i in range(1, len(self.splines)):
+            s = self.splines[i]
+            if s.points[0] == self.splines[i-1].points[3]:
+                data.append("".join(s.raw_svg_path_data[1:]))
+            else:
+                data.append(s.svg_path_data)
+        return " ".join(data)
 
     def get_clipped(self, clip_length):
         splines = self.splines[:-1] + [self.splines[-1].get_clipped(clip_length)]
