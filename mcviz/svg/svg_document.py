@@ -61,7 +61,7 @@ class SVGDocument(object):
         if subscript:
             x_sub = x + glyph.xmax * glyph.default_scale * font_size
             y_sub = y + glyph.ymax * glyph.default_scale * font_size
-            self.add_subscript(subscript, x_sub, y_sub, font_size)
+            self.add_subscript(subscript, (x_sub, y_sub), font_size)
 
     def add_text_glyph(self, pdgid, center, font_size, subscript = None):
         x, y = center

@@ -23,7 +23,7 @@ class BaseLayout(object):
             def label_particle_no(particle):
                 if not particle.gluon:
                     return particle.no
-            self.annotate_particles(self.nodes, label_particle_no)
+            self.annotate_particles(graph.particles.values(), label_particle_no)
 
         # create node and edge objects from the graph
         self.fill_objects(graph)
