@@ -3,13 +3,16 @@ from __future__ import division
 from copy import deepcopy
 from math import sqrt, hypot
 from bisect import bisect_left, bisect_right
+from ..utils import Point2D
 
 class Spline(object):
     def __init__(self, p0, p1, p2, p3, N = 100):
         """ Create a spline given the start point, 
         two control points and the end point"""
         assert not (p0 == p1 == p2 == p3)
-        self.points = (p0, p1, p2, p3)
+        def make_point(p):
+            return Point2D(*p) if isinstance(p, tuple) else p
+        self.points = map(make_point, [p0, p1, p2, p3])
         self.N = N
         self.sampled = False
         self._functionals = None
@@ -17,14 +20,14 @@ class Spline(object):
     def calculate_functionals(self):
         # calculate functional parameters of the spline
         p = self.points
-        A = p[3][0] - 3*p[2][0] + 3*p[1][0] - p[0][0]
-        B = 3*p[2][0] - 6*p[1][0] + 3*p[0][0]
-        C = 3*p[1][0] - 3*p[0][0]
-        D = p[0][0]
-        E = p[3][1] - 3*p[2][1] + 3*p[1][1] - p[0][1]
-        F = 3*p[2][1] - 6*p[1][1] + 3*p[0][1]
-        G = 3*p[1][1] - 3*p[0][1]
-        H = p[0][1]
+        A = p[3].x - 3*p[2].x + 3*p[1].x - p[0].x
+        B = 3*p[2].x - 6*p[1].x + 3*p[0].x
+        C = 3*p[1].x - 3*p[0].x
+        D = p[0].x
+        E = p[3].y - 3*p[2].y + 3*p[1].y - p[0].y
+        F = 3*p[2].y - 6*p[1].y + 3*p[0].y
+        G = 3*p[1].y - 3*p[0].y
+        H = p[0].y
         self._functionals = A, B, C, D, E, F, G, H
 
     @property
@@ -37,7 +40,7 @@ class Spline(object):
         A, B, C, D, E, F, G, H = self.functionals
         x = (((A*t) + B)*t + C)*t + D
         y = (((E*t) + F)*t + G)*t + H
-        return x, y
+        return Point2D(x, y)
 
     def perturb(self, begin, amount):
         """
@@ -45,15 +48,15 @@ class Spline(object):
         TODO: maybe calculate amount to move by in splinelines.
         """
         t = 0 if begin else 1
-        x, y, dx, dy = self.get_point_perp(t)
-        newpoint = x + dx*amount, y + dy*amount
+        p, dp = self.get_point_perp(t)
+        newpoint = Point2D(p.x + dp.x*amount, p.y + dp.y*amount)
         points = list(self.points)
         points[0 if begin else 3] = newpoint
         self.points = tuple(points)
 
     def get_point_perp(self, t):
         A, B, C, D, E, F, G, H = self.functionals
-        x, y = self.get_point(t)
+        p = self.get_point(t)
         dx = 3*A*t**2 + 2*B*t + C
         dy = 3*E*t**2 + 2*F*t + G
         d = sqrt(dx**2 + dy**2)
@@ -64,7 +67,7 @@ class Spline(object):
             else:
                 #print "t = ", t, "decreased"
                 return self.get_point_perp(t - 0.001)
-        return x, y, -dy/d, dx/d
+        return p, Point2D(-dy/d, dx/d)
 
     def get_point_tan_perp(self, t):
         A, B, C, D, E, F, G, H = self.functionals
@@ -80,7 +83,7 @@ class Spline(object):
             else:
                 #print "t = ", t, "decreased"
                 return self.get_point_tan_perp(t - 0.001)
-        return x, y, dx/d, dy/d, -dy/d, dx/d
+        return Point2D(x, y), Point2D(dx/d, dy/d), Point2D(-dy/d, dx/d)
 
     @property
     def length(self):
@@ -94,7 +97,7 @@ class Spline(object):
         else:
             self.N = N
         self.samples = [self.get_point(x / N) for x in range(N + 1)]
-        self.distances = [hypot(p1[0] - p2[0], p1[1] - p2[1])
+        self.distances = [p1.dist(p2)
                           for p1, p2 in zip(self.samples[:-1], self.samples[1:])]
         self._length = sum(self.distances)
         cum = self.cumulative = [0]
@@ -115,22 +118,21 @@ class Spline(object):
         """transform a point according to the spline trafo
         x is length along the spline
         y is across and in the same units as x"""
-        ix, iy = ip
-        t = self.get_t(ix/self.length)
-        x, y, px, py = self.get_point_perp(t)
-        return x + px*iy, y + py*iy
+        t = self.get_t(ip.x/self.length)
+        p, dp = self.get_point_perp(t)
+        return Point2D(p.x + dp.x*ip.y, p.y + dp.y*ip.y)
 
     def transform_x_point(self, ix, pt):
         """transform a point pt according to the spline trafo at splinepoint x"""
         t = self.get_t(ix/self.length)
-        x, y, dx, dy, px, py = self.get_point_tan_perp(t)
-        return x + dx*(pt[0]-ix) + px*pt[1], y + dy*(pt[0]-ix) + py*pt[1]
+        p, dp, perp = self.get_point_tan_perp(t)
+        return Point2D(p.x + dp.x*(pt.x - ix) + perp.x*pt.y, p.y + dp.y*(pt.x - ix) + perp.y*pt.y)
 
     def transform_spline(self, spline):
         s0T = self.transform_point(spline.points[0])
         s3T = self.transform_point(spline.points[3])
-        s1T = self.transform_x_point(spline.points[0][0],spline.points[1])
-        s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
+        s1T = self.transform_x_point(spline.points[0].x,spline.points[1])
+        s2T = self.transform_x_point(spline.points[3].x,spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
     
     def transform_splineline(self, splineline):
@@ -140,16 +142,14 @@ class Spline(object):
     def get_clipped(self, clip_length):
         x = self.length - clip_length
         p0, p1 = self.points[0], self.points[1]
-        p2 = list(self.points[2])
+        p2 = self.points[2] + p3 - self.points[3]
         p3 = self.transform_point((x, 0))
-        for i in (0,1):
-            p2[i] += p3[i] - self.points[3][i]
-        return Spline(p0, p1, tuple(p2), p3, self.N)
+        return Spline(p0, p1, p2, p3, self.N)
     
     @property
     def svg_path_data(self):
-        data = ["M%.2f %.2f" % self.points[0]]
-        pts = (self.points[1] + self.points[2] + self.points[3])
+        data = ["M%.2f %.2f" % self.points[0].tuple()]
+        pts = (self.points[1].tuple() + self.points[2].tuple() + self.points[3].tuple())
         data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
         return "".join(data)
         #return "".join(self.raw_svg_path_data)
@@ -165,7 +165,7 @@ class Spline(object):
     #    return data
 
     def __str__(self):
-        return "spline; start %s; control points %s; %s; end %s" % self.points
+        return "spline; start %s; control points %s; %s; end %s" % tuple(self.points)
 
 
 class SplineLine(object):
@@ -206,18 +206,18 @@ class SplineLine(object):
         return self.splines[i], s - self.cumulative[i], self.cumulative[i]
 
     def transform_point(self, ip):
-        spline, x, xleft = self.find_spline_at(ip[0])
-        return spline.transform_point((x, ip[1]))
+        spline, x, xleft = self.find_spline_at(ip.x)
+        return spline.transform_point(Point2D(x, ip.y))
 
     def transform_x_point(self, ix, pt):
         spline, x, xleft = self.find_spline_at(ix)
-        return spline.transform_x_point(x, (pt[0] - xleft, pt[1]))
+        return spline.transform_x_point(x, Point2D(pt.x - xleft, pt.y))
 
     def transform_spline(self, spline):
         s0T = self.transform_point(spline.points[0])
         s3T = self.transform_point(spline.points[3])
-        s1T = self.transform_x_point(spline.points[0][0],spline.points[1])
-        s2T = self.transform_x_point(spline.points[3][0],spline.points[2])
+        s1T = self.transform_x_point(spline.points[0].x,spline.points[1])
+        s2T = self.transform_x_point(spline.points[3].x,spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
 
     def transform_splineline(self, splineline):
@@ -231,9 +231,9 @@ class SplineLine(object):
     @property
     def svg_path_data(self):
 
-        data = ["M%.2f %.2f" % self.splines[0].points[0]]
+        data = ["M%.2f %.2f" % self.splines[0].points[0].tuple()]
         for s in self.splines:
-            pts = (s.points[1] + s.points[2] + s.points[3])
+            pts = (s.points[1].tuple() + s.points[2].tuple() + s.points[3].tuple())
             data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
         return " ".join(data)
 

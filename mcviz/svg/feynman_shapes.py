@@ -5,6 +5,8 @@ svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
 from spline import Spline, SplineLine
 
+from ..utils import Point2D
+
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
     N = n_waves * 2
     wavelength = length / N
@@ -28,10 +30,10 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
     splines = []
     sgn = 1
     for i in range(1, N + (1 if half_open else 2)): # STYLE HALF OPEN PHOTONS: Was N+2
-        op  = px[i-1], -sgn * py[i-1]
-        cp1 = px[i-1] + cntrl_strength, -sgn * py[i-1]
-        cp2 = px[i] - cntrl_strength, sgn * py[i]
-        dp  = px[i], sgn * py[i]
+        op  = Point2D(px[i-1], -sgn * py[i-1])
+        cp1 = Point2D(px[i-1] + cntrl_strength, -sgn * py[i-1])
+        cp2 = Point2D(px[i] - cntrl_strength, sgn * py[i])
+        dp  = Point2D(px[i], sgn * py[i])
         if i == 1:
             cp1 = op
         elif i == N+1:
@@ -58,10 +60,10 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
     splines = []
     sgn = 1
     for i in range(1, N+2):
-        op  = px[i-1], -sgn * py[i-1]
-        cp1 = px[i-1] - sgn * (2 - sgn) * cntrl_strength, -sgn * py[i-1]
-        cp2 = px[i] - sgn * (2 + sgn) * cntrl_strength, sgn * py[i]
-        dp  = px[i], sgn * py[i]
+        op  = Point2D(px[i-1], -sgn * py[i-1])
+        cp1 = Point2D(px[i-1] - sgn * (2 - sgn) * cntrl_strength, -sgn * py[i-1])
+        cp2 = Point2D(px[i] - sgn * (2 + sgn) * cntrl_strength, sgn * py[i])
+        dp  = Point2D(px[i], sgn * py[i])
         if i == 1:
             cp1 = op
         elif i == N+1:
@@ -114,14 +116,14 @@ def fermion_arrow_data(size, spline):
     """Returns the path data for an arrow in the middle of the given spline"""
     mid = spline.length/2
     width = size*0.3
-    tip = spline.transform_x_point(mid, (mid + size*0.5, 0))
-    tail1 = spline.transform_x_point(mid, (mid - size*0.5, width))
-    tail2 = spline.transform_x_point(mid, (mid - size*0.5, - width))
-    control1 = spline.transform_x_point(mid, (mid - size*0.4, width*0.5))
-    control2 = spline.transform_x_point(mid, (mid - size*0.4, - width*0.5))
-    data = ["M%.2f %.2f" % tip]
-    data.append("L%.2f %.2f" % tail1)
-    data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1 + control2 + tail2))
+    tip = spline.transform_x_point(mid, Point2D(mid + size*0.5, 0))
+    tail1 = spline.transform_x_point(mid, Point2D(mid - size*0.5, width))
+    tail2 = spline.transform_x_point(mid, Point2D(mid - size*0.5, - width))
+    control1 = spline.transform_x_point(mid, Point2D(mid - size*0.4, width*0.5))
+    control2 = spline.transform_x_point(mid, Point2D(mid - size*0.4, - width*0.5))
+    data = ["M%.2f %.2f" % tip.tuple()]
+    data.append("L%.2f %.2f" % tail1.tuple())
+    data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1.tuple() + control2.tuple() + tail2.tuple()))
     data.append("Z")
     return "".join(data)
 
@@ -129,14 +131,14 @@ def pointed_arrow_data(size, spline):
     """Returns the path data for an arrow in the middle of the given spline"""
     width = size*0.3
     x = spline.length - size
-    tip = spline.transform_x_point(x, (spline.length, 0))
-    tail1 = spline.transform_x_point(x, (x, width))
-    tail2 = spline.transform_x_point(x, (x, - width))
-    control1 = spline.transform_x_point(x, (x + size*0.1, width*0.5))
-    control2 = spline.transform_x_point(x, (x + size*0.1, - width*0.5))
+    tip = spline.transform_x_point(x, Point2D(spline.length, 0))
+    tail1 = spline.transform_x_point(x, Point2D(x, width))
+    tail2 = spline.transform_x_point(x, Point2D(x, - width))
+    control1 = spline.transform_x_point(x, Point2D(x + size*0.1, width*0.5))
+    control2 = spline.transform_x_point(x, Point2D(x + size*0.1, - width*0.5))
     data = ["M%.2f %.2f" % tip]
     data.append("L%.2f %.2f" % tail1)
-    data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1 + control2 + tail2))
+    data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1.tuple() + control2.tuple() + tail2.tuple()))
     data.append("Z")
     return "".join(data)
 
@@ -228,15 +230,16 @@ def hadron(energy, spline, scale = 1, **kwds):
 
 def vertex(pt, rx, ry, **kwds):
     ellipse = svgxml.createElement("ellipse")
-    ellipse.setAttribute("cx", "%.2f" % pt[0])
-    ellipse.setAttribute("cy", "%.2f" % pt[1])
+    ellipse.setAttribute("cx", "%.2f" % pt.x)
+    ellipse.setAttribute("cy", "%.2f" % pt.y)
     ellipse.setAttribute("rx", "%.2f" % rx)
     ellipse.setAttribute("ry", "%.2f" % ry)
     for kw, val in kwds.iteritems():
         ellipse.setAttribute(kw, str(val))
     return ellipse
 
-if __name__=="__main__":
+#if __name__=="__main__":
+def test():
     from spline import Spline, SplineLine, Line
     
     spline1 = Spline((5.0, -10), (20.000, -10), (15.0, 30.000), (40.0, 10.000))
