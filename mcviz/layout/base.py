@@ -6,7 +6,7 @@ from itertools import chain
 from ..svg import TexGlyph
 
 from ..graphviz import make_node, make_edge, PlainOutput
-from ..utils import latexize_particle_name, make_unicode_name
+from ..utils import latexize_particle_name, make_unicode_name, Point2D
 
 
 class BaseLayout(object):
@@ -96,7 +96,7 @@ class BaseLayout(object):
             edge.label_center = data.edge_label[edge.item.reference]
 
         for node in self.nodes:
-            node.center = data.nodes[node.item.reference]
+            node.center = Point2D(*data.nodes[node.item.reference])
     
     def get_label_string(self, pdgid):
         if self.options.svg and TexGlyph.exists(pdgid):

@@ -138,12 +138,46 @@ class Spline(object):
     def transform_splineline(self, splineline):
         new_splines = [self.transform_spline(s) for s in splineline.splines]
         return SplineLine(new_splines)
+
+    def shift_by(self, spline, t0 = 0, t1 = None):
+        """
+        Take this spline and transform it using 'spline'
+        spline should be in a relative coordinate system to this spline
+        """
+        if t1 is None:
+            t1 = self.length
+        p0 = spline.get_point(spline.get_t(t0))
+        p0.x = 0
+        p1 = spline.get_point(spline.get_t(t1))
+        p1.x = self.length
+
+        tp0 = self.transform_point(p0)
+        tp1 = self.transform_point(p1)
+
+        tp0 -= self.points[0]
+        tp1 -= self.points[3]
+
+        print "> ", tp0
+        print "> ", tp1
+        print self.points[0], self.points[0] + tp0
+        print self.points[1], self.points[1] + tp0
+        print self.points[2], self.points[2] + tp1
+        print self.points[3], self.points[3] + tp1
+        print "---------"
+        self.points[0] += tp0
+        self.points[1] += tp0
+        v01 = self.points[1] - self.points[0]
+        self.points[1] = self.points[1] - v01 * (1 / v01.len()) * tp0.len() * p0.y
+        self.points[2] += tp1
+        v32 = self.points[3] - self.points[2]
+        self.points[2] = self.points[2] - v32 * (1 / v32.len()) * tp1.len() * p0.y
+        self.points[3] += tp1
     
     def get_clipped(self, clip_length):
         x = self.length - clip_length
         p0, p1 = self.points[0], self.points[1]
+        p3 = self.transform_point(Point2D(x, 0))
         p2 = self.points[2] + p3 - self.points[3]
-        p3 = self.transform_point((x, 0))
         return Spline(p0, p1, p2, p3, self.N)
     
     @property
@@ -173,7 +207,18 @@ class SplineLine(object):
         self.splines = splines
         self.cumulative = None
 
-    def bifurcate(self, amount=1):
+    def shift_by(self, spline):
+        t = 0
+        for s, l in zip(self.splines, self.cumulative):
+            s.shift_by(spline, t, t + s.length)
+            t += s.length
+
+    def bifurcate(self, amount=1.0):
+        s1 = deepcopy(self)
+        s1.shift_by(Line(Point2D(0, amount), Point2D(self.length, amount)))
+        s2 = deepcopy(self)
+        s2.shift_by(Line(Point2D(0, -amount), Point2D(self.length, -amount)))
+        return s1, s2
         if len(self.splines) == 1:
             # TODO. Somehow mess with the handles? Insert an inner control point
             # and perturb that?

@@ -15,8 +15,14 @@ class Point2D(object):
     def tuple(self):
         return self.x, self.y
 
+    def len(self):
+        return hypot(self.x, self.y)
+
     def __add__(self, p):
         return Point2D(self.x+p.x, self.y+p.y)
+
+    def __sub__(self, p):
+        return Point2D(self.x-p.x, self.y-p.y)
 
     def __iadd__(self, p):
         self.x += p.x
@@ -30,6 +36,9 @@ class Point2D(object):
 
     def __mul__(self, f):
         return Point2D(self.x*f, self.y*f)
+
+    def __div__(self, f):
+        return Point2D(self.x/f, self.y/f)
 
     def __repr__(self):
         return 'Point(%f, %f)' % (self.x, self.y)

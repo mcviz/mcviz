@@ -136,8 +136,8 @@ def pointed_arrow_data(size, spline):
     tail2 = spline.transform_x_point(x, Point2D(x, - width))
     control1 = spline.transform_x_point(x, Point2D(x + size*0.1, width*0.5))
     control2 = spline.transform_x_point(x, Point2D(x + size*0.1, - width*0.5))
-    data = ["M%.2f %.2f" % tip]
-    data.append("L%.2f %.2f" % tail1)
+    data = ["M%.2f %.2f" % tip.tuple()]
+    data.append("L%.2f %.2f" % tail1.tuple())
     data.append("C%.2f %.2f %.2f %.2f %.2f %.2f" % (control1.tuple() + control2.tuple() + tail2.tuple()))
     data.append("Z")
     return "".join(data)
@@ -181,7 +181,7 @@ def gluon(energy, spline, scale = 1, **kwds):
     return grp
 
 def multigluon(energy, spline, scale=1, **kwds):
-    line1, line2 = spline.bifurcate(energy)
+    line1, line2 = spline.bifurcate(energy*scale*0.35)
     line1 = line1.svg_path_data
     line2 = line2.svg_path_data
     
