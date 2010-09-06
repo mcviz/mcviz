@@ -41,9 +41,10 @@ def graph_is_consistent(graph):
 event_graph = None
 def setup():
     test_file = "inputs/pythia01.out"
-    
+    from mcviz.options import parse_options
+    options, args = parse_options([])
     global event_graph
-    event_graph = EventGraph.from_pythia_log(test_file)
+    event_graph = EventGraph.from_pythia_log(test_file, options)
 
 def get_bottom_nodes(top):
     #if top.
