@@ -76,6 +76,8 @@ def get_option_parser():
     o("-U", "--use-unicode", action="store_true",
       help="Use unicode for labels. (Default False)")
     
+    o("--profile", action="store_true", 
+      help="Turn on profiling (requires bootstrap_extenv to have been run)")
     return p
     
 def parse_options(argv=None):

@@ -6,6 +6,8 @@ from mcviz.layout import get_layout
 from mcviz.style import get_style
 from sys import argv, stdout, stderr, exit
 
+from textwrap import dedent
+
 def main():
     options, args = parse_options(argv)
     
@@ -64,8 +66,19 @@ def main():
             raise
 
 if __name__ == "__main__":
-    """
-    try:
-        import 
-    """
+    from sys import argv
+    if "--profile" in argv:
+        try:
+            from profilestats import profile
+            main = profile(main)
+        except:
+            print dedent("""
+            #######
+            Profilestats had a problem. Did you install it?
+            Are you in the right environment?
+            See the mcviz/utils/bootstrap_extenv.sh and source 
+            mcviz/utils/extenv/bin/activate
+            #######""").strip()
+            raise
+
     exit(main())
