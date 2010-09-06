@@ -48,9 +48,8 @@ class SVGDocument(object):
             return self.add_text_glyph(pdgid, center, font_size, subscript)
 
         glyph = TexGlyph.from_pdgid(pdgid)
-        glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
-        if not glyph.dom.toxml() in self.defs.children:
-            self.defs.appendChild(RawNode(glyph.dom.toxml()))
+        if not glyph.xml in self.defs.children:
+            self.defs.appendChild(RawNode(glyph.xml))
 
         if False: #options.debug_labels:
             wx, wy = glyph.dimensions

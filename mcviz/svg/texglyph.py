@@ -220,6 +220,8 @@ class TexGlyph(object):
         avg_height = cls.get_average_dimensions()[1]
         for glyph in cls.library.values():
             glyph.default_scale = 1.0 / avg_height
+            glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
+            glyph.dom2xml()
 
     @classmethod
     def get_library(cls):
@@ -408,6 +410,10 @@ class TexGlyph(object):
         xwidth = self.xmax - self.xmin
         ywidth = self.ymax - self.ymin
         return xwidth, ywidth
+
+    def dom2xml(self):
+        self.xml = self.dom.toxml()
+        self.dom = None
 
     @classmethod
     def get_average_dimensions(cls):
