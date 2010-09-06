@@ -228,6 +228,17 @@ def hadron(energy, spline, scale = 1, **kwds):
     grp.appendChild(arrow)
     return grp
 
+def identity(energy, spline, scale = 1, **kwds):
+    
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", spline.svg_path_data)
+    
+    grp = svg_group(kwds)
+    grp.appendChild(path)
+    
+    return grp
+
 def vertex(pt, rx, ry, **kwds):
     ellipse = svgxml.createElement("ellipse")
     ellipse.setAttribute("cx", "%.2f" % pt.x)
