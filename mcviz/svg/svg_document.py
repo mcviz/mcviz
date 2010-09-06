@@ -1,27 +1,44 @@
 from .texglyph import TexGlyph
 
-from xml.dom.minidom import getDOMImplementation, Document
-dom_impl = getDOMImplementation()
+class XMLNode(object):
+    def __init__(self, tag, attrs=None, children=None):
+        self.tag = tag
+        self.attrs = [] if attrs is None else [attrs]
+        self.children = [] if children is None else children
+
+    def appendChild(self, child):
+        self.children.append(child)
+
+    def setAttribute(self, attr, val):
+        self.attrs.append('%s="%s"' % (attr, val))
+
+    def __str__(self):
+        child_data = "".join(str(child) for child in self.children)
+        open_tag = "".join(("<"," ".join([self.tag] + self.attrs),">"))
+        close_tag = "".join(("</",self.tag,">"))
+        return "".join((open_tag, child_data, close_tag))
+
+class RawNode(XMLNode):
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return self.data
+
 
 class SVGDocument(object):
     def __init__(self, wx, wy, scale = 1):
 
-        self.doc = dom_impl.createDocument("http://www.w3.org/2000/svg", "svg", None)
-
-        self.svg = self.doc.documentElement
-        self.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-        self.svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
-        self.svg.setAttribute("viewBox", "0 0 %.1f %.1f" % (wx * scale, 
-                                                            wy * scale))
-        self.svg.setAttribute("version", "1.1")
+        self.svg = XMLNode("svg", 'version="1.1" viewBox="0 0 106.5 53.1" '\
+                        'xmlns="http://www.w3.org/2000/svg"'\
+                        'xmlns:xlink="http://www.w3.org/1999/xlink">')
 
         if scale != 1:
-            g = self.doc.createElement("g")
-            g.setAttribute("transform","scale(%.5f)" % scale)
+            g = XMLNode("g", 'transform="scale(%.5f)"' % scale)
             self.svg.appendChild(g)
             self.svg = g
 
-        self.defs = self.doc.createElement("defs")
+        self.defs = XMLNode("defs")
         self.svg.appendChild(self.defs)
 
     def add_glyph(self, pdgid, center, font_size, subscript = None):
@@ -32,15 +49,15 @@ class SVGDocument(object):
 
         glyph = TexGlyph.from_pdgid(pdgid)
         glyph.dom.setAttribute("transform", "scale(%.6f)" % (glyph.default_scale))
-        if not glyph.dom in self.defs.childNodes:
-            self.defs.appendChild(glyph.dom)
+        if not glyph.dom.toxml() in self.defs.children:
+            self.defs.appendChild(RawNode(glyph.dom.toxml()))
 
         if False: #options.debug_labels:
             wx, wy = glyph.dimensions
             wx *= font_size * glyph.default_scale
             wy *= font_size * glyph.default_scale
 
-            box = self.doc.createElement("rect")
+            box = XMLNode("rect")
             box.setAttribute("x", "%.3f" % (x - wx/2))
             box.setAttribute("y", "%.3f" % (y - wy/2))
             box.setAttribute("width", "%.3f" % wx)
@@ -51,7 +68,7 @@ class SVGDocument(object):
         x -= 0.5 * (glyph.xmin + glyph.xmax) * font_size * glyph.default_scale
         y -= 0.5 * (glyph.ymin + glyph.ymax) * font_size * glyph.default_scale
 
-        use = self.doc.createElement("use")
+        use = XMLNode("use")
         use.setAttribute("x", "%.3f" % (x/font_size))
         use.setAttribute("y", "%.3f" % (y/font_size))
         use.setAttribute("transform", "scale(%.3f)" % (font_size))
@@ -67,11 +84,11 @@ class SVGDocument(object):
         x, y = center
         label = "%i" % pdgid
         width_est = len(label) * font_size * 0.6
-        txt = self.doc.createElement("text")
+        txt = XMLNode("text")
         txt.setAttribute("x", "%.3f" % (x - width_est / 2))
         txt.setAttribute("y", "%.3f" % (y))
         txt.setAttribute("font-size", "%.2f" % (font_size))
-        txt.appendChild(self.doc.createTextNode(label))
+        txt.appendChild(RawNode(label))
         self.svg.appendChild(txt)
 
         if subscript:
@@ -79,7 +96,7 @@ class SVGDocument(object):
                                font_size)
 
     def add_subscript(self, subscript, point, font_size):
-        txt = self.doc.createElement("text")
+        txt = XMLNode("text")
         txt.setAttribute("x", "%.3f" % (point[0]))
         txt.setAttribute("y", "%.3f" % (point[1]))
         txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
@@ -87,8 +104,8 @@ class SVGDocument(object):
         self.svg.appendChild(txt)
 
     def add_object(self, element):
-        self.svg.appendChild(element)
+        self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return self.doc.toprettyxml()
+        return "".join(['<?xml version="1.0" ?>', str(self.svg)])
 
