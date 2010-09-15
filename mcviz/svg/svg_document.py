@@ -29,14 +29,16 @@ class RawNode(XMLNode):
 class SVGDocument(object):
     def __init__(self, wx, wy, scale = 1):
 
-        self.svg = XMLNode("svg", 'version="1.1" viewBox="0 0 106.5 53.1" '\
+        self.root = XMLNode("svg", 'version="1.1" viewBox="0 0 106.5 53.1" '\
                         'xmlns="http://www.w3.org/2000/svg"'\
-                        'xmlns:xlink="http://www.w3.org/1999/xlink">')
+                        'xmlns:xlink="http://www.w3.org/1999/xlink"')
 
         if scale != 1:
             g = XMLNode("g", 'transform="scale(%.5f)"' % scale)
-            self.svg.appendChild(g)
+            self.root.appendChild(g)
             self.svg = g
+        else:
+            self.svg = self.root
 
         self.defs = XMLNode("defs")
         self.svg.appendChild(self.defs)
@@ -106,5 +108,5 @@ class SVGDocument(object):
         self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return "".join(['<?xml version="1.0" ?>', str(self.svg)])
+        return "".join(['<?xml version="1.0" ?>', str(self.root)])
 
