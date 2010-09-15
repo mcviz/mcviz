@@ -181,12 +181,14 @@ def gluon(energy, spline, scale = 1, **kwds):
     return grp
 
 def multigluon(energy, spline, scale=1, **kwds):
-    line1, line2 = spline.bifurcate(energy*scale*0.35)
+    line1, line2 = spline.bifurcate(energy*scale)
     line1 = line1.svg_path_data
     line2 = line2.svg_path_data
     
     path1 = svgxml.createElement("path"); path1.setAttribute("fill", "none"); path1.setAttribute("d", line1)
+    path1.setAttribute("stroke", kwds.pop("color"))
     path2 = svgxml.createElement("path"); path2.setAttribute("fill", "none"); path2.setAttribute("d", line2)
+    path2.setAttribute("stroke", kwds.pop("anticolor"))
     grp = svg_group(kwds)
     grp.appendChild(path1)
     grp.appendChild(path2)
@@ -272,6 +274,7 @@ def test():
 
     args = {"fill":"none", "stroke":"blue", "scale" : 5}
     fargs = {"fill":"blue", "stroke":"blue", "scale" : 5}
+    mgargs = {"color":"blue", "anticolor":"red", "scale" : 5}
 
     n = 10
     for i in range(n+1):
@@ -286,7 +289,7 @@ def test():
         doc.appendChild(boson(e, spline, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
         doc.appendChild(fermion(e, line, transform="translate(%i,%i)" % (x+600, y),**fargs)).toprettyxml()    
         doc.appendChild(fermion(e, spline, transform="translate(%i,%i)" % (x+700, y),**fargs)).toprettyxml()
-        doc.appendChild(multigluon(e, spline, transform="translate(%i,%i)" % (x+800, y),**args)).toprettyxml()    
+        doc.appendChild(multigluon(e, spline, transform="translate(%i,%i)" % (x+800, y),**mgargs)).toprettyxml()    
 
     for i in range(n+1):
         x = 10

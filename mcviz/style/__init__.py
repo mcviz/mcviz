@@ -1,11 +1,13 @@
 from base import Style
 from svg import SVGStyle
 from simple import SimpleStyle
+from strong import StrongStyle
 
 styles = {}
 styles["base"] = Style
 styles["svg"] = SVGStyle
 styles["simple"] = SimpleStyle
+styles["strong"] = StrongStyle
 default = "svg"
 
 def list_styles():
