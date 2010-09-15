@@ -157,20 +157,22 @@ class Spline(object):
         tp0 -= self.points[0]
         tp1 -= self.points[3]
 
-        print "> ", tp0
-        print "> ", tp1
-        print self.points[0], self.points[0] + tp0
-        print self.points[1], self.points[1] + tp0
-        print self.points[2], self.points[2] + tp1
-        print self.points[3], self.points[3] + tp1
-        print "---------"
+        #print "> ", tp0
+        #print "> ", tp1
+        #print self.points[0], self.points[0] + tp0
+        #print self.points[1], self.points[1] + tp0
+        #print self.points[2], self.points[2] + tp1
+        #print self.points[3], self.points[3] + tp1
+        #print "---------"
         self.points[0] += tp0
         self.points[1] += tp0
         v01 = self.points[1] - self.points[0]
-        self.points[1] = self.points[1] - v01 * (1 / v01.len()) * tp0.len() * p0.y
+        if v01.len() > 0:
+            self.points[1] = self.points[1] - v01 * (1 / v01.len()) * tp0.len() * p0.y
         self.points[2] += tp1
         v32 = self.points[3] - self.points[2]
-        self.points[2] = self.points[2] - v32 * (1 / v32.len()) * tp1.len() * p0.y
+        if v32.len() > 0:
+            self.points[2] = self.points[2] - v32 * (1 / v32.len()) * tp1.len() * p0.y
         self.points[3] += tp1
     
     def get_clipped(self, clip_length):
@@ -215,6 +217,8 @@ class SplineLine(object):
         self.cumulative = None
 
     def shift_by(self, spline):
+        if not self.cumulative:
+            self.cumulate()
         t = 0
         for s, l in zip(self.splines, self.cumulative):
             s.shift_by(spline, t, t + s.length)
@@ -319,7 +323,7 @@ if __name__=="__main__":
         x, y, px, py = s.get_point_perp(t)
         if lx == 0 and ly == 0: 
             lx, ly = x, y        
-        print t, x,y, px, py, hypot(x - lx, y - ly)
+        #print t, x,y, px, py, hypot(x - lx, y - ly)
         lx, ly = x, y
 
 
