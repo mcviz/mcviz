@@ -22,16 +22,33 @@ END_LIST = ("--------  End PYTHIA Event Listing  -----------------------------"
     "------------------------------------------------------------------")
 
 class EventGraph(object):
-    def __init__(self, records, options=None):
+    def __init__(self, vertices, particles, options=None):
         """
         `records`: A list containing many particles
         """
         options = self.options = options if options else parse_options()
+        self.vertices = vertices
+        self.particles = particles
+        self.other_stuff(options)
         
-        if options.limit is not None:
-            # Limit the number of records used to generate the graph
-            records = records[:options.limit]
+    def other_stuff(self, options):
+        self.do_contractions(options)
         
+        self.tag_by_progenitors()
+        self.tag_by_hadronization_vertex()
+        
+        #print >>stderr, "Does the graph have loops?", self.has_loop
+        
+        for i in xrange(options.strip_outer_nodes):
+            #print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
+            self.strip_outer_nodes()
+            self.do_contractions(options)
+    
+        # Graph consistency checks
+        from .tests.test_graph import graph_is_consistent
+        #graph_is_consistent(self)
+    
+    def make_pythia_graph(records):
         # Make particle objects and {no:Particle} dictionary
         particles = [Particle(*p) for p in records]
         self.particles = dict((p.no, p) for p in particles)
@@ -102,24 +119,8 @@ class EventGraph(object):
 
         self.vertices = dict((v.vno,v) for v in self.vertices.values())
         
-        self.do_contractions(options)
-            
         # Remove system vertex
         del self.particles[0]
-        
-        self.tag_by_progenitors()
-        self.tag_by_hadronization_vertex()
-        
-        #print >>stderr, "Does the graph have loops?", self.has_loop
-        
-        for i in xrange(options.strip_outer_nodes):
-            #print >>stderr, "Iteration", i, "loopy=", self.has_loop, "depth=", self.depth
-            self.strip_outer_nodes()
-            self.do_contractions(options)
-    
-        # Graph consistency checks
-        from .tests.test_graph import graph_is_consistent
-        graph_is_consistent(self)
     
     def do_contractions(self, options):
         
@@ -335,8 +336,13 @@ class EventGraph(object):
         return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
-    def from_hepmc(cls, filename):
+    def from_hepmc(cls, filename, options=None):
         "TODO"
+        
+        from hepmc_parser import load_first_event
+        vertices, particles = load_first_event(filename)
+        
+        return cls(vertices, particles, options)
         
     @classmethod
     def from_pythia_log(cls, filename, options=None):

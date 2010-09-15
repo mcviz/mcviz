@@ -20,7 +20,10 @@ def main():
         return -1
 
     # step 1: get event graph representation
-    event = EventGraph.from_pythia_log(args[1], options)
+    if options.hepmc:
+        event = EventGraph.from_hepmc(args[1], options)
+    else:
+        event = EventGraph.from_pythia_log(args[1], options)
    
     # step 2: layout event graph into a dot file
     layout_class = get_layout(options.layout)

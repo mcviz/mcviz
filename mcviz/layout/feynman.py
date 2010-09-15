@@ -13,7 +13,7 @@ class FeynmanLayout(BaseLayout):
 
     @property
     def subgraph_names(self):
-        return ["initial", "connecting", None]
+        return ["initial", None]
 
     def process(self):
 

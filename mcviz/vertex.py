@@ -6,10 +6,16 @@ class Vertex(object):
     * The frozenset of particles going into that vertex
     """
     
-    def __init__(self, vno, incoming, outgoing):
+    def __init__(self, vno, incoming=(), outgoing=()):
         self.vno = vno
         self.incoming = set(incoming)
         self.outgoing = set(outgoing)
+    
+    @classmethod
+    def from_hepmc(self, hvertex, outgoing):
+        v = Vertex(int(hvertex.barcode), outgoing=outgoing)
+        v.hvertex = hvertex
+        return v
     
     def __repr__(self):
         args = self.vno, sorted(self.incoming), sorted(self.outgoing)
@@ -85,4 +91,4 @@ class Vertex(object):
 
     @property
     def reference(self):
-        return "V%i" % self.vno
+        return ("V%i" % self.vno).replace("-","_")
