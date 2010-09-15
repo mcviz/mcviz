@@ -179,6 +179,13 @@ class Spline(object):
         p3 = self.transform_point(Point2D(x, 0))
         p2 = self.points[2] + p3 - self.points[3]
         return Spline(p0, p1, p2, p3, self.N)
+
+    def bifurcate(self, amount=1.0):
+        s1 = deepcopy(self)
+        s1.shift_by(Line(Point2D(0, amount), Point2D(self.length, amount)))
+        s2 = deepcopy(self)
+        s2.shift_by(Line(Point2D(0, -amount), Point2D(self.length, -amount)))
+        return s1, s2
     
     @property
     def svg_path_data(self):
