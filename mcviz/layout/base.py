@@ -16,7 +16,7 @@ class BaseLayout(object):
         self.subgraphs = {None: []}
         self.subgraph_options = {}
         self.edges = []
-        self.width, self.height, self.scale = None, None, None
+        self.width, self.height, self.scale = None, None, 1.0
             
         # Label particles by id if --show-id is on the command line.
         if self.options.show_id:
@@ -92,11 +92,12 @@ class BaseLayout(object):
         self.scale = data.scale
 
         for edge in self.edges:
-            edge.spline = data.edge_lines[edge.item.reference]
-            edge.label_center = data.edge_label[edge.item.reference]
+            edge.spline = data.edge_lines.get(edge.item.reference, None)
+            edge.label_center = data.edge_label.get(edge.item.reference, None)
 
         for node in self.nodes:
-            node.center = Point2D(*data.nodes[node.item.reference])
+            if node.item.reference in data.nodes:
+                node.center = Point2D(*data.nodes[node.item.reference])
     
     def get_label_string(self, pdgid):
         if self.options.svg and TexGlyph.exists(pdgid):

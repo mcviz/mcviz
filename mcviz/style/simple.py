@@ -33,8 +33,9 @@ class SimpleStyle(SVGStyle):
             args["stroke"] = args["fill"] = "black"
         else:
             args["stroke"] = args["fill"] = "black"
-        
-        self.doc.add_object(display_func(spline = edge.spline, **args))
+
+        if edge.spline:
+            self.doc.add_object(display_func(spline = edge.spline, **args))
         self.label_edge(edge)
 
 

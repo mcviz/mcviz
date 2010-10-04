@@ -71,8 +71,9 @@ class SVGStyle(Style):
             display_func = hadron
             args["stroke"] = "black"
             args["fill"] = "black"
-        
-        self.doc.add_object(display_func(spline = edge.spline, **args))
+       
+        if edge.spline:
+            self.doc.add_object(display_func(spline = edge.spline, **args))
         self.label_edge(edge)
 
     def label_edge(self, edge):
@@ -82,7 +83,7 @@ class SVGStyle(Style):
                                ", ".join(map(str, edge.item.subscripts)))
 
     def paint_vertex(self, node):
-        if not node.style == "invis":
+        if not node.style == "invis" and node.center:
             vx = vertex(node.center, node.width/2, node.height/2, 
                         **self.vertex_args)
             self.doc.add_object(vx)
