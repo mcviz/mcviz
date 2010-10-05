@@ -15,7 +15,8 @@ class SVGStyle(Style):
 
         for edge in self.layout.edges:
             if isinstance(edge.item, Particle):
-                self.paint_particle(edge)
+                if edge.spline:
+                    self.paint_particle(edge)
             else:
                 raise NotImplementedError("Cannot draw vertices as edges :(")
 

@@ -1,9 +1,11 @@
 from dual import DualLayout
 from feynman import FeynmanLayout
+from phi import PhiLayout
 
 layouts = {}
 layouts["dual"] = DualLayout
 layouts["feynman"] = FeynmanLayout
+layouts["phi"] = PhiLayout
 default = "feynman"
 
 def list_layouts():

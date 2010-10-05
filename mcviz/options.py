@@ -96,7 +96,7 @@ def parse_options(argv=None):
     result = options, args = p.parse_args(argv)
     options.extra_gv_options = extra_gv_options
 
-    if options.svg and not options.layout_engine:
-        options.layout_engine = "dot"
+    #if options.svg and not options.layout_engine:
+    #    options.layout_engine = "dot"
         
     return result
