@@ -32,6 +32,8 @@ def get_option_parser():
     
     o("-I", "--show-id", action="store_true",
       help="Controls labelling particle ids")
+    o("", "--show-color-id", action="store_true",
+      help="Adds a label specifiying the color and anticolor")
     
     o("-c", "--contract", action="append", type=str, default=[],
       help="Particle graph contraction. Value: 'gluballs', 'kinks'")
