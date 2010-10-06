@@ -10,6 +10,32 @@ from .base import Style
 class SVGStyle(Style):
 
     def paint(self):
+        # if we do not know the scale; (i.e. bounding box) calculate it
+        x_min, y_min, x_max, y_max = 0, 0, 0, 0
+        def get_minmax(x,y):
+            return min(x, x_min), min(y, y_min), max(x, x_max), max(y, y_max)
+
+        for edge in self.layout.edges:
+            if edge.spline:
+                x0, x1, y0, y1 = edge.spline.boundingbox
+                x_min, y_min, x_max, y_max = get_minmax(x0, y0)
+                x_min, y_min, x_max, y_max = get_minmax(x1, y0)
+                x_min, y_min, x_max, y_max = get_minmax(x0, y1)
+                x_min, y_min, x_max, y_max = get_minmax(x1, y1)
+
+        for node in self.layout.nodes:
+            if node.center:
+                x_min, y_min, x_max, y_max = get_minmax(node.center.x, node.center.y)
+        wx = x_max - x_min
+        wy = y_max - y_min
+        if not self.width:
+            self.width = 100
+            self.height = 100
+            self.scale = 1
+        else:
+            self.scale = min(self.width/wx, self.height/wy)
+
+
         self.doc = SVGDocument(self.width, self.height, self.scale)
         self.vertex_args = {"stroke":"black", "fill":"none", "stroke-width" : "0.05"}
 

@@ -206,6 +206,13 @@ class Spline(object):
     #        y = self.points[i][1] - self.points[0][1]
     #        data.append("%.3f,%.3f " % (x, y))
     #    return data
+    @property 
+    def boundingbox(self):
+        x0 = min(p.x for p in self.points)
+        x1 = max(p.x for p in self.points)
+        y0 = min(p.y for p in self.points)
+        y1 = max(p.y for p in self.points)
+        return x0, x1, y0, y1
 
     def __str__(self):
         return "spline; start %s; control points %s; %s; end %s" % tuple(self.points)
@@ -302,6 +309,13 @@ class SplineLine(object):
         #    else:
         #        data.append(s.svg_path_data)
         #return " ".join(data)
+    @property
+    def boundingbox(self):
+        x0, x1, y0, y1 = self.splines[0].boundingbox
+        for s in self.splines[1:]:
+            sx0, sx1, sy0, sy1 = self.splines[0].boundingbox
+            x0, x1, y0, y1 = min(x0, sx0), max(x1, sx1), min(y0, sy0), max(y1, sy1)
+        return x0, x1, y0, y1 
 
     def get_clipped(self, clip_length):
         splines = self.splines[:-1] + [self.splines[-1].get_clipped(clip_length)]
