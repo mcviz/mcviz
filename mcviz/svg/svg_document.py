@@ -29,9 +29,10 @@ class RawNode(XMLNode):
 class SVGDocument(object):
     def __init__(self, wx, wy, scale = 1):
 
-        self.root = XMLNode("svg", 'version="1.1" viewBox="0 0 106.5 53.1" '\
+        viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
+        self.root = XMLNode("svg", 'version="1.1" viewBox="%s" '\
                         'xmlns="http://www.w3.org/2000/svg"'\
-                        'xmlns:xlink="http://www.w3.org/1999/xlink"')
+                        'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
 
         if scale != 1:
             g = XMLNode("g", 'transform="scale(%.5f)"' % scale)
