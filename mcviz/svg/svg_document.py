@@ -101,7 +101,7 @@ class SVGDocument(object):
         txt.setAttribute("x", "%.3f" % (point[0]))
         txt.setAttribute("y", "%.3f" % (point[1]))
         txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
-        txt.appendChild(self.doc.createTextNode(subscript))
+        txt.appendChild(subscript)
         self.svg.appendChild(txt)
 
     def add_object(self, element):
