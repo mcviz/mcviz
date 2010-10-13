@@ -3,8 +3,8 @@
 from collections import namedtuple
 import re
 from mcviz import MCVizParseError
-from particle import Particle
-from vertex import Vertex
+from ..particle import Particle
+from ..vertex import Vertex
 
 HEPMC_TEXT = re.compile("""
 HepMC::Version (?P<version>.*?)

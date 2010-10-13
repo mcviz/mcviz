@@ -339,7 +339,7 @@ class EventGraph(object):
     def from_hepmc(cls, filename, options=None):
         "TODO"
         
-        from hepmc_parser import load_first_event
+        from loaders.hepmc import load_first_event
         vertices, particles = load_first_event(filename)
         
         return cls(vertices, particles, options)
