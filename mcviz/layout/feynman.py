@@ -97,3 +97,21 @@ class FeynmanLayout(BaseLayout):
        
         return lo
 
+class PrunedHadronsLayout(FeynmanLayout):
+    
+    def process(self):
+
+        if self.options.fix_initial:
+            sg_options = self.subgraph_options.setdefault("jet", [])
+            sg_options.append('rank="same"')
+        
+        return super(PrunedHadronsLayout, self).process()
+        
+    @property
+    def subgraph_names(self):
+        return ["jet"] + super(PrunedHadronsLayout, self).subgraph_names
+        
+    def get_subgraph(self, vertex):
+        if vertex.hadronization:
+            return "jet"
+        return super(PrunedHadronsLayout, self).get_subgraph(vertex)

@@ -95,7 +95,6 @@ class SVGStyle(Style):
             args["scale"] = 0.8
             args["stroke-width"] = 0.4
             edge.item.subscripts.append("x%i" % particle.jet_nparticles)
-        
         elif particle.gluon:
             display_func = gluon
             args["stroke"] = "green"
@@ -128,7 +127,9 @@ class SVGStyle(Style):
        
         if edge.spline:
             self.doc.add_object(display_func(spline = edge.spline, **args))
-        self.label_edge(edge)
+            
+        if not hasattr(edge, "jet"):
+            self.label_edge(edge)
 
     def label_edge(self, edge):
         if edge.label_center:
