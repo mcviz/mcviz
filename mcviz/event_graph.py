@@ -52,6 +52,9 @@ class EventGraph(object):
     
     @property
     def has_loop(self):
+        """
+        Returns true if loops exist in the graph
+        """
         class Store:
             result = False
         
@@ -64,6 +67,9 @@ class EventGraph(object):
         return Store.result
         
     def strip_outer_nodes(self):
+        """
+        Remove the outermost nodes of the graph
+        """
         result = []
         for particle in self.particles.values():
             if particle.final_state:
@@ -86,7 +92,7 @@ class EventGraph(object):
                 self.walk(particle, Particle.attr_setter("had_idx", i))
     
     def walk(self, particle, 
-             walk_action=lambda p, d:None, loop_action=lambda p, d:None, 
+             walk_action=lambda p, d: None, loop_action=lambda p, d: None, 
              completed_walks=None, uncompleted_walks=None, depth=0):
         """
         Walk the particle graph.
@@ -153,7 +159,8 @@ class EventGraph(object):
         
     def drop_particle(self, particle):
         """
-        Remove a particle from the graph only.
+        Remove a particle from the graph only. 
+        (updates mothers and daughters, etc)
         """
         particle.vertex_in.outgoing.discard(particle)
         for p in particle.vertex_in.incoming:

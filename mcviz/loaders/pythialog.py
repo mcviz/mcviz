@@ -1,3 +1,7 @@
+"""
+This whole module is begging for a refactor, but by some miracle it works.
+"""
+
 from logging import getLogger; log = getLogger("pythialog_parser")
 
 from mcviz import MCVizParseError

@@ -110,6 +110,8 @@ def load_event(ev):
         
         elif isinstance(record, HVertex):
             if current_vertex:
+                # If there is a vertex outstanding, make it and record
+                # the particles outgoing from it.
                 vertex = Vertex.from_hepmc(current_vertex, outgoing_particles)
                 vertices[vertex.vno] = vertex
                 outgoing_particles = []
@@ -144,6 +146,7 @@ def load_event(ev):
             v = vertices[vertex_barcode]
             v.incoming = incoming_particles
     
+    # Construct "initial" vertices
     for initial_particle in initial_particles:
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
