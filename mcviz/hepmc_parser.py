@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 import re
+from mcviz import MCVizParseError
 from particle import Particle
 from vertex import Vertex
 
@@ -141,7 +142,9 @@ def load_first_event(filename):
     with open(filename) as fd:
         match = HEPMC_TEXT.search(fd.read())
         
-    assert match, "Not obviously hepmc data."
+    if not match:
+        raise MCVizParseError("Not obviously hepmc data.")
+        
     result = match.groupdict()
     version = tuple(map(int, result["version"].split(".")))
     if version != (2, 06, 01):

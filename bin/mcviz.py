@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 
-from mcviz import EventGraph, parse_options
+from mcviz import EventGraph, parse_options, MCVizParseError
 from mcviz.graphviz import run_graphviz
 from mcviz.layout import get_layout
 from mcviz.style import get_style
@@ -18,11 +18,11 @@ def main():
     if len(args) <= 1:
         print "Specify a pythia log file to run on"
         return -1
-
-    # step 1: get event graph representation
-    if options.hepmc:
+    
+    try:
         event = EventGraph.from_hepmc(args[1], options)
-    else:
+    except MCVizParseError:
+        # try pythia log file parser
         event = EventGraph.from_pythia_log(args[1], options)
    
     # step 2: layout event graph into a dot file

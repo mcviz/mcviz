@@ -21,9 +21,6 @@ def get_option_parser():
     o("-D", "--debug", action="store_true",
       help="Drop to ipython shell on exception")
     
-    o("-H", "--hepmc", action="store_true",
-      help="If true, input is hepmc format")
-    
     o("-L", "--limit", type=int, default=None,
       help="Limit number of particles made")
     
