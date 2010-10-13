@@ -14,6 +14,9 @@ HepMC::IO_GenEvent-END_EVENT_LISTING
 """, re.M | re.DOTALL)
 
 def event_generator(lines):
+    """
+    Yield one event at a time from a HepMC file
+    """
     event = []
     for line in (l.split() for l in lines):
         if line[0] == "E" and event:
@@ -33,13 +36,23 @@ HParticle = namedtuple("HParticle",
     "vertex_out_barcode flow")
 
 def items(length, record):
+    """
+    Parse a `record` with a given `length`. Returns what was parsed and what
+    remains to be parsed
+    """
     return record[:length], record[length:]
 
 def variable_item(record):
+    """
+    Parses a variable-length `record` where the first item
+    """
     n, record = int(record[0]), record[1:] 
     return items(n, record)
 
 def make_record(record):
+    """
+    Given a HepMC record, return a named tuple containing the same information
+    """
     orig_record = record[:]
     type_, record = record[0], record[1:]
     
@@ -69,6 +82,10 @@ def make_record(record):
         return HParticle._make(first_part + [flow])
 
 def load_event(ev):
+    """
+    Given one event in HepMC's text format, return a list of mcviz's `Particle`s
+    and `Vertex`es.
+    """
     current_vertex = event = None
     outgoing_particles = []
     
@@ -79,13 +96,17 @@ def load_event(ev):
     
     orphans = 0
     
+    # Loop over event records.
+    # Read a vertex, then read N particles. When we get to the next vertex, 
+    # associate the N particles with the previous vertexMCVizParseError
     for record in map(make_record, ev):
         if isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
         
         elif event is None:
-            raise RuntimeError("FAIL!")
+            raise RuntimeError("Event record should come first. Corrupted "
+                                  "input hepmc?")
         
         elif isinstance(record, HVertex):
             if current_vertex:
@@ -139,6 +160,9 @@ def load_event(ev):
     return vertices, particles
 
 def load_first_event(filename):
+    """
+    Load one event from a HepMC file
+    """
     with open(filename) as fd:
         match = HEPMC_TEXT.search(fd.read())
         
