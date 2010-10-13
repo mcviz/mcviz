@@ -101,12 +101,13 @@ class BaseLayout(object):
         self.scale = data.scale
 
         for edge in self.edges:
-            edge.spline = data.edge_lines.get(edge.item.reference, None)
-            edge.label_center = data.edge_label.get(edge.item.reference, None)
+            edge.spline = data.edge_lines.get(edge.reference, None)
+            edge.label_center = data.edge_label.get(edge.reference, None)
 
         for node in self.nodes:
             if node.item.reference in data.nodes:
-                node.center = Point2D(*data.nodes[node.item.reference])
+                node.center, size = data.nodes[node.item.reference]
+                node.width, node.height = size
     
     def get_label_string(self, pdgid):
         if self.options.svg and TexGlyph.exists(pdgid):
@@ -145,14 +146,20 @@ class LayoutEdge(object):
             setattr(self, key, val)
 
     @property
+    def reference(self):
+        parts = self.item.reference, self.coming.reference, self.going.reference
+        return "_".join(parts)
+
+    @property
     def dot(self):
         def join_port(to, port):
             return ":".join((to, port)) if port else to 
         coming = join_port(self.coming.reference, self.port_coming)
         going = join_port(self.going.reference, self.port_going)
+        
         return make_edge(coming, going,
             label=self.label,
-            style=self.item.reference,
+            style=self.reference,
             arrowhead="none",
             **self.dot_args
             # consider this for the future
@@ -168,12 +175,14 @@ class LayoutNode(object):
         self.label = ""
         self.subgraph = None
         self.center = None
-        self.width = self.height = 1
+        self.width = self.height = None
         for key, val in args.iteritems():
             setattr(self, key, val)
 
     @property
     def dot(self):
-        return make_node(self.item.reference, height=self.height, 
-                width=self.width, label=self.label, style=self.style,
-                **self.dot_args)
+        kwargs = ({"width":self.width, "height":self.height} 
+                  if self.width and self.height else {})
+        kwargs.update(self.dot_args)
+        return make_node(self.item.reference, label=self.label, 
+            style=self.style, **kwargs)

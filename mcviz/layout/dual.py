@@ -11,7 +11,7 @@ class DualLayout(BaseLayout):
         return ["initial", None]
 
     def get_particle(self, particle):
-        lo = LayoutNode(particle, width=0.1, height=0.1)
+        lo = LayoutNode(particle)
         lo.subgraph = self.get_subgraph(particle)
         lo.label = self.get_label_string(particle.pdgid)
          

@@ -1,5 +1,6 @@
 from subprocess import Popen, PIPE
 from svg import Spline, SplineLine 
+from utils import Point2D
 
 def run_graphviz(layout_engine, input_dot, options=[]):
     p = Popen([layout_engine] + options, 
@@ -75,9 +76,14 @@ class PlainOutput(object):
     def handle_node(self, parameters):
         node_ref = parameters[0]
         x, y = float(parameters[1]), self.height - float(parameters[2])
-        self.nodes[node_ref] = (x,y)
+        w, h = float(parameters[3]), float(parameters[4])
+        self.nodes[node_ref] = Point2D(x, y), (w, h)
 
     def handle_edge(self, parameters):
+        """
+        Reads an edge from graphviz plain output and updates LayoutEdges with 
+        this information.
+        """
         ref_in, ref_out = parameters[0], parameters[1]
 
         n_control_points = int(parameters[2])

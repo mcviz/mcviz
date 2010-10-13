@@ -40,21 +40,39 @@ class SVGStyle(Style):
         self.vertex_args = {"stroke":"black", "fill":"none", "stroke-width" : "0.05"}
 
         for edge in self.layout.edges:
+            if not edge.spline:
+                # Nothing to paint!
+                continue
+                
             if isinstance(edge.item, Particle):
-                if edge.spline:
-                    self.paint_particle(edge)
+                self.paint_particle(edge)
             else:
-                raise NotImplementedError("Cannot draw vertices as edges :(")
+                self.paint_edge(edge)
 
         for node in self.layout.nodes:
-
             if isinstance(node.item, Vertex):
                 self.paint_vertex(node)
             else:
-                raise NotImplementedError("Cannot draw particles as nodes :(")
+                self.paint_vertex(node)
+                #raise NotImplementedError("Cannot draw particles as nodes :(")
 
         return self.doc.toprettyxml()
 
+    def paint_edge(self, edge):
+        """
+        In the dual layout, paint a connection between particles
+        """
+        display_func = hadron
+        args = {}
+        args["energy"] = 0.2
+        args["stroke"] = "black"
+        args["fill"] = "black"
+        args["stroke-width"] = 0.05
+        args["scale"] = 0.1
+
+        if edge.spline:
+            self.doc.add_object(display_func(spline=edge.spline, **args))
+            
     def paint_particle(self, edge):
 
         particle = edge.item
@@ -114,3 +132,9 @@ class SVGStyle(Style):
             vx = vertex(node.center, node.width/2, node.height/2, 
                         **self.vertex_args)
             self.doc.add_object(vx)
+            
+            # This needs fixing for the Feynman layout, if we want node labels.
+            if node.label and isinstance(node.item, Particle):
+                self.doc.add_glyph(node.item.pdgid, node.center.tuple(),
+                                   self.options.label_size,
+                                   ", ".join(map(str, node.item.subscripts)))
