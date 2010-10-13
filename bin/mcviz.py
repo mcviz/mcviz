@@ -1,5 +1,7 @@
 #! /usr/bin/env python2.6
 
+import logging as L
+
 from mcviz import EventGraph, parse_options, MCVizParseError
 from mcviz.graphviz import run_graphviz
 from mcviz.layout import get_layout
@@ -65,6 +67,8 @@ def main():
             raise
 
 if __name__ == "__main__":
+    L.basicConfig(level=L.DEBUG)
+    
     from sys import argv
     if "--profile" in argv:
         try:

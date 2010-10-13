@@ -11,6 +11,8 @@ from .vertex import Vertex
 from .options import parse_options
 from .utils import OrderedSet
 
+from logging import getLogger; log = getLogger("event_graph")
+import logging as L
 
 class EventGraph(object):
     def __init__(self, vertices, particles, options=None):
