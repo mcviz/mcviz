@@ -33,6 +33,8 @@ class Particle(object):
         p.daughters = [int(d) for d in (daughter1, daughter2) if d != 0]
         p.color, p.anticolor = int(color1), int(color2)
         
+        return p
+        
     @classmethod
     def from_hepmc(cls, hparticle):
         hp = hparticle

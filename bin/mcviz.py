@@ -19,11 +19,7 @@ def main():
         print "Specify a pythia log file to run on"
         return -1
     
-    try:
-        event = EventGraph.from_hepmc(args[1], options)
-    except MCVizParseError:
-        # try pythia log file parser
-        event = EventGraph.from_pythia_log(args[1], options)
+    event = EventGraph.load(args[1], options)
    
     # step 2: layout event graph into a dot file
     layout_class = get_layout(options.layout)
