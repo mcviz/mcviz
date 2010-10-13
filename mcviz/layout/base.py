@@ -46,6 +46,11 @@ class BaseLayout(object):
     def add_object(self, obj):
         if obj is None:
             return
+        elif hasattr(obj, "__iter__"):
+            for o in obj:
+                self.add_object(o)
+            return
+            
         if isinstance(obj, LayoutNode):
             self.subgraphs.setdefault(obj.subgraph, []).append(obj)
         else:

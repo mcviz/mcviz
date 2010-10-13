@@ -1,33 +1,31 @@
-from ..graphviz import make_node, make_edge
-from ..utils import latexize_particle_name
+from base import BaseLayout, LayoutEdge, LayoutNode
 
-class DualLayout(object):
+class DualLayout(BaseLayout):
 
-    def __init__(self, graph, options):
-        self.graph = graph
-        self.options = options
+    def get_subgraph(self, particle):
+        if particle.initial_state:
+            return "initial"
 
-    def layout(self, graph):
-        print("strict digraph pythia {")
-        print("node [style=filled, shape=oval]")
-        for particle in graph.particles.itervalues():
-            self.draw_particle(particle)
-        print("}")
+    @property
+    def subgraph_names(self):
+        return ["initial", None]
 
-    def draw_particle(self, particle):
-        color = particle.get_color("gray")
-        size = (15 + log10(particle.pt + 1)*100)
-        args = (particle.no, particle.name, particle.no, color, size)
+    def get_particle(self, particle):
+        lo = LayoutNode(particle, width=0.1, height=0.1)
+        lo.subgraph = self.get_subgraph(particle)
+        lo.label = self.get_label_string(particle.pdgid)
+         
+        if particle.initial_state:
+            # Big red initial vertices
+            lo.width = lo.height = 1.0
         
-        # TODO: Do different things for initial/final state
-        print(make_node(particle.no, 
-                        label="%s (%s)" % (particle.name, particle.no), 
-                        fillcolor=color, fontsize=size))
+        return lo
+   
+    def get_vertex(self, vertex, node_style=None):
+
+        edges = []
+        for particle in vertex.outgoing:
+            for mother in particle.mothers:
+                edges.append(LayoutEdge(vertex, mother, particle))
         
-        # Printing edges
-        for mother in particle.mothers:
-            print(make_edge(mother.no, particle.no, comment="mother"))
-            
-        for daughter in particle.daughters:
-            print(make_edge(particle.no, daughter.no, comment="daughter"))
-            
+        return edges
