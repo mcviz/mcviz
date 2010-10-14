@@ -22,7 +22,7 @@ class EventGraph(object):
         options = self.options = options if options else parse_options()
         self.vertices = vertices
         self.particles = particles
-        self.other_stuff(options)
+        #self.other_stuff(options)
         
     def other_stuff(self, options):
         self.do_contractions(options)

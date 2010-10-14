@@ -44,51 +44,9 @@ class Vertex(object):
             self.outgoing.discard(p)
         return [p.no for p in loops]
 
-    @property
-    def edge(self):
-        return not self.incoming or not self.outgoing
 
-    @property
-    def is_kink(self):
-        return len(self.incoming) == 1 and len(self.outgoing) == 1
-        
-    @property
-    def inp_is_outp(self):
-        assert self.is_kink, "This function is only intended for kinks"
-        incoming, = self.incoming
-        outgoing, = self.outgoing
-        return incoming.pdgid == outgoing.pdgid
-
-    @property
-    def is_initial(self):
-        return not self.incoming
-    
-    @property    
-    def is_final(self):
-        return not self.outgoing
-    
-    @property
-    def is_dangling(self):
-        return self.is_initial and self.is_final
-
-    @property
-    def hadronization(self):
-        """
-        Any vertex which has a colored particle incoming and a non-colored 
-        particle outgoing is a hadronization vertex
-        """
-        return (any(v.colored for v in self.incoming) and 
-                any(not v.colored for v in self.outgoing))
-                
-    @property
-    def connecting(self):
-        """
-        A connecting vertex is one which connects the two initial states 
-        together.
-        """        
-        return (any(p.descends_one  for p in self.incoming) and 
-                all(p.descends_both for p in self.outgoing))
 
     @property
     def reference(self):
         return ("V%i" % self.vno).replace("-","_")
+
