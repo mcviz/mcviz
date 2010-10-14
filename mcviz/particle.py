@@ -12,6 +12,7 @@ class Particle(object):
         self.phi = atan2(px, py)
         self.e = e
         self.m = m
+        self.other_flow = {}
         
         self.vertex_in = None
         self.vertex_out = None
@@ -45,7 +46,8 @@ class Particle(object):
         p.name = "" 
         p.status = "unknown"
         p.mothers = p.daughters = None
-        p.color = p.anticolor = None
+        p.color, p.anticolor = hp.flow.pop(1, 0), hp.flow.pop(2, 0)
+        p.other_flow = hp.flow
         return p
         
     def __repr__(self):

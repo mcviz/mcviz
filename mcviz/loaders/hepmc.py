@@ -76,7 +76,10 @@ def make_record(record):
     elif type_ == "P":
         varparts_idx = HParticle._fields.index("flow")
         first_part, record = items(varparts_idx, record)
-        flow,       record = variable_item(record)
+        (n_flow,), record = items(1, record)
+        flow,      record = items(int(n_flow)*2, record)
+        flow = map(int, flow)
+        flow = dict(zip(flow[::2], flow[1::2]))
         assert not record, "Unexpected additional data on vertex"
         
         return HParticle._make(first_part + [flow])
