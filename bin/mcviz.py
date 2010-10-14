@@ -6,7 +6,7 @@ from mcviz import EventGraph, parse_options, MCVizParseError
 from mcviz.graphviz import run_graphviz
 from mcviz.layout import get_layout
 from mcviz.style import get_style
-from mcviz.views import apply_view_tool, GraphView
+from mcviz.views import apply_view_tool, GraphView, tag
 from sys import argv, stdout, stderr, exit
 
 from textwrap import dedent
@@ -29,6 +29,7 @@ def main():
     if options.view_tools:
         for tool in options.view_tools:
             apply_view_tool(tool, graph_view)
+    tag(graph_view)
    
     # step 2: layout event graph into a dot file
     layout_class = get_layout(options.layout)

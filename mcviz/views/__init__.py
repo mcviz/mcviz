@@ -1,8 +1,9 @@
 from views import GraphView
-from tools import contract
+from tools import contract, remove_kinks
+from tagging import tag
 
 view_tools = {}
-view_tools["contract"] = contract
+view_tools["kinks"] = remove_kinks
 
 def list_view_tools():
     return sorted(view_tools.keys())
