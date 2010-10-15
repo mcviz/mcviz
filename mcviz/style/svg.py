@@ -130,8 +130,11 @@ class SVGStyle(Style):
 
     def paint_vertex(self, node):
         if not node.style == "invis" and node.center:
+            v_args = dict(self.vertex_args)
+            if "summary" in node.item.tags:
+                v_args["fill"] = "lightgreen"
             vx = vertex(node.center, node.width/2, node.height/2, 
-                        **self.vertex_args)
+                        **v_args)
             self.doc.add_object(vx)
             
             # This needs fixing for the Feynman layout, if we want node labels.

@@ -47,8 +47,11 @@ class FeynmanLayout(BaseLayout):
 
         if node_style:
             lo.dot_args.update(node_style)
-        
-        if vertex.hadronization:
+       
+        if "summary" in vertex.tags:
+            lo.width = 1.0
+            lo.height = 1.0
+        elif vertex.hadronization:
             # Big white hardronization vertices
             if self.options.layout_engine == "dot":
                 n_gluons_in = sum(1 for p in vertex.incoming if p.gluon)
