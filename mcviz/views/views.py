@@ -195,10 +195,6 @@ class ViewObject(object):
 
 class ViewVertex(ViewObject):
     @property
-    def interior(self):
-        return self.incoming == self.outgoing
-
-    @property
     def edge(self):
         return not self.incoming or not self.outgoing
 
@@ -255,10 +251,9 @@ class ViewVertexSingle(ViewVertex):
         # replace - for negative vertex numbers
         return ("V%i" % self.vertex_number).replace("-","N")
 
-
-
-class ViewVertexSummary(object):
-    def __init__(self, vertex_numbers):
+class ViewVertexSummary(ViewVertex):
+    def __init__(self, graph, vertex_numbers):
+        super(ViewVertexSummary, self).__init__(graph)
         self.vertex_numbers = vertex_numbers
         self._incoming = set()
         self._outgoing = set()
@@ -270,21 +265,25 @@ class ViewVertexSummary(object):
                 else:
                     self.graph.p_map[p_nr] = None
             for p_nr in self.graph._outgoing[v_nr]:
-                if not self.graph._end[p_nr] in self.vertex_numbers:
+                if not self.graph._end_vertex[p_nr] in self.vertex_numbers:
                     self._outgoing.add(v_nr)
                 else:
                     self.graph.p_map[p_nr] = None
+        self.tags.add("summary")
 
+    @property
     def incoming(self):
         return self.graph.numbers_to_particles(self._incoming)
 
+    @property
     def outgoing(self):
         return self.graph.numbers_to_particles(self._outgoing)
 
     @property
     def reference(self):
-        ref = "V" + "_".join("%i" % vno for vno in self.vertex_numbers)
-        return ref.replace("-","N") # replace for negative vno
+        #ref = "V" + "_".join("%i" % vno for vno in self.vertex_numbers)
+        #return ref.replace("-","N") # replace for negative vno
+        return ("V%i" % min(self.vertex_numbers)).replace("-","N")
 
 
 class ViewParticle(ViewObject):
@@ -445,5 +444,6 @@ class ViewParticleSummary(ViewParticle):
 
     @property
     def reference(self):
-        ref = "P" + "_".join("%i" % no for no in self.particle_numbers)
-        return ref.replace("-","N") # replace for negative particle nr
+        #ref = "P" + "_".join("%i" % no for no in self.particle_numbers)
+        #return ref.replace("-","N") # replace for negative particle nr
+        return "P%i" % min(self.particle_numbers)
