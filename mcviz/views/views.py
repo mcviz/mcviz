@@ -46,12 +46,12 @@ class GraphView(object):
     def numbers_to_particles(self, numbers):
         particles = set(self.p_map[nr] for nr in numbers)
         particles.discard(None)
-        return particles
+        return sorted(particles)
 
     def numbers_to_vertices(self, numbers):
         vertices = set(self.v_map[nr] for nr in numbers)
         vertices.discard(None)
-        return vertices
+        return sorted(vertices)
 
     def particle_start_vertex(self, particle_number):
         start_vertex = self._start_vertex[particle_number]
@@ -260,15 +260,15 @@ class ViewVertexSummary(ViewVertex):
         for v_nr in self.vertex_numbers:
             self.graph.v_map[v_nr] = self
             for p_nr in self.graph._incoming[v_nr]:
-                if not self.graph._start_vertex[p_nr] in self.vertex_numbers:
-                    self._incoming.add(v_nr)
-                else:
+                if self.graph._start_vertex[p_nr] in self.vertex_numbers:
                     self.graph.p_map[p_nr] = None
+                else:
+                    self._incoming.add(p_nr)
             for p_nr in self.graph._outgoing[v_nr]:
-                if not self.graph._end_vertex[p_nr] in self.vertex_numbers:
-                    self._outgoing.add(v_nr)
-                else:
+                if self.graph._end_vertex[p_nr] in self.vertex_numbers:
                     self.graph.p_map[p_nr] = None
+                else:
+                    self._outgoing.add(p_nr)
         self.tags.add("summary")
 
     @property
