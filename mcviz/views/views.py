@@ -3,7 +3,7 @@
 from __future__ import with_statement
 
 from sys import argv, stderr
-from itertools import takewhile
+
 
 from ..utils import walk
 
@@ -92,38 +92,38 @@ class GraphView(object):
         elementary_vertices = []
         for p in vertices:
             if isinstance(p, ViewVertexSummary):
-                elementary_particles.extend(p.vertex_numbers)
+                elementary_vertices.extend(p.vertex_numbers)
             else:
-                elementary_particles.append(p.vertex_number)
-        ViewParticleSummary(self, elementary_vertices)
+                elementary_vertices.append(p.vertex_number)
+        ViewVertexSummary(self, elementary_vertices)
 
-    def walk_descendants(self, obj, 
-            walk_action=lambda p, d: None, loop_action=lambda p, d: None):
-        if isinstance(obj, ViewParticle):
-            step = lambda p : p.daughters
-        elif isinstance(obj, ViewVertex):
-            step = lambda v : [p.end_vertex for p in v.outgoing]
-        return walk(obj, step, walk_action, loop_action)
+    def walk(self, obj, 
+        particle_action=lambda p, d: None, vertex_action=lambda p, d: None,
+        loop_action=lambda p, d: None, ascend=False):
+        def walk_action(obj, depth):
+            if isinstance(obj, ViewParticle):
+                next_vertices = particle_action(obj, depth) if particle_action else None
+                if next_vertices is None:
+                    next_vertices = (obj.start_vertex,) if ascend else (obj.end_vertex,)
+                return next_vertices
+            elif isinstance(obj, ViewVertex):
+                next_particles = vertex_action(obj, depth) if vertex_action else None
+                if next_particles is None:
+                    next_particles = obj.incoming if ascend else obj.outgoing
+                return next_particles
+            else:
+                raise NotImplementedError("Unknown object in graph: %s" % obj.__class__.__name__)
+        return walk(obj, walk_action, loop_action)
     
-    def walk_ascendants(self, obj, 
-            walk_action=lambda p, d: None, loop_action=lambda p, d: None):
-        if isinstance(obj, ViewParticle):
-            step = lambda p : p.mothers
-        elif isinstance(obj, ViewVertex):
-            step = lambda v : [p.start_vertex for p in v.incoming]
-        return walk(particle, step, walk_action, loop_action)
-    
-    def tag_descendants(self, obj, tag): 
-        return self.walk_descendants(obj, ViewObject.tagger(tag))
+    def tag(self, obj, tag, particles=False, vertices=False, ascend=False): 
+        particle_action = ViewObject.tagger(tag) if particles else None
+        vertex_action = ViewObject.tagger(tag) if vertices else None
+        return self.walk(obj, particle_action, vertex_action, ascend=ascend)
 
-    def tag_ascendants(self, obj, tag):
-        return self.walk_ascendants(obj, ViewObject.tagger(tag))
-
-    def set_descendants(self, obj, key, f): 
-        return self.walk_descendants(obj, ViewObject.attr_setter(key, f))
-
-    def set_ascendants(self, obj, key, f):
-        return self.walk_ascendants(obj, ViewObject.attr_setter(key, f))
+    def set(self, obj, key, f, particles=False, vertices=False, ascend=False): 
+        particle_action = ViewObject.attr_setter(key, f) if particles else None
+        vertex_action = ViewObject.attr_setter(key, f) if vertices else None
+        return self.walk(obj, particle_action, vertex_action, ascend=ascend)
     
     @property
     def has_loop(self):
@@ -137,7 +137,7 @@ class GraphView(object):
             Store.result = True
         
         for particle in self.initial_particles:
-            self.walk_descendants(particle, loop_action=found_loop)
+            self.walk(particle, loop_action=found_loop)
         
         return Store.result
         

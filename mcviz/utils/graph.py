@@ -1,7 +1,8 @@
 from orderedset import OrderedSet
+from itertools import takewhile
 
 
-def walk(node, get_next,
+def walk(node,
          walk_action=lambda p, d: None, loop_action=lambda p, d: None, 
          completed_walks=None, uncompleted_walks=None, depth=0):
     """
@@ -15,11 +16,11 @@ def walk(node, get_next,
     if completed_walks is None: completed_walks = OrderedSet()
     if uncompleted_walks is None: uncompleted_walks = OrderedSet()
     
-    walk_action(node, depth)
-    
+    next_nodes = walk_action(node, depth)
+
     uncompleted_walks.add(node)
     
-    for next_node in get_next(node):
+    for next_node in next_nodes:
         if next_node not in completed_walks:
             # we haven't yet seen this particle, walk it.
             if next_node in uncompleted_walks:
@@ -42,7 +43,7 @@ def walk(node, get_next,
                      
             else:
                 # Not circular, so walk it.
-                walk(next_node, get_next, walk_action, loop_action,
+                walk(next_node, walk_action, loop_action,
                           completed_walks, uncompleted_walks, depth+1)
     
     completed_walks.add(node)
