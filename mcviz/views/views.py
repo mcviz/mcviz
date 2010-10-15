@@ -415,20 +415,27 @@ class ViewParticleSummary(ViewParticle):
         self.start_vertex
         self.end_vertex
 
-        #TODO: define p, e, m
+        # Extract quantities from particles that go into the end vertex of this summary
         self.m = 0
         self.e = 0
         momentum = [0, 0, 0]
+        color, anticolor = set(), set()
+        pdgids = set()
         for v in self._end_vertices:
             for p in self.graph._incoming[v]:
-                pp = self.graph.event.particles[p].p
-                for i in (0, 1, 2):
-                    momentum[i] += pp[i]
-                self.e += self.graph.event.particles[p].e
+                if p in self.particle_numbers:
+                    ep = self.graph.event.particles[p]
+                    for i in (0, 1, 2):
+                        momentum[i] += ep.p[i]
+                    self.e += self.graph.event.particles[p].e
+                    color.add(ep.color)
+                    anticolor.add(ep.anticolor)
+                    pdgids.add(ep.pdgid)
+
         self.p = tuple(momentum)
 
-        self.pdgid = -666
-        self.color, self.anticolor = None, None
+        self.pdgid = min(pdgids)
+        self.color, self.anticolor = max(color), max(anticolor)
 
     @property
     def start_vertex(self):
