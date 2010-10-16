@@ -6,7 +6,7 @@ def contract(graph_view):
 def remove_kinks(graph_view):
     for vertex in graph_view.vertices:
         if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
-            graph_view.summarize_particles(vertex.incoming + vertex.outgoing)
+            graph_view.summarize_particles(vertex.incoming | vertex.outgoing)
             
 
 def gluballs(graph_view):
@@ -14,10 +14,10 @@ def gluballs(graph_view):
     while retry:
         retry = False
         for vertex in graph_view.vertices:
-            if all(p.gluon for p in vertex.incoming + vertex.outgoing):
+            if all(p.gluon for p in vertex.incoming | vertex.outgoing):
                 vertices = set()
                 def walker(vertex, depth):
-                    if all(p.gluon for p in vertex.incoming + vertex.outgoing):
+                    if all(p.gluon for p in vertex.incoming | vertex.outgoing):
                         vertices.add(vertex)
                     else:
                         return () # empty tuple means: do not continue here

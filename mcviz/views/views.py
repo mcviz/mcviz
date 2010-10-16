@@ -5,7 +5,7 @@ from __future__ import with_statement
 from sys import argv, stderr
 
 
-from ..utils import walk
+from ..utils import walk, OrderedSet
 
 from logging import getLogger; log = getLogger("event_graph")
 import logging as L
@@ -27,31 +27,29 @@ class GraphView(object):
     def init_cache(self):
         """ cache input graph topology """
         self._start_vertex, self._end_vertex = {}, {}
-        for nr in self.p_map.keys():
+        self._incoming, self._outgoing = {}, {}
+        self._initial_particles = []
+        self._particles = sorted(self.p_map.keys())
+        self._vertices = sorted(self.v_map.keys())
+        for nr in self._particles:
             p = self.event.particles[nr]
             if p.vertex_in:
                 self._start_vertex[nr] = p.vertex_in.vno if p.vertex_in else None
             if p.vertex_out:
                 self._end_vertex[nr] = p.vertex_out.vno if p.vertex_out else None
 
-        self._incoming, self._outgoing = {}, {}
-        self._initial_particles = set()
-        for nr in self.v_map.keys():
+        for nr in self._vertices:
             v = self.event.vertices[nr]
-            self._incoming[nr] = set(p.no for p in self.event.vertices[nr].incoming)
-            self._outgoing[nr] = set(p.no for p in self.event.vertices[nr].outgoing)
+            self._incoming[nr] = sorted([p.no for p in self.event.vertices[nr].incoming])
+            self._outgoing[nr] = sorted([p.no for p in self.event.vertices[nr].outgoing])
             if not self._incoming[nr]:
-                self._initial_particles.update(self._outgoing[nr])
+                self._initial_particles.append(self._outgoing[nr])
 
     def numbers_to_particles(self, numbers):
-        particles = set(self.p_map[nr] for nr in numbers)
-        particles.discard(None)
-        return sorted(particles)
+        return OrderedSet(p for p in (self.p_map[nr] for nr in numbers) if p)
 
     def numbers_to_vertices(self, numbers):
-        vertices = set(self.v_map[nr] for nr in numbers)
-        vertices.discard(None)
-        return sorted(vertices)
+        return OrderedSet(v for v in (self.v_map[nr] for nr in numbers) if v)
 
     def particle_start_vertex(self, particle_number):
         start_vertex = self._start_vertex[particle_number]
@@ -69,11 +67,11 @@ class GraphView(object):
 
     @property
     def vertices(self):
-        return self.numbers_to_vertices(self.v_map.keys())
+        return self.numbers_to_vertices(self._vertices)
 
     @property
     def particles(self):
-        return self.numbers_to_particles(self.p_map.keys())
+        return self.numbers_to_particles(self._particles)
 
     @property
     def initial_particles(self):
@@ -94,7 +92,7 @@ class GraphView(object):
         connected = [unconnected.pop()]
         while len(unconnected) > 0:
             for v in unconnected:
-                for p in self._incoming[v] | self._outgoing[v]:
+                for p in self._incoming[v] + self._outgoing[v]:
                     if self._start_vertex[p] in connected or self._end_vertex[p] in connected:
                         connected.append(v)
                         unconnected.remove(v)
@@ -196,16 +194,7 @@ class ViewObject(object):
 
     def __lt__(self, rhs):
         "Define p1 < p2 so that we can sort particles (by id in this case)"
-        def get_number(obj):
-            if hasattr(obj, "vertex_number"):
-                return obj.vertex_number
-            elif hasattr(obj, "particle_number"):
-                return obj.particle_number
-            elif hasattr(obj, "vertex_numbers"):
-                return max(obj.vertex_numbers)
-            elif hasattr(obj, "particle_numbers"):
-                return max(obj.particle_numbers)
-        return get_number(self) < get_number(rhs)
+        return self.order_number < rhs.order_number
 
 class ViewVertex(ViewObject):
     @property
@@ -245,6 +234,11 @@ class ViewVertex(ViewObject):
         """        
         return (any(p.descends_one  for p in self.incoming) and 
                 all(p.descends_both for p in self.outgoing))
+    
+    @property
+    def reference(self):
+        # replace - for negative vertex numbers
+        return ("V%i" % self.order_number).replace("-","N")
 
 class ViewVertexSingle(ViewVertex):
     def __init__(self, graph, vertex_number):
@@ -261,28 +255,28 @@ class ViewVertexSingle(ViewVertex):
         return self.graph.vertex_outgoing_particles(self.vertex_number)
 
     @property
-    def reference(self):
+    def order_number(self):
         # replace - for negative vertex numbers
-        return ("V%i" % self.vertex_number).replace("-","N")
+        return self.vertex_number
 
 class ViewVertexSummary(ViewVertex):
     def __init__(self, graph, vertex_numbers):
         super(ViewVertexSummary, self).__init__(graph)
         self.vertex_numbers = vertex_numbers
-        self._incoming = set()
-        self._outgoing = set()
+        self._incoming = []
+        self._outgoing = []
         for v_nr in self.vertex_numbers:
             self.graph.v_map[v_nr] = self
             for p_nr in self.graph._incoming[v_nr]:
                 if self.graph._start_vertex[p_nr] in self.vertex_numbers:
                     self.graph.p_map[p_nr] = None
                 else:
-                    self._incoming.add(p_nr)
+                    self._incoming.append(p_nr)
             for p_nr in self.graph._outgoing[v_nr]:
                 if self.graph._end_vertex[p_nr] in self.vertex_numbers:
                     self.graph.p_map[p_nr] = None
                 else:
-                    self._outgoing.add(p_nr)
+                    self._outgoing.append(p_nr)
         self.tags.add("summary")
 
     @property
@@ -294,11 +288,10 @@ class ViewVertexSummary(ViewVertex):
         return self.graph.numbers_to_particles(self._outgoing)
 
     @property
-    def reference(self):
+    def order_number(self):
         #ref = "V" + "_".join("%i" % vno for vno in self.vertex_numbers)
         #return ref.replace("-","N") # replace for negative vno
-        return ("V%i" % min(self.vertex_numbers)).replace("-","N")
-
+        return min(self.vertex_numbers)
 
 class ViewParticle(ViewObject):
     @property
@@ -365,6 +358,12 @@ class ViewParticle(ViewObject):
         assert n == 1 or n == 2, "Only supported for initial particles"
         return "descendant_of_p%i" % n in self.tags
 
+    @property
+    def reference(self):
+        #ref = "P" + "_".join("%i" % no for no in self.particle_numbers)
+        #return ref.replace("-","N") # replace for negative particle nr
+        return "P%i" % self.order_number
+
 class ViewParticleSingle(ViewParticle):
     """
     Represents a view of a single particle
@@ -393,32 +392,39 @@ class ViewParticleSingle(ViewParticle):
         return self.graph.event.particles[self.particle_number]
 
     @property
-    def reference(self):
-        return "P%i" % self.particle_number
+    def order_number(self):
+        return self.particle_number
 
 class ViewParticleSummary(ViewParticle):
     """
     Represents a view of a summary of particles ("jet", "gluball")
     """
-    def __init__(self, graph, particle_numbers):
+    def __init__(self, graph, summarized_particle_numbers):
         super(ViewParticleSummary, self).__init__(graph)
-        self.particle_numbers = particle_numbers
+        self.particle_numbers = summarized_particle_numbers
 
         start_vertices = []
         end_vertices = []
         for p_nr in self.particle_numbers:
+            # this summary now represent this particle
             self.graph.p_map[p_nr] = self
+
+            # find mother and daughter graph particles
             start_vertex = self.graph._start_vertex[p_nr]
             end_vertex = self.graph._end_vertex[p_nr]
             mother_nrs = self.graph._incoming[start_vertex]
             daughter_nrs = self.graph._outgoing[end_vertex]
 
+            # if all mothers of this particle are to be summarized 
             if mother_nrs and all(m in self.particle_numbers for m in mother_nrs):
+                assert all(p in self.particle_numbers for p in self.graph._outgoing[start_vertex])
                 self.graph.v_map[start_vertex] = None
+
             else:
                 start_vertices.append(start_vertex)
 
             if daughter_nrs and all(d in self.particle_numbers for d in daughter_nrs):
+                assert all(p in self.particle_numbers for p in self.graph._incoming[end_vertex])
                 self.graph.v_map[end_vertex] = None
             else:
                 end_vertices.append(end_vertex)
@@ -463,8 +469,7 @@ class ViewParticleSummary(ViewParticle):
         assert len(evs) == 1
         return evs.pop()
 
+
     @property
-    def reference(self):
-        #ref = "P" + "_".join("%i" % no for no in self.particle_numbers)
-        #return ref.replace("-","N") # replace for negative particle nr
-        return "P%i" % min(self.particle_numbers)
+    def order_number(self):
+        return min(self.particle_numbers)
