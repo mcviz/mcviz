@@ -88,6 +88,20 @@ class GraphView(object):
                 elementary_particles.append(p.particle_number)
         ViewParticleSummary(self, elementary_particles)
 
+    def check_connected(self, vertex_numbers):
+        # check for connectedness
+        unconnected = list(vertex_numbers)
+        connected = [unconnected.pop()]
+        while len(unconnected) > 0:
+            for v in unconnected:
+                for p in self._incoming[v] | self._outgoing[v]:
+                    if self._start_vertex[p] in connected or self._end_vertex[p] in connected:
+                        connected.append(v)
+                        unconnected.remove(v)
+                        break
+                if not v in unconnected:
+                    break
+
     def summarize_vertices(self, vertices):
         elementary_vertices = []
         for p in vertices:
