@@ -3,7 +3,7 @@
 from __future__ import with_statement
 
 from sys import argv, stderr
-
+from itertools import chain
 
 from ..utils import walk, OrderedSet
 
@@ -43,7 +43,7 @@ class GraphView(object):
             self._incoming[nr] = sorted([p.no for p in self.event.vertices[nr].incoming])
             self._outgoing[nr] = sorted([p.no for p in self.event.vertices[nr].outgoing])
             if not self._incoming[nr]:
-                self._initial_particles.append(self._outgoing[nr])
+                self._initial_particles.extend(self._outgoing[nr])
 
     def numbers_to_particles(self, numbers):
         return OrderedSet(p for p in (self.p_map[nr] for nr in numbers) if p)
@@ -259,6 +259,10 @@ class ViewVertexSingle(ViewVertex):
         # replace - for negative vertex numbers
         return self.vertex_number
 
+    @property
+    def represented_numbers(self):
+        return [self.vertex_number]
+
 class ViewVertexSummary(ViewVertex):
     def __init__(self, graph, vertex_numbers):
         super(ViewVertexSummary, self).__init__(graph)
@@ -292,6 +296,10 @@ class ViewVertexSummary(ViewVertex):
         #ref = "V" + "_".join("%i" % vno for vno in self.vertex_numbers)
         #return ref.replace("-","N") # replace for negative vno
         return min(self.vertex_numbers)
+
+    @property
+    def represented_numbers(self):
+        return self.vertex_numbers
 
 class ViewParticle(ViewObject):
     @property
@@ -403,34 +411,36 @@ class ViewParticleSummary(ViewParticle):
         super(ViewParticleSummary, self).__init__(graph)
         self.particle_numbers = summarized_particle_numbers
 
-        start_vertices = []
-        end_vertices = []
-        for p_nr in self.particle_numbers:
-            # this summary now represent this particle
-            self.graph.p_map[p_nr] = self
+        # represent all particles
+        for p in self.particle_numbers:
+            self.graph.p_map[p] = self
 
-            # find mother and daughter graph particles
-            start_vertex = self.graph._start_vertex[p_nr]
-            end_vertex = self.graph._end_vertex[p_nr]
-            mother_nrs = self.graph._incoming[start_vertex]
-            daughter_nrs = self.graph._outgoing[end_vertex]
+        start_vnrs = (self.graph._start_vertex[p_nr] for p_nr in self.particle_numbers)
+        end_vnrs = (self.graph._end_vertex[p_nr] for p_nr in self.particle_numbers)
+        
+        start_vertices = set(self.graph.numbers_to_vertices(start_vnrs))
+        end_vertices = set(self.graph.numbers_to_vertices(end_vnrs))
+        
+        # internal vertex := vertex that has no non-summarized incoming and outgoings
+        #                    AND is not final or initial
+        def is_internal(vertex):
+            me = set((self,))
+            return (me == set(vertex.outgoing)) and (me == set(vertex.incoming))
 
-            # if all mothers of this particle are to be summarized 
-            if mother_nrs and all(m in self.particle_numbers for m in mother_nrs):
-                assert all(p in self.particle_numbers for p in self.graph._outgoing[start_vertex])
-                self.graph.v_map[start_vertex] = None
+        internal_vertices = [vn for vn in start_vertices & end_vertices if is_internal(vn)]
+        start_vertices.difference_update(internal_vertices)
+        end_vertices.difference_update(internal_vertices)
 
-            else:
-                start_vertices.append(start_vertex)
+        for vertex in internal_vertices:
+            for nr in vertex.represented_numbers:
+                self.graph.v_map[nr] = None
+        
+        assert len(start_vertices) == 1
+        assert len(end_vertices) == 1
 
-            if daughter_nrs and all(d in self.particle_numbers for d in daughter_nrs):
-                assert all(p in self.particle_numbers for p in self.graph._incoming[end_vertex])
-                self.graph.v_map[end_vertex] = None
-            else:
-                end_vertices.append(end_vertex)
+        self._start_vertices = sorted(chain(*[v.represented_numbers for v in start_vertices]))
+        self._end_vertices = sorted(chain(*[v.represented_numbers for v in end_vertices]))
 
-        self._start_vertices = start_vertices
-        self._end_vertices = end_vertices
         # for the assertion:
         self.start_vertex
         self.end_vertex
