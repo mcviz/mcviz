@@ -88,7 +88,15 @@ class SVGStyle(Style):
         args["scale"] = 0.1
 
         # colouring
-        if particle.gluon:
+        if "jet" in particle.tags:
+            display_func = hadron
+            args["stroke"] = "black"
+            args["fill"] = "black"
+            args["scale"] = 0.8
+            args["stroke-width"] = 0.4
+            edge.item.subscripts.append("x%i" % particle.jet_nparticles)
+        
+        elif particle.gluon:
             display_func = gluon
             args["stroke"] = "green"
         elif particle.photon:
@@ -131,8 +139,12 @@ class SVGStyle(Style):
     def paint_vertex(self, node):
         if not node.style == "invis" and node.center:
             v_args = dict(self.vertex_args)
-            if "summary" in node.item.tags:
+
+            if "jet" in node.item.tags:
+                return
+            elif "gluball" in node.item.tags:
                 v_args["fill"] = "lightgreen"
+
             vx = vertex(node.center, node.width/2, node.height/2, 
                         **v_args)
             self.doc.add_object(vx)
