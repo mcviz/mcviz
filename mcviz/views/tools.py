@@ -41,3 +41,19 @@ def chainmail(graph_view):
                 retry = True
                 break
 
+def contract_jets(graph_view):
+    for vertex in graph_view.vertices:
+        if vertex.hadronization:
+            class Walk:
+                particles = set()
+                vertices = set()
+                failed = False
+            def walker(particle, depth):
+                if particle.end_vertex.hadronization:
+                    Walk.failed = True
+                Walk.particles.add(particle)
+            graph_view.walk(vertex, particle_action=walker)
+            if not Walk.failed:
+                graph_view.summarize_vertices(set(p.end_vertex for p in Walk.particles if p.final_state))
+                graph_view.summarize_particles(Walk.particles)
+
