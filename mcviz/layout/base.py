@@ -142,6 +142,7 @@ class LayoutEdge(object):
         self.spline = None
         self.label = ""
         self.label_center = None
+        self.args = args
         for key, val in args.iteritems():
             setattr(self, key, val)
 

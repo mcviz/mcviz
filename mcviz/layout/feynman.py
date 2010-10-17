@@ -115,3 +115,27 @@ class PrunedHadronsLayout(FeynmanLayout):
         if vertex.hadronization:
             return "jet"
         return super(PrunedHadronsLayout, self).get_subgraph(vertex)
+        
+        
+class CombinedLayout(FeynmanLayout):
+    
+    def get_particle(self, particle):
+            
+        down = super(CombinedLayout, self).get_particle(particle)
+        if down.item.gluon or down.item.photon:
+            return down
+        
+        
+        middle = LayoutNode(down.item, label=self.get_label_string(down.item.pdgid))
+        middle.dot_args["margin"] = "0,0"
+        #middle.dot_args["sep"] = "0,0"
+        middle.dot_args["shape"] = "square"
+
+        middle.dot_args["group"] = "plabels"
+        
+        up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
+        down.coming = middle.item
+        up.label = down.label = ""
+        up.port_going = None
+        
+        return [up, middle, down] 
