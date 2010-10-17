@@ -144,7 +144,11 @@ class SVGStyle(Style):
 
             vx = vertex(node.center, node.width/2, node.height/2, 
                         **v_args)
-            self.doc.add_object(vx)
+            
+            # If we have text on the label, don't draw the box around it (except
+            # if it is a hadronization vertex which has <middle> in it)
+            if not node.label or "<middle>" in node.label:
+                self.doc.add_object(vx)
             
             # This needs fixing for the Feynman layout, if we want node labels.
             if node.label and isinstance(node.item, ViewParticle):
