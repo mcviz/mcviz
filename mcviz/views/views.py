@@ -84,21 +84,7 @@ class GraphView(object):
                 elementary_particles.extend(p.particle_numbers)
             else:
                 elementary_particles.append(p.particle_number)
-        ViewParticleSummary(self, elementary_particles)
-
-    def check_connected(self, vertex_numbers):
-        # check for connectedness
-        unconnected = list(vertex_numbers)
-        connected = [unconnected.pop()]
-        while len(unconnected) > 0:
-            for v in unconnected:
-                for p in self._incoming[v] + self._outgoing[v]:
-                    if self._start_vertex[p] in connected or self._end_vertex[p] in connected:
-                        connected.append(v)
-                        unconnected.remove(v)
-                        break
-                if not v in unconnected:
-                    break
+        return ViewParticleSummary(self, elementary_particles)
 
     def summarize_vertices(self, vertices):
         elementary_vertices = []
@@ -107,7 +93,7 @@ class GraphView(object):
                 elementary_vertices.extend(p.vertex_numbers)
             else:
                 elementary_vertices.append(p.vertex_number)
-        ViewVertexSummary(self, elementary_vertices)
+        return ViewVertexSummary(self, elementary_vertices)
 
     def walk(self, obj, 
         particle_action=lambda p, d: None, vertex_action=lambda p, d: None,
@@ -176,6 +162,9 @@ class ViewObject(object):
         self.graph = graph
         self.subscripts = []
         self.tags = set()
+
+    def tag(self, tag):
+        self.tags.add(tag)
 
     @classmethod
     def tagger(self, what):

@@ -8,7 +8,10 @@ def remove_kinks(graph_view):
     for vertex in graph_view.vertices:
         if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
             if list(vertex.incoming)[0].pdgid == list(vertex.outgoing)[0].pdgid:
-                graph_view.summarize_particles(vertex.incoming | vertex.outgoing)
+                to_summarize = vertex.incoming | vertex.outgoing
+                summary = graph_view.summarize_particles(vertex.incoming | vertex.outgoing)
+                summary.tag("kink")
+                summary.kink_number = sum(getattr(x, "kink_number", 0) for x in to_summarize) + 1
             else:
                 print >> stderr, "%s changing to %s" % (list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid)
             
@@ -26,9 +29,11 @@ def gluballs(graph_view):
                     else:
                         return () # empty tuple means: do not continue here
                 graph_view.walk(vertex, vertex_action=walker)
-                #graph_view.walk(vertex, vertex_action=walker, ascend=True)
                 if len(vertices) > 1:
-                    graph_view.summarize_vertices(vertices)
+                    summary = graph_view.summarize_vertices(vertices)
+                    summary.tag("gluball")
+                    nv = sum(getattr(x, "gluball_nvertices", 1) for x in vertices))
+                    summary.gluball_nvertices = nv 
                     retry = True
                     break
 
@@ -41,7 +46,9 @@ def chainmail(graph_view):
             candidates = particle.start_vertex.outgoing
             siblings = set(p for p in candidates if p.end_vertex == particle.end_vertex)
             if len(siblings) > 1:
-                graph_view.summarize_particles(siblings)
+                summary = graph_view.summarize_particles(siblings)
+                summary.tag("multiple")
+                summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
                 retry = True
                 break
 
@@ -58,6 +65,10 @@ def contract_jets(graph_view):
                 Walk.particles.add(particle)
             graph_view.walk(vertex, particle_action=walker)
             if not Walk.failed:
-                graph_view.summarize_vertices(set(p.end_vertex for p in Walk.particles if p.final_state))
-                graph_view.summarize_particles(Walk.particles)
+                vsummary = graph_view.summarize_vertices(set(p.end_vertex for p in Walk.particles if p.final_state))
+                vsummary.tag("jet")
+                vsummary.jet_nvertices = len(Walk.vertices)
+                psummary = graph_view.summarize_particles(Walk.particles)
+                psummary.tag("jet")
+                psummary.jet_nparticles = len(Walk.particles)
 
