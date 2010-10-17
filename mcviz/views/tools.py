@@ -32,7 +32,7 @@ def gluballs(graph_view):
                 if len(vertices) > 1:
                     summary = graph_view.summarize_vertices(vertices)
                     summary.tag("gluball")
-                    nv = sum(getattr(x, "gluball_nvertices", 1) for x in vertices))
+                    nv = sum(getattr(x, "gluball_nvertices", 1) for x in vertices)
                     summary.gluball_nvertices = nv 
                     retry = True
                     break
