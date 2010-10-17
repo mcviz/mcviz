@@ -11,10 +11,6 @@ class FeynmanLayout(BaseLayout):
         elif vertex.connecting:
             return "connecting"
 
-    @property
-    def subgraph_names(self):
-        return ["initial", None]
-
     def process(self):
 
         if self.options.fix_initial:

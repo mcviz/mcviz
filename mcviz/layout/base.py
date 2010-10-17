@@ -22,8 +22,8 @@ class BaseLayout(object):
         if self.options.show_id:
             def label_particle_no(particle):
                 if not particle.gluon:
-                    return particle.no
-            self.annotate_particles(graph.particles.values(), label_particle_no)
+                    return particle.reference
+            self.annotate_particles(graph.particles, label_particle_no)
 
         if self.options.show_color_id:
             self.annotate_particles(graph.particles, lambda p: p.color)
