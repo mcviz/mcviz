@@ -44,7 +44,9 @@ def chainmail(graph_view):
         retry = False
         for particle in graph_view.particles:
             candidates = particle.start_vertex.outgoing
-            siblings = set(p for p in candidates if p.end_vertex == particle.end_vertex)
+            siblings = set(p for p in candidates 
+                           if p.end_vertex == particle.end_vertex and 
+                              p.pdgid == particle.pdgid)
             if len(siblings) > 1:
                 summary = graph_view.summarize_particles(siblings)
                 summary.tag("multiple")
