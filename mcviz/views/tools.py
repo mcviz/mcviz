@@ -1,4 +1,5 @@
 from views import ViewParticleSummary
+from sys import stderr
 
 def contract(graph_view):
     pass
@@ -6,7 +7,10 @@ def contract(graph_view):
 def remove_kinks(graph_view):
     for vertex in graph_view.vertices:
         if len(vertex.incoming) == 1 and len(vertex.outgoing) == 1:
-            graph_view.summarize_particles(vertex.incoming | vertex.outgoing)
+            if list(vertex.incoming)[0].pdgid == list(vertex.outgoing)[0].pdgid:
+                graph_view.summarize_particles(vertex.incoming | vertex.outgoing)
+            else:
+                print >> stderr, "%s changing to %s" % (list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid)
             
 
 def gluballs(graph_view):
