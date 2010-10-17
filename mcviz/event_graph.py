@@ -1,25 +1,14 @@
 #! /usr/bin/env python
 
-from __future__ import with_statement
-
-from sys import argv, stderr
-from itertools import takewhile
-
 from mcviz import MCVizParseError
-from .particle import Particle
-from .vertex import Vertex
-from .options import parse_options
-from .utils import OrderedSet
 
 from logging import getLogger; log = getLogger("event_graph")
-import logging as L
 
 class EventGraph(object):
-    def __init__(self, vertices, particles, options=None):
+    def __init__(self, vertices, particles):
         """
         `records`: A list containing many particles
         """
-        options = self.options = options if options else parse_options()
         self.vertices = vertices
         self.particles = particles
         # Graph consistency checks
@@ -31,28 +20,29 @@ class EventGraph(object):
         return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
-    def load(cls, filename, options=None):
+    def load(cls, filename):
         """
         Try to load a monte-carlo event using all available loaders
         """
-        parsers = [cls.from_hepmc, cls.from_pythia_log]
-        for parser in parsers:
+        loaders = [cls.from_hepmc, cls.from_pythia_log]
+        for loader in loaders:
             try:
-                return parser(filename, options)
+                return loader(filename)
             except MCVizParseError:
-                L.debug("Parser %s failed" % parser.__name__)
+                log.debug("loader %s failed" % loader.__name__)
                 
-        raise MCVizParseError("No parsers succeeded")
+        raise MCVizParseError("No loaders succeeded")
     
     @classmethod
-    def from_hepmc(cls, filename, options=None):
+    def from_hepmc(cls, filename):
         from loaders.hepmc import load_first_event
         vertices, particles = load_first_event(filename)
-        return cls(vertices, particles, options)
+        return cls(vertices, particles)
+
         
     @classmethod
-    def from_pythia_log(cls, filename, options=None):
+    def from_pythia_log(cls, filename):
         from loaders.pythialog import load_event
         vertices, particles = load_event(filename)
-        return cls(vertices, particles, options)
+        return cls(vertices, particles)
 

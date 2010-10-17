@@ -22,7 +22,8 @@ def main():
         print "Specify a pythia log file to run on"
         return -1
     
-    event_graph = EventGraph.load(args[1], options)
+    # Load the first event from the given file 
+    event_graph = EventGraph.load(args[1])
 
     # step 1a: make a view and apply view tools on it
     graph_view = GraphView(event_graph)
