@@ -51,11 +51,7 @@ class SVGStyle(Style):
                 self.paint_edge(edge)
 
         for node in self.layout.nodes:
-            if isinstance(node.item, ViewVertex):
-                self.paint_vertex(node)
-            else:
-                self.paint_vertex(node)
-                #raise NotImplementedError("Cannot draw particles as nodes :(")
+            self.paint_vertex(node)
 
         return self.doc.toprettyxml()
 
