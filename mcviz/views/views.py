@@ -95,6 +95,17 @@ class GraphView(object):
                 elementary_vertices.append(p.vertex_number)
         return ViewVertexSummary(self, elementary_vertices)
 
+    def drop(self, obj):
+        if isinstance(obj, ViewParticle):
+            for pn in obj.represented_numbers:
+                self.p_map[pn] = None
+        
+            if obj.final_state:
+                self.drop(obj.end_vertex)
+            
+        elif isinstance(obj, ViewVertex):
+            raise NotImplementedError
+
     def walk(self, obj, 
         particle_action=lambda p, d: None, vertex_action=lambda p, d: None,
         loop_action=lambda p, d: None, ascend=False):
@@ -391,6 +402,10 @@ class ViewParticleSingle(ViewParticle):
     @property
     def order_number(self):
         return self.particle_number
+        
+    @property
+    def represented_numbers(self):
+        return set([self.particle_number])
 
 class ViewParticleSummary(ViewParticle):
     """
@@ -467,8 +482,11 @@ class ViewParticleSummary(ViewParticle):
         evs = self.graph.numbers_to_vertices(self._end_vertices)
         assert len(evs) == 1
         return evs.pop()
-
-
+    
     @property
     def order_number(self):
         return min(self.particle_numbers)
+        
+    @property
+    def represented_numbers(self):
+        return self.particle_numbers

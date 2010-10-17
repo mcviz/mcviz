@@ -74,3 +74,7 @@ def contract_jets(graph_view):
                 psummary.tag("jet")
                 psummary.jet_nparticles = len(Walk.particles)
 
+def contract_loops(graph_view):
+    for particle in graph_view.particles:
+        if particle.start_vertex == particle.end_vertex:
+            graph_view.drop(particle)
