@@ -22,12 +22,14 @@ END_LIST = ("--------  End PYTHIA Event Listing  -----------------------------"
 def make_pythia_graph(records):
     # Make particle objects and {no:Particle} dictionary
     particles = [Particle.from_pythia(p) for p in records]
-    particle_dict = dict((p.no, p) for p in particles)
-    
+
     # Convert mothers/daughters to objects
     for particle in particles:
-        particle.daughters = set(particles[d] for d in particle.daughters)
-        particle.mothers = set(particles[m] for m in particle.mothers)
+        particle.daughters = set(particles[d] for d in particle.daughters if particles[d].no != 0)
+        particle.mothers = set(particles[m] for m in particle.mothers if particles[m].no != 0)
+
+    particles = [p for p in particles if p.no != 0]
+    particle_dict = dict((p.no, p) for p in particles)
 
     # Populate mothers and daughters for particles
     for particle in particles:
@@ -89,9 +91,6 @@ def make_pythia_graph(records):
             particle.vertex_in = vertex
 
     vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
-    
-    # Remove system vertex
-    del particle_dict[0]
     
     return vertex_dict, particle_dict
         

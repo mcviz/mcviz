@@ -6,7 +6,7 @@ from base import BaseLayout, LayoutEdge, LayoutNode
 class FeynmanLayout(BaseLayout):
 
     def get_subgraph(self, vertex):
-        if vertex.is_initial:
+        if vertex.initial:
             return "initial"
         elif vertex.connecting:
             return "connecting"
@@ -47,8 +47,11 @@ class FeynmanLayout(BaseLayout):
 
         if node_style:
             lo.dot_args.update(node_style)
-        
-        if vertex.hadronization:
+       
+        if "summary" in vertex.tags:
+            lo.width = 1.0
+            lo.height = 1.0
+        elif vertex.hadronization:
             # Big white hardronization vertices
             if self.options.layout_engine == "dot":
                 n_gluons_in = sum(1 for p in vertex.incoming if p.gluon)
@@ -59,11 +62,11 @@ class FeynmanLayout(BaseLayout):
             else:
                 lo.width = lo.height = 1.0
             
-        elif vertex.is_initial:
+        elif vertex.initial:
             # Big red initial vertices
             lo.width = lo.height = 1.0
 
-        elif vertex.is_final:
+        elif vertex.final:
             # Don't show final particle vertices
             lo.style = "invis"
         
@@ -75,7 +78,7 @@ class FeynmanLayout(BaseLayout):
    
     def get_particle(self, particle):
 
-        lo = LayoutEdge(particle, particle.vertex_in, particle.vertex_out)
+        lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
 
         lo.label = self.get_label_string(particle.pdgid)
         if particle.gluon or particle.photon:
@@ -84,7 +87,7 @@ class FeynmanLayout(BaseLayout):
         lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
 
         if self.options.layout_engine == "dot":
-            if particle.vertex_out.hadronization:
+            if particle.end_vertex.hadronization:
                 if particle.gluon:
                     lo.port_going = "middle"
                 elif particle.color:

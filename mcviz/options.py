@@ -4,6 +4,7 @@ import sys
 
 from mcviz.layout import list_layouts
 from mcviz.style import list_styles
+from mcviz.views import list_view_tools
 
 def get_option_parser():
     
@@ -12,6 +13,9 @@ def get_option_parser():
     #
     # Program control
     #
+    o("-v", "--view-tools", choices=list_view_tools(), action="append",
+      help="Select the tools applied to the graph (%s)" % ", ".join(list_view_tools()))
+
     o("-l", "--layout", choices=list_layouts(),
       help="Select the layout class used to layout the graph (%s)" % ", ".join(list_layouts()))
 

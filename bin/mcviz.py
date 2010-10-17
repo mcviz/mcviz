@@ -6,6 +6,7 @@ from mcviz import EventGraph, parse_options, MCVizParseError
 from mcviz.graphviz import run_graphviz
 from mcviz.layout import get_layout
 from mcviz.style import get_style
+from mcviz.views import apply_view_tool, GraphView, tag
 from sys import argv, stdout, stderr, exit
 
 from textwrap import dedent
@@ -21,11 +22,18 @@ def main():
         print "Specify a pythia log file to run on"
         return -1
     
-    event = EventGraph.load(args[1], options)
+    event_graph = EventGraph.load(args[1], options)
+
+    # step 1a: make a view and apply view tools on it
+    graph_view = GraphView(event_graph)
+    if options.view_tools:
+        for tool in options.view_tools:
+            apply_view_tool(tool, graph_view)
+    tag(graph_view)
    
     # step 2: layout event graph into a dot file
     layout_class = get_layout(options.layout)
-    layout = layout_class(event, options)
+    layout = layout_class(graph_view, options)
     result = layout.dot
 
     # [step 3]: process layouted dot file with graphviz

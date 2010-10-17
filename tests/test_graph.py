@@ -38,6 +38,45 @@ def graph_is_consistent(graph):
             #print d, d.mothers
             assert p in d.mothers
 
+def graph_view_is_consistent(graph):
+    for v in graph.vertices:
+        if hasattr(v, "vertex_number"):
+            graph.v_map[v.vertex_number] == v
+        if hasattr(v, "vertex_numbers"):
+            for vertex_number in v.vertex_numbers:
+                graph.v_map[vertex_number] == v
+
+        #print "VERTEX: ", v
+        #print "INCOMING: ", v.incoming
+        for p in v.incoming:
+            assert p in graph.particles
+            assert v == p.end_vertex
+            #print p, p.daughters, v.outgoing
+            assert set(p.daughters).issubset(v.outgoing)
+
+        #print "OUTGOING: ", v.outgoing
+        for p in v.outgoing:
+            assert p in graph.particles
+            assert v == p.start_vertex
+            assert set(p.mothers).issubset(v.incoming)
+
+    for p in graph.particles:
+        candidates = p.start_vertex.outgoing
+
+        #print "PARTICLE: ", p
+        assert p.start_vertex in graph.vertices
+        assert p.end_vertex in graph.vertices
+
+        #print "MOTHERS: ", p.mothers
+        for m in p.mothers:
+            #print m, m.daughters
+            assert p in m.daughters
+
+        #print "DAUGHTERS: ", p.daughters
+        for d in p.daughters:
+            #print d, d.mothers
+            assert p in d.mothers
+
 event_graph = None
 def setup():
     test_file = "inputs/pythia01.out"

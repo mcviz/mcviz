@@ -2,14 +2,15 @@ from __future__ import division
 
 from ..svg import SVGDocument
 from ..svg import photon, final_photon, gluon, boson, fermion, hadron, vertex
-from ..particle import Particle
-from ..vertex import Vertex
+from ..views.views import ViewParticle
+from ..views.views import ViewVertex
 
 from .base import Style
 
 class SVGStyle(Style):
 
     def paint(self):
+
         # if we do not know the scale; (i.e. bounding box) calculate it
         x_min, y_min, x_max, y_max = 0, 0, 0, 0
         def get_minmax(x,y):
@@ -44,13 +45,13 @@ class SVGStyle(Style):
                 # Nothing to paint!
                 continue
                 
-            if isinstance(edge.item, Particle):
+            if isinstance(edge.item, ViewParticle):
                 self.paint_particle(edge)
             else:
                 self.paint_edge(edge)
 
         for node in self.layout.nodes:
-            if isinstance(node.item, Vertex):
+            if isinstance(node.item, ViewVertex):
                 self.paint_vertex(node)
             else:
                 self.paint_vertex(node)
@@ -129,12 +130,15 @@ class SVGStyle(Style):
 
     def paint_vertex(self, node):
         if not node.style == "invis" and node.center:
+            v_args = dict(self.vertex_args)
+            if "summary" in node.item.tags:
+                v_args["fill"] = "lightgreen"
             vx = vertex(node.center, node.width/2, node.height/2, 
-                        **self.vertex_args)
+                        **v_args)
             self.doc.add_object(vx)
             
             # This needs fixing for the Feynman layout, if we want node labels.
-            if node.label and isinstance(node.item, Particle):
+            if node.label and isinstance(node.item, ViewParticle):
                 self.doc.add_glyph(node.item.pdgid, node.center.tuple(),
                                    self.options.label_size,
                                    ", ".join(map(str, node.item.subscripts)))
