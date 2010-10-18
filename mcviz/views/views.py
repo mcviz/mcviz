@@ -188,6 +188,7 @@ class ViewObject(object):
         self.graph = graph
         self.subscripts = []
         self.tags = set()
+        self.layout_objects = []
 
     def tag(self, tag):
         self.tags.add(tag)

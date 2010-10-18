@@ -64,7 +64,7 @@ class FeynmanLayout(BaseLayout):
 
         elif vertex.final:
             # Don't show final particle vertices
-            lo.style = "invis"
+            lo.show = False
         
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
@@ -122,8 +122,9 @@ class CombinedLayout(FeynmanLayout):
             return down
         
         middle = LayoutNode(down.item, label=self.get_label_string(down.item.pdgid))
+        middle.show = False
         middle.dot_args["margin"] = "0,0"
-        middle.dot_args["shape"] = "square"
+        #middle.dot_args["shape"] = "square"
         #middle.dot_args["group"] = "plabels"
         
         up = LayoutEdge(down.item, down.coming, middle.item, **down.args)

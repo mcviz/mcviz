@@ -1,21 +1,15 @@
-from base import Style
-from svg import SVGStyle
-from simple import SimpleStyle
-from strong import StrongStyle
-from rainbow import RainbowStyle
+from styles import svg, simple, fancylines
+from color import color, rainbow
 
 styles = {}
-styles["base"] = Style
-styles["svg"] = SVGStyle
-styles["simple"] = SimpleStyle
-styles["strong"] = StrongStyle
-styles["rainbow"] = RainbowStyle
-default = "svg"
+styles["svg"] = svg
+styles["simple"] = simple
+styles["fancylines"] = fancylines
+styles["color"] = color
+styles["rainbow"] = rainbow
 
 def list_styles():
     return sorted(styles.keys())
 
-def get_style(name):
-    if name is None:
-        return styles[default]
-    return styles[name]
+def apply_style(name, layout):
+    styles[name](layout)

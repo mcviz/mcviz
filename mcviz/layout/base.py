@@ -19,13 +19,13 @@ class BaseLayout(object):
         self.width, self.height, self.scale = None, None, 1.0
             
         # Label particles by id if --show-id is on the command line.
-        if self.options.show_id:
+        if "id" in self.options.subscript:
             def label_particle_no(particle):
                 if not particle.gluon:
                     return particle.reference
             self.annotate_particles(graph.particles, label_particle_no)
 
-        if self.options.show_color_id:
+        if "color" in self.options.subscript:
             self.annotate_particles(graph.particles, lambda p: p.color)
             self.annotate_particles(graph.particles, lambda p: -p.anticolor)
 
@@ -110,7 +110,7 @@ class BaseLayout(object):
                 node.width, node.height = size
     
     def get_label_string(self, pdgid):
-        if self.options.svg and TexGlyph.exists(pdgid):
+        if TexGlyph.exists(pdgid):
             w, h = TexGlyph.from_pdgid(pdgid).dimensions
             w *= self.options.label_size
             h *= self.options.label_size
@@ -132,10 +132,16 @@ class BaseLayout(object):
             if subscript:
                 particle.subscripts.append(subscript)
 
-
-class LayoutEdge(object):
-    def __init__(self, item, coming, going, **args):
+class LayoutObject(object):
+    def __init__(self, item):
         self.item = item
+        self.show = True
+        self.label = True
+        self.style_args = {}
+
+class LayoutEdge(LayoutObject):
+    def __init__(self, item, coming, going, **args):
+        super(LayoutEdge, self).__init__(item)
         self.coming, self.going = coming, going
         self.port_coming, self.port_going = None, None
         self.dot_args = {}
@@ -143,6 +149,7 @@ class LayoutEdge(object):
         self.label = ""
         self.label_center = None
         self.args = args
+        self.style_line_type = None
         for key, val in args.iteritems():
             setattr(self, key, val)
 
@@ -168,11 +175,10 @@ class LayoutEdge(object):
         )
 
 
-class LayoutNode(object):
+class LayoutNode(LayoutObject):
     def __init__(self, item, **args):
-        self.item = item
+        super(LayoutNode, self).__init__(item)
         self.dot_args = {}
-        self.style = ""
         self.label = ""
         self.subgraph = None
         self.center = None
@@ -186,4 +192,4 @@ class LayoutNode(object):
                   if self.width and self.height else {})
         kwargs.update(self.dot_args)
         return make_node(self.item.reference, label=self.label, 
-            style=self.style, **kwargs)
+            style="" if self.show else "invis", **kwargs)

@@ -5,57 +5,39 @@ import sys
 from mcviz.layout import list_layouts
 from mcviz.style import list_styles
 from mcviz.views import list_view_tools
+from mcviz.painter import list_painters, list_extensions
 
 def get_option_parser():
-    
-    p = OptionParser()
+    usage = "usage: %prog [options] {hepmc_file|pythia_log}"
+    p = OptionParser(usage=usage)
     o = p.add_option
     #
     # Program control
     #
-    o("-v", "--view-tools", choices=list_view_tools(), action="append",
-      help="Select the tools applied to the graph (%s)" % ", ".join(list_view_tools()))
+    o("-d", "--debug", action="store_true",
+      help="Drop to ipython shell on exception")
 
-
-    o("-s", "--style", choices=list_styles(),
-      help="Select the style class used to style the graph (%s)" % ", ".join(list_styles()))
+    o("-t", "--tool", choices=list_view_tools(), action="append", default=[],
+      help="Select a tool that is applied to the graph (%s)" % ", ".join(list_view_tools()))
 
     o("-l", "--layout", choices=list_layouts(), action="append", default=[],
       help="Select the layout classes used to layout the graph (%s)" % ", ".join(list_layouts()))
 
-    o("-D", "--debug", action="store_true",
-      help="Drop to ipython shell on exception")
-    
-    o("-L", "--limit", type=int, default=None,
-      help="Limit number of particles made")
-    
-    o("-w", "--penwidth", choices=["pt", "off"], default="off", help="[not implemented]")
-    o("-W", "--edge-weight", choices=["e", "off"], default="off", help="[not implemented]")
-    
-    o("-t", "--line-thickness", type=float, default=1.,
-      help="Controls the thickness of the graph edges")
-    
-    o("-I", "--show-id", action="store_true",
-      help="Controls labelling particle ids")
-    o("", "--show-color-id", action="store_true",
-      help="Adds a label specifiying the color and anticolor")
-    
-    o("-c", "--contract", action="append", type=str, default=[],
-      help="Particle graph contraction. Value: 'gluballs', 'kinks'")
+    o("-s", "--style", choices=list_styles(), action="append", default=[],
+      help="Select a style that is applied to the graph (%s)" % ", ".join(list_styles()))
 
-    o("-C", "--color-mechanism", default="color_charge",
-      help="Changes the way particles are colored. "
-           "Possible values: color_charge, ascendents.")
-           
-    o("-S", "--strip-outer-nodes", type=int, default=0, metavar="N",
-      help="Performs outer node stripping N times.")
+    o("-o", "--output-file", type="string", default="mcviz.svg",
+      help="Output file for graph. Known file extensions: %s" % ", ".join(list_extensions()))
 
+    o("--painter", type="string", default=None,
+      help="Override autodetect from outputfile extension (%s)" % ", ".join(list_painters()))
 
-    
-    
     #
     # Presentation
     #
+    o("--subscript", choices=["id","color"], action="append", default=[],
+      help="Add a subscript specifying a property to the label (id, color)")
+    
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],
       help="If specified, pipes output through specified graphviz engine")
 
@@ -85,6 +67,9 @@ def get_option_parser():
     
     o("--profile", action="store_true", 
       help="Turn on profiling (requires bootstrap_extenv to have been run)")
+
+    o("--dump-dot", action="store_true",
+      help="Print the DOT data passed into graphviz.")
     return p
     
 def parse_options(argv=None):
@@ -98,7 +83,7 @@ def parse_options(argv=None):
         extra_gv_options = argv[extraopts_index+1:]
         argv = argv[:extraopts_index]
     else:
-        extra_gv_options = ["-Tplain"]
+        extra_gv_options = []
 
     result = options, args = p.parse_args(argv)
     options.extra_gv_options = extra_gv_options
