@@ -20,8 +20,8 @@ from textwrap import dedent
 
 from logging import getLogger; log = getLogger("mcviz")
 
-from mcviz import EventGraph, parse_options
-from mcviz.tools import apply_tool, GraphView, tag
+from mcviz import EventGraph, GraphView, parse_options
+from mcviz.tools import apply_tool, tag
 from mcviz.painters import get_painter
 
 def main(argv):

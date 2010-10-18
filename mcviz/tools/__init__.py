@@ -1,4 +1,3 @@
-from views import GraphView
 from tools import contract_jets, remove_kinks, gluballs, chainmail, contract_loops, pluck, unsummarize
 from tagging import tag
 
