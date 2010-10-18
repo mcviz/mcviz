@@ -81,7 +81,7 @@ class BaseLayout(object):
         out.append("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
 
         for name in self.subgraph_names:
-            nodelist = self.subgraphs[name]
+            nodelist = self.subgraphs.get(name, [])
             subgraph = self.subgraph_options.get(name, [])
             subgraph.extend(node.dot for node in nodelist)
             if name:
