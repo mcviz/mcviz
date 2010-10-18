@@ -1,8 +1,24 @@
 from views import ViewParticleSummary, Summary
 from sys import stderr
+from functools import wraps
 
-def contract(graph_view):
-    pass
+def retrying(func):
+    """
+    If the decorated function raises retry, run it again, else, fallthrough.
+    The Retry object is passed through as a kwarg.
+    """
+    class Retry(Exception): pass
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        kwargs["Retry"] = Retry()
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except Retry:
+                pass
+            else:
+                break
+    return wrapped
 
 def remove_kinks(graph_view):
     """
@@ -27,52 +43,46 @@ def remove_kinks(graph_view):
             arg = list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid
             print >> stderr, "%s changing to %s" % arg
 
-def gluballs(graph_view):
+@retrying
+def gluballs(graph_view, Retry):
     """
     Remove gluon self-interaction, replacing them all with one glu-vertex.
     """
-    retry = True
-    while retry:
-        retry = False
-        for vertex in graph_view.vertices:
+    for vertex in graph_view.vertices:
+        if not all(p.gluon for p in vertex.through):
+            continue
+            
+        vertices = set()
+        def walker(vertex, depth):
             if not all(p.gluon for p in vertex.through):
-                continue
+                return () # empty tuple means: do not continue here
+            vertices.add(vertex)
                 
-            vertices = set()
-            def walker(vertex, depth):
-                if not all(p.gluon for p in vertex.through):
-                    return () # empty tuple means: do not continue here
-                vertices.add(vertex)
-                    
-            graph_view.walk(vertex, vertex_action=walker)
-            if len(vertices) > 1:
-                summary = graph_view.summarize_vertices(vertices)
-                summary.tag("gluball")
-                nv = sum(getattr(x, "gluball_nvertices", 1) for x in vertices)
-                summary.gluball_nvertices = nv
-                retry = True
-                break
+        graph_view.walk(vertex, vertex_action=walker)
+        if len(vertices) > 1:
+            summary = graph_view.summarize_vertices(vertices)
+            summary.tag("gluball")
+            nv = sum(getattr(x, "gluball_nvertices", 1) for x in vertices)
+            summary.gluball_nvertices = nv
+            raise Retry
 
-def chainmail(graph_view):
+@retrying
+def chainmail(graph_view, Retry):
     """
     So named because lots of gluons all going the same way looks like chainmail.
     
     This function removes sibling particles of the same type.
     """
-    retry = True
-    while retry:
-        retry = False
-        for particle in graph_view.particles:
-            candidates = particle.start_vertex.outgoing
-            siblings = set(p for p in candidates 
-                           if p.end_vertex == particle.end_vertex and 
-                              p.pdgid == particle.pdgid)
-            if len(siblings) > 1:
-                summary = graph_view.summarize_particles(siblings)
-                summary.tag("multiple")
-                summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
-                retry = True
-                break
+    for particle in graph_view.particles:
+        candidates = particle.start_vertex.outgoing
+        siblings = set(p for p in candidates 
+                       if p.end_vertex == particle.end_vertex and 
+                          p.pdgid == particle.pdgid)
+        if len(siblings) > 1:
+            summary = graph_view.summarize_particles(siblings)
+            summary.tag("multiple")
+            summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
+            raise Retry
 
 def contract_jets(graph_view):
     """
@@ -134,18 +144,19 @@ def pluck(graph_view, vno_keep=3):
         if obj not in keep_objects:
             graph_view.drop(obj)
 
-def unsummarize(graph_view):
+@retrying
+def unsummarize(graph_view, Retry):
     """
     Undo a summarization.
     Useful when used in combination with other tools, 
     e.g. -v{gluballs,pluck,unsummarize}
     """
-    retry = True
-    while retry:
-        retry = False
-        for obj in list(graph_view.particles) + list(graph_view.vertices):
-            if isinstance(obj, Summary):
-                obj.undo_summary()
-                retry = True
-                # No break needed because we don't remove particles
+    retry = False
+    for obj in list(graph_view.particles) + list(graph_view.vertices):
+        if isinstance(obj, Summary):
+            obj.undo_summary()
+            retry = True
+    
+    if retry:
+        raise Retry
 
