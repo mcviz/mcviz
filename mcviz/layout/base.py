@@ -10,6 +10,9 @@ from ..utils import latexize_particle_name, make_unicode_name, Point2D
 
 
 class BaseLayout(object):
+    """
+    Class that encapsulates the layout and styling information of the graph
+    """
 
     def __init__(self, graph, options):
         self.options = options
@@ -69,6 +72,7 @@ class BaseLayout(object):
     @property
     def subgraph_names(self):
         names = sorted(self.subgraphs.keys())
+        # move "None" (sorted always first) to the back
         return names[1:] + [None]
 
     @property
