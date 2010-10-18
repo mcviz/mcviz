@@ -51,10 +51,13 @@ class BaseLayout(object):
                 self.add_object(o)
             return
             
+        obj.item.layout_objects.append(obj)
         if isinstance(obj, LayoutNode):
             self.subgraphs.setdefault(obj.subgraph, []).append(obj)
-        else:
+        elif isinstance(obj, LayoutEdge):
             self.edges.append(obj)
+        else:
+            raise NotImplementedError()
 
     def process(self):
         pass
