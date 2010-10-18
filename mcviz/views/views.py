@@ -245,7 +245,11 @@ class ViewVertexSingle(ViewVertex):
         super(ViewVertex, self).__init__(graph)
         self.vertex_number = vertex_number
         self.graph.v_map[vertex_number] = self
-
+        
+    def __repr__(self):
+        args = self.reference, len(self.incoming), len(self.outgoing)
+        return '<ViewVertexSingle ref="%s" n_in="%i" n_out="%i">' % args
+        
     @property
     def incoming(self):
         return self.graph.vertex_incoming_particles(self.vertex_number)
@@ -282,6 +286,11 @@ class ViewVertexSummary(ViewVertex):
                 else:
                     self._outgoing.append(p_nr)
         self.tags.add("summary")
+
+    def __repr__(self):
+        args = (self.reference, len(self.vertex_numbers), len(self.incoming), 
+                len(self.outgoing))
+        return '<ViewVertexSummary ref="%s" n=%i in=%i, out=%i>' % args
 
     @property
     def incoming(self):
@@ -386,7 +395,11 @@ class ViewParticleSingle(ViewParticle):
         self.pdgid = self.event_particle.pdgid
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
-
+    
+    def __repr__(self):
+        args = self.pdgid, self.reference
+        return "<ViewParticleSingle pdgid=%s ref='%s'>" % args
+    
     @property
     def start_vertex(self):
         return self.graph.particle_start_vertex(self.particle_number)
