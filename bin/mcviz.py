@@ -1,6 +1,7 @@
 #! /usr/bin/env python2.6
 
-import logging as L
+import logging
+from logging import getLogger; log = getLogger("mcviz")
 
 from mcviz import EventGraph, parse_options, MCVizParseError
 from mcviz.graphviz import run_graphviz
@@ -19,7 +20,7 @@ def main():
         ip = IPShellEmbed(["-pdb"], rc_override=dict(quiet=True))
 
     if len(args) <= 1:
-        print "Specify a pythia log file to run on"
+        print "Please specify an HepMC file or Pythia log file to run on. Use --help for help."
         return -1
     
     # Load the first event from the given file 
@@ -76,7 +77,8 @@ def main():
             raise
 
 if __name__ == "__main__":
-    L.basicConfig(level=L.DEBUG)
+
+    logging.basicConfig(level=logging.DEBUG)
     
     from sys import argv
     if "--profile" in argv:
