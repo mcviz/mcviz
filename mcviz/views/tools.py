@@ -79,6 +79,26 @@ def contract_loops(graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
+def pluck(graph_view, vno_keep=3):
+    """
+    Keep a specific vertex and particles travelling through it
+    """
+    
+    keep_objects = set()
+    keep_vertex = graph_view.v_map[vno_keep]
+            
+    def walker(vertex, depth):
+        keep_objects.add(vertex)
+        if depth > 3:
+            return ()
+        
+    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker)    
+    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker, ascend=True)
+    
+    for obj in list(graph_view.particles) + list(graph_view.vertices):
+        if obj not in keep_objects:
+            graph_view.drop(obj)
+
 def unsummarize(graph_view):
     """
     Undo a summarization.
