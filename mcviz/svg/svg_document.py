@@ -48,7 +48,7 @@ class SVGDocument(object):
         x, y = center
 
         if not TexGlyph.exists(pdgid):
-            return self.add_text_glyph(pdgid, center, font_size, subscript)
+            return self.add_text_glyph(str(pdgid), center, font_size, subscript)
 
         glyph = TexGlyph.from_pdgid(pdgid)
         if not glyph.xml in self.defs.children:
@@ -82,9 +82,8 @@ class SVGDocument(object):
             y_sub = y + glyph.ymax * glyph.default_scale * font_size
             self.add_subscript(subscript, (x_sub, y_sub), font_size)
 
-    def add_text_glyph(self, pdgid, center, font_size, subscript = None):
+    def add_text_glyph(self, label, center, font_size, subscript = None):
         x, y = center
-        label = "%i" % pdgid
         width_est = len(label) * font_size * 0.6
         txt = XMLNode("text")
         txt.setAttribute("x", "%.3f" % (x - width_est / 2))
