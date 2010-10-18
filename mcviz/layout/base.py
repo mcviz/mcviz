@@ -37,10 +37,10 @@ class BaseLayout(object):
 
     def fill_objects(self, graph):
 
-        for vertex in sorted(graph.vertices):
+        for vertex in graph.vertices:
             self.add_object(self.get_vertex(vertex))
 
-        for particle in sorted(graph.particles):
+        for particle in graph.particles:
             self.add_object(self.get_particle(particle))
 
     def add_object(self, obj):
