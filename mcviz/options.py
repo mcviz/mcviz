@@ -16,11 +16,12 @@ def get_option_parser():
     o("-v", "--view-tools", choices=list_view_tools(), action="append",
       help="Select the tools applied to the graph (%s)" % ", ".join(list_view_tools()))
 
-    o("-l", "--layout", choices=list_layouts(),
-      help="Select the layout class used to layout the graph (%s)" % ", ".join(list_layouts()))
 
     o("-s", "--style", choices=list_styles(),
       help="Select the style class used to style the graph (%s)" % ", ".join(list_styles()))
+
+    o("-l", "--layout", choices=list_layouts(), action="append", default=[],
+      help="Select the layout classes used to layout the graph (%s)" % ", ".join(list_layouts()))
 
     o("-D", "--debug", action="store_true",
       help="Drop to ipython shell on exception")
