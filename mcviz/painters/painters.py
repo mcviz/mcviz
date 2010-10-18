@@ -2,8 +2,8 @@ from os.path import basename
 
 from ..svg import SVGDocument
 from ..svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
-from ..layout import get_layout
-from ..style import apply_style
+from ..layouts import get_layout
+from ..styles import apply_style
 from ..graphviz import run_graphviz
 
 

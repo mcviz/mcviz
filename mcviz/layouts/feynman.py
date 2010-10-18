@@ -1,7 +1,7 @@
 from __future__ import division
 
 from math import log10
-from base import BaseLayout, LayoutEdge, LayoutNode
+from layouts import BaseLayout, LayoutEdge, LayoutNode
 
 class FeynmanLayout(BaseLayout):
 

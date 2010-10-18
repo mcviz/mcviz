@@ -1,4 +1,4 @@
-from base import BaseLayout, LayoutEdge, LayoutNode
+from layouts import BaseLayout, LayoutEdge, LayoutNode
 
 class DualLayout(BaseLayout):
 

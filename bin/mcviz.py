@@ -21,8 +21,8 @@ from textwrap import dedent
 from logging import getLogger; log = getLogger("mcviz")
 
 from mcviz import EventGraph, parse_options
-from mcviz.views import apply_view_tool, GraphView, tag
-from mcviz.painter import get_painter
+from mcviz.tools import apply_tool, GraphView, tag
+from mcviz.painters import get_painter
 
 def main(argv):
     options, args = parse_options(argv)

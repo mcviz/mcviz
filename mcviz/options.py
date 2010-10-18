@@ -2,10 +2,10 @@
 from optparse import OptionParser
 import sys
 
-from mcviz.layout import list_layouts
-from mcviz.style import list_styles
-from mcviz.views import list_view_tools
-from mcviz.painter import list_painters, list_extensions
+from mcviz.layouts import list_layouts
+from mcviz.styles import list_styles
+from mcviz.tools import list_tools
+from mcviz.painters import list_painters, list_extensions
 
 def get_option_parser():
     usage = "usage: %prog [options] {hepmc_file|pythia_log}"
@@ -17,8 +17,8 @@ def get_option_parser():
     o("-d", "--debug", action="store_true",
       help="Drop to ipython shell on exception")
 
-    o("-t", "--tool", choices=list_view_tools(), action="append", default=[],
-      help="Select a tool that is applied to the graph (%s)" % ", ".join(list_view_tools()))
+    o("-t", "--tool", choices=list_tools(), action="append", default=[],
+      help="Select a tool that is applied to the graph (%s)" % ", ".join(list_tools()))
 
     o("-l", "--layout", choices=list_layouts(), action="append", default=[],
       help="Select the layout classes used to layout the graph (%s)" % ", ".join(list_layouts()))
