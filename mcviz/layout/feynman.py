@@ -39,6 +39,7 @@ class FeynmanLayout(BaseLayout):
     def get_vertex(self, vertex, node_style=None):
 
         lo = LayoutNode(vertex, width = 0.1, height = 0.1)
+        lo.label = False
         lo.subgraph = self.get_subgraph(vertex)
 
         if node_style:
@@ -54,7 +55,7 @@ class FeynmanLayout(BaseLayout):
                 lo.width = 2 + n_gluons_in*0.5
                 lo.height = 1
                 lo.dot_args["shape"] = "record"
-                lo.label = " <leftedge>|<left>|<middle>|<right>|<rightedge>" 
+                lo.dot_label = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
             else:
                 lo.width = lo.height = 1.0
             

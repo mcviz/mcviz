@@ -140,6 +140,7 @@ class LayoutObject(object):
         self.item = item
         self.show = True
         self.label = True
+        self.dot_label = False # special dot_only label
         self.style_args = {}
 
 class LayoutEdge(LayoutObject):
@@ -194,5 +195,11 @@ class LayoutNode(LayoutObject):
         kwargs = ({"width":self.width, "height":self.height} 
                   if self.width and self.height else {})
         kwargs.update(self.dot_args)
-        return make_node(self.item.reference, label=self.label, 
+        if self.dot_label:
+            label = self.dot_label
+        elif self.label:
+            label = self.label
+        else:
+            label = ""
+        return make_node(self.item.reference, label=label, 
             style="" if self.show else "invis", **kwargs)

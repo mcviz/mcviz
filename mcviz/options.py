@@ -39,6 +39,7 @@ def get_option_parser():
       help="Add a subscript specifying a property to the label (id, color)")
     
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],
+      default="dot",
       help="If specified, pipes output through specified graphviz engine")
 
     o("--svg", action="store_true",
