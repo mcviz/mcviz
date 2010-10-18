@@ -1,4 +1,4 @@
-from views import ViewParticleSummary
+from views import ViewParticleSummary, Summary
 from sys import stderr
 
 def contract(graph_view):
@@ -78,3 +78,19 @@ def contract_loops(graph_view):
     for particle in graph_view.particles:
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
+
+def unsummarize(graph_view):
+    """
+    Undo a summarization.
+    Useful when used in combination with other tools, 
+    e.g. -v{gluballs,pluck,unsummarize}
+    """
+    retry = True
+    while retry:
+        retry = False
+        for obj in list(graph_view.particles) + list(graph_view.vertices):
+            if isinstance(obj, Summary):
+                obj.undo_summary()
+                retry = True
+                # No break needed because we don't remove particles
+

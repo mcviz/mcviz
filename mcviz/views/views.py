@@ -10,6 +10,10 @@ from ..utils import walk, OrderedSet
 from logging import getLogger; log = getLogger("event_graph")
 import logging as L
 
+class Summary(object):
+    def undo_summary(self):
+        self.graph.p_map.update(self.orig_p_map)
+        self.graph.v_map.update(self.orig_v_map)
 
 class GraphView(object):
     def __init__(self, event_graph):
@@ -96,15 +100,26 @@ class GraphView(object):
         return ViewVertexSummary(self, elementary_vertices)
 
     def drop(self, obj):
+        """
+        Remove a view{particle,vertex} from the graph.
+        If calling this repeatedly, it is acceptable to continue looping even
+        if this means also calling this function on implicitly removed objects.
+        """
         if isinstance(obj, ViewParticle):
             for pn in obj.represented_numbers:
                 self.p_map[pn] = None
-        
-            if obj.final_state:
+            
+            if obj.start_vertex and obj.start_vertex.dangling:
+                self.drop(obj.start_vertex)
+            if obj.end_vertex and obj.end_vertex.dangling:
                 self.drop(obj.end_vertex)
             
         elif isinstance(obj, ViewVertex):
-            raise NotImplementedError
+            for vn in obj.represented_numbers:
+                self.v_map[vn] = None
+            
+            for particle in obj.through:
+                self.drop(particle)
 
     def walk(self, obj, 
         particle_action=lambda p, d: None, vertex_action=lambda p, d: None,
@@ -239,6 +254,13 @@ class ViewVertex(ViewObject):
     def reference(self):
         # replace - for negative vertex numbers
         return ("V%i" % self.order_number).replace("-","N")
+    
+    @property
+    def through(self):
+        """
+        All particles which travel through this vertex
+        """
+        return self.incoming | self.outgoing
 
 class ViewVertexSingle(ViewVertex):
     def __init__(self, graph, vertex_number):
@@ -267,24 +289,38 @@ class ViewVertexSingle(ViewVertex):
     def represented_numbers(self):
         return [self.vertex_number]
 
-class ViewVertexSummary(ViewVertex):
+class ViewVertexSummary(ViewVertex, Summary):
     def __init__(self, graph, vertex_numbers):
         super(ViewVertexSummary, self).__init__(graph)
+        
         self.vertex_numbers = vertex_numbers
         self._incoming = []
-        self._outgoing = []
+        self._outgoing = [] 
+        self.orig_v_map, self.orig_p_map = {}, {}
+        
+        summarized_particle_nrs = set()
+        
         for v_nr in self.vertex_numbers:
+            self.orig_v_map[v_nr] = self.graph.v_map[v_nr]
             self.graph.v_map[v_nr] = self
+            
             for p_nr in self.graph._incoming[v_nr]:
                 if self.graph._start_vertex[p_nr] in self.vertex_numbers:
-                    self.graph.p_map[p_nr] = None
+                    summarized_particle_nrs.add(p_nr)
                 else:
                     self._incoming.append(p_nr)
+                    
             for p_nr in self.graph._outgoing[v_nr]:
                 if self.graph._end_vertex[p_nr] in self.vertex_numbers:
-                    self.graph.p_map[p_nr] = None
+                    summarized_particle_nrs.add(p_nr)
                 else:
                     self._outgoing.append(p_nr)
+            
+        for p_nr in summarized_particle_nrs:
+            self.orig_p_map[p_nr] = self.graph.p_map[p_nr]
+            self.graph.p_map[p_nr] = None
+            
+            
         self.tags.add("summary")
 
     def __repr__(self):
@@ -420,16 +456,20 @@ class ViewParticleSingle(ViewParticle):
     def represented_numbers(self):
         return set([self.particle_number])
 
-class ViewParticleSummary(ViewParticle):
+class ViewParticleSummary(ViewParticle, Summary):
     """
     Represents a view of a summary of particles ("jet", "gluball")
     """
     def __init__(self, graph, summarized_particle_numbers):
         super(ViewParticleSummary, self).__init__(graph)
         self.particle_numbers = summarized_particle_numbers
+        
+        # For storing information before we did the summary (so we can invert it)
+        self.orig_p_map, self.orig_v_map = {}, {}
 
         # represent all particles
         for p in self.particle_numbers:
+            self.orig_p_map[p] = self.graph.p_map[p]
             self.graph.p_map[p] = self
 
         start_vnrs = (self.graph._start_vertex[p_nr] for p_nr in self.particle_numbers)
@@ -450,6 +490,7 @@ class ViewParticleSummary(ViewParticle):
 
         for vertex in internal_vertices:
             for nr in vertex.represented_numbers:
+                self.orig_v_map[nr] = self.graph.v_map[nr]
                 self.graph.v_map[nr] = None
         
         assert len(start_vertices) == 1
