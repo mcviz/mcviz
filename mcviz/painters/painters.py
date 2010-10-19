@@ -112,6 +112,7 @@ class SVGPainter(GraphvizPainter):
 
     def paint(self):
         self.layout()
+        apply_style("svg", self.layout)
         self.style()
         engine = self.options.layout_engine
         engine = engine if engine else "dot"
