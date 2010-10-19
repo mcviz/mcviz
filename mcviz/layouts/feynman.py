@@ -94,26 +94,27 @@ class FeynmanLayout(BaseLayout):
        
         return lo
 
-class PrunedHadronsLayout(FeynmanLayout):
-    
+class FixedHadronsLayout(FeynmanLayout):
+    """
+    Place all of the hadronization vertices on the same rank.
+    """
     def process(self):
 
         if self.options.fix_initial:
-            sg_options = self.subgraph_options.setdefault("jet", [])
+            sg_options = self.subgraph_options.setdefault("hadronization", [])
             sg_options.append('rank="same"')
         
-        return super(PrunedHadronsLayout, self).process()
+        return super(FixedHadronsLayout, self).process()
         
     @property
     def subgraph_names(self):
-        return ["jet"] + super(PrunedHadronsLayout, self).subgraph_names
+        return ["hadronization"] + super(FixedHadronsLayout, self).subgraph_names
         
     def get_subgraph(self, vertex):
         if vertex.hadronization:
-            return "jet"
-        return super(PrunedHadronsLayout, self).get_subgraph(vertex)
-        
-        
+            return "hadronization"
+        return super(FixedHadronsLayout, self).get_subgraph(vertex)
+
 class CombinedLayout(FeynmanLayout):
     
     def get_particle(self, particle):
