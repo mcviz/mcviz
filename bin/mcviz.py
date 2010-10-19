@@ -51,7 +51,7 @@ def main(argv):
     # Apply view tools on it
     for tool in options.tool:
         log.debug('applying tool: %s' % tool)
-        apply_view_tool(tool, graph_view)
+        apply_tool(tool, graph_view)
 
     # Apply all Taggers on the graph
     tag(graph_view)
