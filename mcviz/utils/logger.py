@@ -59,11 +59,11 @@ class ColoredLogger(logging.Logger):
         console.setFormatter(color_formatter)
         self.addHandler(console)
 
-    def verbose(self, message):
-        self.log(VERBOSE_LEVEL, message)
+    def verbose(self, *args):
+        self.log(VERBOSE_LEVEL, *args)
 
-    def fatal(self, message):
-        self.critical(message)
+    def fatal(self, *args):
+        self.critical(*args)
 
 all_loggers = []
 
