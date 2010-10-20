@@ -7,7 +7,7 @@ layouts = {}
 layouts["Dual"] = DualLayout
 layouts["Feynman"] = FeynmanLayout
 layouts["Phi"] = PhiLayout
-layouts["Fixhad"] = FixedHadronsLayout
+layouts["FixHad"] = FixedHadronsLayout
 layouts["InlineLabels"] = InlineLabelsLayout
 default = "InlineLabels"
 
