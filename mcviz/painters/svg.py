@@ -4,7 +4,7 @@ from ..styles import svg
 
 from painters import GraphvizPainter
 
-from ..utils import get_logger; log = get_logger("svg_painter")
+from ..utils import get_logger, timer; log = get_logger("svg_painter")
 
 class SVGPainter(GraphvizPainter):
 
@@ -32,14 +32,15 @@ class SVGPainter(GraphvizPainter):
         plain = self.graphviz_pass(engine, opts, self.layout.dot)
         self.layout.update_from_plain(plain)
     
-        self.doc = SVGDocument(self.layout.width, self.layout.height, self.layout.scale)
-        for edge in self.layout.edges:
-            if not edge.spline:
-                # Nothing to paint!
-                continue
-            self.paint_edge(edge)
-        for node in self.layout.nodes:
-            self.paint_vertex(node)
+        with timer("to create the SVG document"):
+            self.doc = SVGDocument(self.layout.width, self.layout.height, self.layout.scale)
+            for edge in self.layout.edges:
+                if not edge.spline:
+                    # Nothing to paint!
+                    continue
+                self.paint_edge(edge)
+            for node in self.layout.nodes:
+                self.paint_vertex(node)
 
         self.write_data(self.doc.toprettyxml())
 

@@ -43,7 +43,7 @@ def remove_kinks(graph_view):
             # Oops, we have a particle changing pdgid on the way through.. 
             # It could be a graph inconsistency or it could be a K meson. Warn.
             arg = list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid
-            log.debug("%s changing to %s" % arg)
+            log.debug("kink removal: observed pdgid %s changing into pdgid %s" % arg)
 
 @retrying
 def gluballs(graph_view, Retry):

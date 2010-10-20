@@ -4,7 +4,7 @@ from ..layouts import get_layout
 from ..styles import apply_style
 from ..graphviz import run_graphviz
 
-from ..utils import set_logger_level, get_logger, timer; log = get_logger("painter")
+from ..utils import get_logger, timer; log = get_logger("painter")
 
 class Painter(object):
     def __init__(self, graph_view, output_file, options):
@@ -70,8 +70,9 @@ class GraphvizPainter(Painter):
             log.debug("Data passed to %s:\n%s" % (engine, dot_data))
 
         # Process the DOT data with graphviz
-        log.debug("Calling '%s' with options %s" % (engine, graphviz_options))
-        output, errors = run_graphviz(engine, dot_data, graphviz_options)
+        log.verbose("Calling '%s' with options %s" % (engine, graphviz_options))
+        with timer("to run graphviz", log.VERBOSE):
+            output, errors = run_graphviz(engine, dot_data, graphviz_options)
         errors = map(str.strip, errors.split("\n"))
         errors = filter(lambda e : e and not "Warning: gvrender" in e, errors)
         if errors:
