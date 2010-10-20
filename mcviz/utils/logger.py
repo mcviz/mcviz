@@ -21,7 +21,7 @@ def formatter_message(message, use_color = True):
 COLORS = {
     'DEBUG'   : BLUE,
     'VERBOSE' : WHITE,
-    'INFO'    : WHITE,
+    'INFO'    : YELLOW,
     'WARNING' : YELLOW,
     'ERROR'   : RED,
     'FATAL'   : RED,
@@ -43,6 +43,14 @@ class ColoredLogger(logging.Logger):
     #FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
     FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s"
     COLOR_FORMAT = formatter_message(FORMAT, True)
+
+    # define commonly used constants
+    FATAL = logging.CRITICAL
+    ERROR = logging.ERROR
+    WARNING = logging.WARNING
+    INFO = logging.INFO
+    VERBOSE = VERBOSE_LEVEL
+    DEBUG = logging.DEBUG
 
     def __init__(self, name, level):
         logging.Logger.__init__(self, name, level)
