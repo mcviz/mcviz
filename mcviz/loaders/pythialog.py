@@ -2,11 +2,12 @@
 This whole module is begging for a refactor, but by some miracle it works.
 """
 
-from logging import getLogger; log = getLogger("pythialog_parser")
-
 from mcviz import MCVizParseError
+
 from ..particle import Particle
 from ..vertex import Vertex
+
+from ..utils import get_logger; log = get_logger("pythialog_parser")
 
 START_COMPLETE = ("--------  "
     "PYTHIA Event Listing  (complete event)  ---------"

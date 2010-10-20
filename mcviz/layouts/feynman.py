@@ -1,7 +1,7 @@
 from __future__ import division
 
 from math import log10
-from base import BaseLayout, LayoutEdge, LayoutNode
+from layouts import BaseLayout, LayoutEdge, LayoutNode
 
 class FeynmanLayout(BaseLayout):
 
@@ -39,6 +39,7 @@ class FeynmanLayout(BaseLayout):
     def get_vertex(self, vertex, node_style=None):
 
         lo = LayoutNode(vertex, width = 0.1, height = 0.1)
+        lo.label = False
         lo.subgraph = self.get_subgraph(vertex)
 
         if node_style:
@@ -54,7 +55,7 @@ class FeynmanLayout(BaseLayout):
                 lo.width = 2 + n_gluons_in*0.5
                 lo.height = 1
                 lo.dot_args["shape"] = "record"
-                lo.label = " <leftedge>|<left>|<middle>|<right>|<rightedge>" 
+                lo.dot_label = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
             else:
                 lo.width = lo.height = 1.0
             
@@ -64,7 +65,7 @@ class FeynmanLayout(BaseLayout):
 
         elif vertex.final:
             # Don't show final particle vertices
-            lo.style = "invis"
+            lo.show = False
         
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
@@ -93,37 +94,39 @@ class FeynmanLayout(BaseLayout):
        
         return lo
 
-class PrunedHadronsLayout(FeynmanLayout):
-    
+class FixedHadronsLayout(FeynmanLayout):
+    """
+    Place all of the hadronization vertices on the same rank.
+    """
     def process(self):
 
         if self.options.fix_initial:
-            sg_options = self.subgraph_options.setdefault("jet", [])
+            sg_options = self.subgraph_options.setdefault("hadronization", [])
             sg_options.append('rank="same"')
         
-        return super(PrunedHadronsLayout, self).process()
+        return super(FixedHadronsLayout, self).process()
         
     @property
     def subgraph_names(self):
-        return ["jet"] + super(PrunedHadronsLayout, self).subgraph_names
+        return ["hadronization"] + super(FixedHadronsLayout, self).subgraph_names
         
     def get_subgraph(self, vertex):
         if vertex.hadronization:
-            return "jet"
-        return super(PrunedHadronsLayout, self).get_subgraph(vertex)
-        
-        
-class CombinedLayout(FeynmanLayout):
+            return "hadronization"
+        return super(FixedHadronsLayout, self).get_subgraph(vertex)
+
+class InlineLabelsLayout(FeynmanLayout):
     
     def get_particle(self, particle):
             
-        down = super(CombinedLayout, self).get_particle(particle)
+        down = super(InlineLabelsLayout, self).get_particle(particle)
         if down.item.gluon or down.item.photon:
             return down
         
         middle = LayoutNode(down.item, label=self.get_label_string(down.item.pdgid))
+        middle.show = False
         middle.dot_args["margin"] = "0,0"
-        middle.dot_args["shape"] = "square"
+        #middle.dot_args["shape"] = "square"
         #middle.dot_args["group"] = "plabels"
         
         up = LayoutEdge(down.item, down.coming, middle.item, **down.args)

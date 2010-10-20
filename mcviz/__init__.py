@@ -6,3 +6,5 @@ class MCVizParseError(Exception):
     """
 
 from event_graph import EventGraph
+from graph_view import GraphView
+
