@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from .orderedset import OrderedSet
 from .point import Point2D
 from .graph import walk
+from .logger import set_logger_level, get_logger
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."

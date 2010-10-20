@@ -4,7 +4,7 @@ from ..styles import apply_style
 
 from painters import GraphvizPainter
 
-from logging import getLogger; log = getLogger("svg_painter")
+from ..utils import get_logger; log = get_logger("svg_painter")
 
 class SVGPainter(GraphvizPainter):
 

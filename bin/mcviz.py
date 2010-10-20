@@ -18,15 +18,18 @@
 from os.path import basename
 from textwrap import dedent
 
-from logging import getLogger; log = getLogger("mcviz")
-
 from mcviz import EventGraph, GraphView, parse_options
 from mcviz.tools import apply_tool, tag
 from mcviz.painters import get_painter
 
+from mcviz.utils import set_logger_level, get_logger 
+
 def main(argv):
     options, args = parse_options(argv)
-   
+
+    set_logger_level(options.quiet, options.verbose)
+    log = get_logger("mcviz")
+
     # Activate the python debugger if requested
     if options.debug:
         from IPython.Shell import IPShellEmbed
@@ -73,9 +76,7 @@ def main(argv):
 
 if __name__ == "__main__":
 
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    
+
     from sys import argv, exit
     if "--profile" in argv:
         try:

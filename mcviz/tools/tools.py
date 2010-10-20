@@ -2,7 +2,7 @@ from functools import wraps
 
 from ..view_object import Summary
 
-from logging import getLogger; log = getLogger("event_graph")
+from ..utils import get_logger; log = get_logger("event_graph")
 
 def retrying(func):
     """

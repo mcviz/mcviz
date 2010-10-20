@@ -4,7 +4,7 @@ from ..layouts import get_layout
 from ..styles import apply_style
 from ..graphviz import run_graphviz
 
-from logging import getLogger; log = getLogger("painter")
+from ..utils import get_logger; log = get_logger("painter")
 
 class Painter(object):
     def __init__(self, graph_view, output_file, options):
