@@ -1,0 +1,27 @@
+from setuptools import setup
+from textwrap import dedent
+
+version = "0.1"
+
+setup(name='mcviz',
+      version=version,
+      description="mcviz",
+      long_description=dedent("""
+          `MCViz` is intended to be a tool for novices to have a quick play 
+          around in, or for more serious users and people who need to explore 
+          generator information to make sense of what is going on.
+      """).strip(),      
+      classifiers=[
+        'Development Status :: 1 - Alpha',
+        'Intended Audience :: Physicists :: Developers',
+        'GNU Affero General Public License v3',
+      ],
+      keywords='mcviz hep montecarlo hepmc graphviz svg visualization',
+      author='Johannes Ebke and Peter Waller',
+      author_email='dev@mcviz.net',
+      url='http://mcviz.net',
+      license='Affero GPLv3',
+      py_modules=['mcviz'],
+      packages=['mcviz'],
+      scripts=['bin/mcviz'],
+      )
