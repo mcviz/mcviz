@@ -44,7 +44,7 @@ def main(argv):
     log.info("This program comes with ABSOLUTELY NO WARRANTY - ")
     log.info("including no guarantee for correctness (aka. validation)")
     log.info("This is free software, and you are welcome to redistribute it")
-    log.info("under the conditions of the GNU GPL version 3")
+    log.info("under the conditions of the GNU AGPL version 3")
     log.info("-------------------------------------------------------------")
     
     # Load the first event from the given file 
