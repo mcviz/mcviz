@@ -53,11 +53,10 @@ def get_option_parser():
     o = g.add_option
 
     o("-F", "--fix-initial", action="store_true",
-      help="Fix the initial vertex positions.")
+      help="Fix the initial vertex positions. Requires resolution to be set if you use 'fdp'")
 
-    o("--stretch", default=20, type=float,
-      help="Ranges from 0 to width/2. 0 pulls the initial particles apart the "
-           "furthest.")
+    o("--stretch", default=0.2, type=float,
+      help="Ranges from 0 to 1; 0 pulls the initial particles apart the furthest.")
 
     o("--label-size", type=float, default=1.,
       help="scale of the labels in the output SVG file")
@@ -71,16 +70,15 @@ def get_option_parser():
     #
     # Control the output file options
     #
-    o("-o", "--output-file", type="string", default="mcviz.svg",
+    o("-o", "--output-file", type=str, default="mcviz.svg",
       help="Output file for graph. (known file extensions: %s) "
            "Note: Currently output as SVG is best by far" % ", ".join(list_extensions()))
 
-    o("--ratio", default="0.5", 
-      help="Ratio of output canvas")
+    o("--ratio", type=float, help="aspect ratio of output canvas")
       
-    o("--width", default=100, type=float, help="Width of the output file in pixels")
+    o("--width", default=100, type=int, help="Width of the output file in pixels")
 
-    o("--resolution", default="800x400", metavar="800x600",
+    o("--resolution", metavar="800x400",
             type=str, help="Resolution of the output file in pixels")
 
       
@@ -114,7 +112,4 @@ def parse_options(argv=None):
     result = options, args = p.parse_args(argv)
     options.extra_gv_options = extra_gv_options
 
-    #if options.svg and not options.layout_engine:
-    #    options.layout_engine = "dot"
-        
     return result

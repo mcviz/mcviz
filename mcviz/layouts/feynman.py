@@ -20,12 +20,11 @@ class FeynmanLayout(BaseLayout):
                 sg_options = self.subgraph_options.setdefault("initial", [])
                 sg_options.append('rank="source"')
                 pair = i // 2
-                stretch = self.options.stretch
-                width = self.options.width
-                height = width * float(self.options.ratio)
-                xposition = stretch + (i % 2) * (width - 2 * stretch)
-                yposition = (1 + pair) * height / (initial_pairs + 1)
-                p.dot_args["pos"] = "%s,%s!" % (xposition, yposition)
+                if self.width and self.height:
+                    stretch = self.options.stretch * self.width / 2.0
+                    xposition = stretch + (i % 2) * (self.width - 2 * stretch)
+                    yposition = (1 + pair) * self.height / (initial_pairs + 1)
+                    p.dot_args["pos"] = "%s,%s!" % (xposition, yposition)
         
         # sort the edges
         def ordering(edge): 
@@ -100,9 +99,8 @@ class FixedHadronsLayout(FeynmanLayout):
     """
     def process(self):
 
-        if self.options.fix_initial:
-            sg_options = self.subgraph_options.setdefault("hadronization", [])
-            sg_options.append('rank="same"')
+        sg_options = self.subgraph_options.setdefault("hadronization", [])
+        sg_options.append('rank="same"')
         
         return super(FixedHadronsLayout, self).process()
         

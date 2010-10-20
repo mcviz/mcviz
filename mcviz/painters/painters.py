@@ -1,3 +1,5 @@
+from __future__ import division
+
 from os.path import basename
 
 from ..layouts import get_layout
@@ -13,12 +15,27 @@ class Painter(object):
         self.options = options
         self.extension = basename(output_file).split(".")[-1]
 
+        # resolve resolutions
+        self.ratio = options.ratio
+        self.res_x, self.res_y = None, None
+        if options.resolution:
+            try:
+                self.res_x, self.res_y = map(int, options.resolution.split("x"))
+            except ValueError:
+                log.fatal("resolution must be given as AxB, i.e. 800x400")
+                raise Exception()
+            self.ratio = self.res_y / self.res_x
+        elif options.width:
+            self.res_x = options.width
+            if self.ratio:
+                self.res_y = int(self.ratio*self.res_x)
+
     def layout(self):
         # Get the specified layout class and create a layout of the graph
         log.verbose('applying layout classes %s' % self.options.layout)
         layout_class = get_layout(self.options.layout)
         with timer("to layout the graph", log.VERBOSE):
-            self.layout = layout_class(self.graph, self.options)
+            self.layout = layout_class(self.graph, self.res_x, self.res_y, self.ratio, self.options)
 
     def style(self):
         # Apply any specified styles onto the layouted graph
@@ -34,6 +51,7 @@ class Painter(object):
             print data_string
         else:
             # Write the data to file otherwise
+            log.info('writing "%s"' % self.output_file)
             with open(self.output_file, "w") as f:
                 f.write(data_string)
 

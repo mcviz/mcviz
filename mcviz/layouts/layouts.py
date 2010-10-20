@@ -14,13 +14,14 @@ class BaseLayout(object):
     Class that encapsulates the layout and styling information of the graph
     """
 
-    def __init__(self, graph, options):
+    def __init__(self, graph, width, height, ratio, options):
         self.options = options
         self.subgraphs = {None: []}
         self.subgraph_options = {}
         self.edges = []
-        self.width, self.height, self.scale = None, None, 1.0
-            
+        self.width, self.height, self.scale = width, height, 1.0
+        self.ratio = ratio
+
         # Label particles by id if --show-id is on the command line.
         if "id" in self.options.subscript:
             def label_particle_no(particle):
@@ -79,12 +80,11 @@ class BaseLayout(object):
     def dot(self):
         out = ["digraph pythia {"]
         out.append(self.options.extra_dot)
-        if self.options.fix_initial:
-            width = self.options.width
-            height = width * float(self.options.ratio)
-            stretch = self.options.stretch
-            out.append('size="%s,%s!";' % (width, height))
-        out.append("ratio=%s;" % self.options.ratio)
+        if self.width and self.height:
+            out.append('size="%s,%s!";' % (self.width, self.height))
+        if self.ratio:
+            out.append("ratio=%s;" % self.ratio)
+
         out.append("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
 
         for name in self.subgraph_names:
