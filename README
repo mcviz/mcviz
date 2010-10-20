@@ -34,7 +34,7 @@ You will need:
 
 The easy way:
     $ mkdir mcviz && cd mcviz
-    $ wget http://github.com/pwaller/mcviz/raw/dev/mcviz_bootstrap.py
+    $ wget (http://github.com/pwaller/mcviz/raw/dev/mcviz_bootstrap.py)[http://github.com/pwaller/mcviz/raw/dev/mcviz_bootstrap.py]
     $ ./bootstrap.py # Creates a [virtualenv](http://virtualenv.openplans.org/) 
                      # environment the current working directory where mcviz will 
                      # be installed.
