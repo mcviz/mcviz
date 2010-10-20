@@ -1,5 +1,6 @@
 
-from painters import GraphvizPainter, DOTPainter, SVGPainter
+from painters import GraphvizPainter, DOTPainter
+from svg import SVGPainter
 
 # List of known painters
 painters = {}
