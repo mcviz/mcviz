@@ -11,6 +11,7 @@ from .orderedset import OrderedSet
 from .point import Point2D
 from .graph import walk
 from .logger import set_logger_level, get_logger
+from .timer import timer
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."

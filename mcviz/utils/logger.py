@@ -21,7 +21,7 @@ def formatter_message(message, use_color = True):
 COLORS = {
     'DEBUG'   : BLUE,
     'VERBOSE' : WHITE,
-    'INFO'    : WHITE,
+    'INFO'    : YELLOW,
     'WARNING' : YELLOW,
     'ERROR'   : RED,
     'FATAL'   : RED,
@@ -44,6 +44,14 @@ class ColoredLogger(logging.Logger):
     FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s"
     COLOR_FORMAT = formatter_message(FORMAT, True)
 
+    # define commonly used constants
+    FATAL = logging.CRITICAL
+    ERROR = logging.ERROR
+    WARNING = logging.WARNING
+    INFO = logging.INFO
+    VERBOSE = VERBOSE_LEVEL
+    DEBUG = logging.DEBUG
+
     def __init__(self, name, level):
         logging.Logger.__init__(self, name, level)
         color_formatter = ColoredFormatter(self.COLOR_FORMAT)
@@ -51,11 +59,11 @@ class ColoredLogger(logging.Logger):
         console.setFormatter(color_formatter)
         self.addHandler(console)
 
-    def verbose(self, message):
-        self.log(VERBOSE_LEVEL, message)
+    def verbose(self, *args):
+        self.log(VERBOSE_LEVEL, *args)
 
-    def fatal(self, message):
-        self.critical(message)
+    def fatal(self, *args):
+        self.critical(*args)
 
 all_loggers = []
 

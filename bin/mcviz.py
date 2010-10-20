@@ -22,7 +22,7 @@ from mcviz import EventGraph, GraphView, parse_options
 from mcviz.tools import apply_tool, tag
 from mcviz.painters import get_painter
 
-from mcviz.utils import set_logger_level, get_logger 
+from mcviz.utils import set_logger_level, get_logger, timer
 
 def main(argv):
     options, args = parse_options(argv)
@@ -39,38 +39,53 @@ def main(argv):
         print "Please specify an HepMC file or Pythia log file to run on. Use --help for help."
         return -1
 
+    log.info("-------------------------------------------------------------")
     log.info("MCViz Copyright (C) 2010 Peter Waller & Johannes Ebke")
     log.info("This program comes with ABSOLUTELY NO WARRANTY - ")
     log.info("including no guarantee for correctness (aka. validation)")
     log.info("This is free software, and you are welcome to redistribute it")
     log.info("under the conditions of the GNU GPL version 3")
+    log.info("-------------------------------------------------------------")
     
     # Load the first event from the given file 
-    event_graph = EventGraph.load(args[1])
+    filename = args[1]
+    log.verbose('trying to read the first event from "%s"' % filename)
+    with timer('to read one event from "%s"' % filename):
+        event_graph = EventGraph.load(filename)
+    log.info('drawing the first event from "%s" to "%s"' % (filename, options.output_file))
 
     # Create a view of the graph
+    log.debug('creating a graph view')
     graph_view = GraphView(event_graph)
 
     # Apply view tools on it
-    for tool in options.tool:
-        log.debug('applying tool: %s' % tool)
-        apply_tool(tool, graph_view)
+    
+    with timer("to apply all tools", log.VERBOSE):
+        for tool in options.tool:
+            log.verbose('applying tool: %s' % tool)
+            with timer('to apply %s' % tool):
+                apply_tool(tool, graph_view)
 
-    # Apply all Taggers on the graph
-    tag(graph_view)
+        # Apply all Taggers on the graph
+        log.debug('tagging graph')
+        with timer('to tag the graph'):
+            tag(graph_view)
    
     # Determine which Painter gets to paint this graph
     outfile_extension = basename(options.output_file).split(".")[-1]
     painter_class = get_painter(options.painter, outfile_extension)
-    log.info("requested painter '%s' extension '%s' ; got class '%s'" % 
-            (options.painter, outfile_extension, painter_class.__name__ ))
+    log.debug("file extension '%s', using painter class '%s'" % 
+                (outfile_extension, painter_class.__name__ ))
     if painter_class is None:
         log.error("Unknown output file extension: %s" % outfile_extension)
         return -1
 
     # Create a painter and paint
+    log.debug('creating painter class')
     painter = painter_class(graph_view, options.output_file, options)
-    painter.paint()
+    log.verbose('painting the graph')
+    with timer('to paint the graph', log.VERBOSE):
+        painter.paint()
 
     return 0
 
