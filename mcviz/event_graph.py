@@ -30,6 +30,9 @@ class EventGraph(object):
                 return loader(filename)
             except MCVizParseError:
                 log.debug("loader %s failed" % loader.__name__)
+            except IOError:
+                log.fatal('loading file "%s" failed!' % filename)
+                raise
                 
         raise MCVizParseError("No loaders succeeded")
     

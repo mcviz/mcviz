@@ -4,7 +4,7 @@ from ..layouts import get_layout
 from ..styles import apply_style
 from ..graphviz import run_graphviz
 
-from ..utils import get_logger; log = get_logger("painter")
+from ..utils import set_logger_level, get_logger, timer; log = get_logger("painter")
 
 class Painter(object):
     def __init__(self, graph_view, output_file, options):
@@ -15,16 +15,18 @@ class Painter(object):
 
     def layout(self):
         # Get the specified layout class and create a layout of the graph
+        log.verbose('applying layout classes %s' % self.options.layout)
         layout_class = get_layout(self.options.layout)
-        self.layout = layout_class(self.graph, self.options)
+        with timer("to layout the graph", log.VERBOSE):
+            self.layout = layout_class(self.graph, self.options)
 
     def style(self):
         # Apply any specified styles onto the layouted graph
-        for style in self.options.style:
-
-            log.debug('applying style: %s' % style)
-            apply_style(style, self.layout)
-            print self.layout.edges[0].style_args
+        with timer("to apply all styles", log.VERBOSE):
+            for style in self.options.style:
+                log.verbose('applying style: %s' % style)
+                with timer('to apply %s' % style):
+                    apply_style(style, self.layout)
 
     def write_data(self, data_string):
         # Dump the data to stdout if required

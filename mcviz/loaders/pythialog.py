@@ -71,7 +71,7 @@ def make_pythia_graph(records):
             vertex_dict[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
             if len(particle.mothers) == 0:
                 # this is the system vertex
-                log.error("No mothers: %s, %s", particle.no, particle)
+                log.error("particle %s has no mothers: %s", particle.no, particle)
         else: # initial state vertex
             vno += 1
             vertex_dict[particle] = Vertex(vno, [], [particle])
@@ -81,7 +81,7 @@ def make_pythia_graph(records):
             vno += 1
             vertex_dict[particle] = Vertex(vno, [particle], [])
         if particle.initial_state:
-            log.debug("INITIAL PARTICLE: %s, %s", particle.no, particle.name)
+            log.verbose("found initial particle: %s, %s", particle.no, particle.name)
             
     # Connect particles to their vertices
     for vertex in vertex_dict.itervalues():

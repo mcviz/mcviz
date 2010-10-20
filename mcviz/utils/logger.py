@@ -1,3 +1,4 @@
+import os
 import logging
 
 log_level = logging.INFO
@@ -56,7 +57,8 @@ class ColoredLogger(logging.Logger):
         logging.Logger.__init__(self, name, level)
         color_formatter = ColoredFormatter(self.COLOR_FORMAT)
         console = logging.StreamHandler()
-        console.setFormatter(color_formatter)
+        if os.isatty(console.stream.fileno()):
+            console.setFormatter(color_formatter)
         self.addHandler(console)
 
     def verbose(self, *args):
