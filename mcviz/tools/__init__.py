@@ -2,13 +2,13 @@ from tools import contract_jets, remove_kinks, gluballs, chainmail, contract_loo
 from tagging import tag
 
 tools = {}
-tools["kinks"] = remove_kinks
-tools["gluballs"] = gluballs
-tools["chainmail"] = chainmail
-tools["jets"] = contract_jets
-tools["loops"] = contract_loops
-tools["pluck"] = pluck
-tools["unsummarize"] = unsummarize
+tools["Kinks"] = remove_kinks
+tools["Gluballs"] = gluballs
+tools["Chainmail"] = chainmail
+tools["Jets"] = contract_jets
+tools["Loops"] = contract_loops
+tools["Pluck"] = pluck
+tools["Unsummarize"] = unsummarize
 
 def list_tools():
     return sorted(tools.keys())

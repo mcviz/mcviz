@@ -1,15 +1,15 @@
 from dual import DualLayout
-from feynman import FeynmanLayout, FixedHadronsLayout, CombinedLayout
+from feynman import FeynmanLayout, FixedHadronsLayout, InlineLabelsLayout
 from phi import PhiLayout
 from new import classobj
 
 layouts = {}
-layouts["dual"] = DualLayout
-layouts["feynman"] = FeynmanLayout
-layouts["phi"] = PhiLayout
-layouts["fixhad"] = FixedHadronsLayout
-layouts["combined"] = CombinedLayout
-default = "feynman"
+layouts["Dual"] = DualLayout
+layouts["Feynman"] = FeynmanLayout
+layouts["Phi"] = PhiLayout
+layouts["Fixhad"] = FixedHadronsLayout
+layouts["InlineLabels"] = InlineLabelsLayout
+default = "InlineLabels"
 
 def list_layouts():
     return sorted(layouts.keys())

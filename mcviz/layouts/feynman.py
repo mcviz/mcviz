@@ -115,11 +115,11 @@ class FixedHadronsLayout(FeynmanLayout):
             return "hadronization"
         return super(FixedHadronsLayout, self).get_subgraph(vertex)
 
-class CombinedLayout(FeynmanLayout):
+class InlineLabelsLayout(FeynmanLayout):
     
     def get_particle(self, particle):
             
-        down = super(CombinedLayout, self).get_particle(particle)
+        down = super(InlineLabelsLayout, self).get_particle(particle)
         if down.item.gluon or down.item.photon:
             return down
         

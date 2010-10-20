@@ -1,6 +1,6 @@
 from ..svg import SVGDocument
 from ..svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
-from ..styles import apply_style
+from ..styles import svg
 
 from painters import GraphvizPainter
 
@@ -21,7 +21,7 @@ class SVGPainter(GraphvizPainter):
 
     def paint(self):
         self.layout()
-        apply_style("svg", self.layout)
+        svg(self.layout) # apply svg style
         self.style()
         engine = self.options.layout_engine
         engine = engine if engine else "dot"
