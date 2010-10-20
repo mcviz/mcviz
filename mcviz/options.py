@@ -42,9 +42,6 @@ def get_option_parser():
       default="dot",
       help="If specified, pipes output through specified graphviz engine")
 
-    o("--svg", action="store_true",
-      help="create an SVG from the layout using the internal SVG painter")
-
     o("--label-size", type=float, default=1.,
       help="scale of the labels in the output SVG file")
     
@@ -57,15 +54,13 @@ def get_option_parser():
     o("-F", "--fix-initial", action="store_true",
       help="Fix the initial vertex positions.")
       
-    # These two only have an effect if fix_initial is on.
     o("--width", default=100, type=float, help="Arbitrary units.")
+
+    # This one only has an effect if fix_initial is on.
     o("--stretch", default=20, type=float,
       help="Ranges from 0 to width/2. 0 pulls the initial particles apart the "
            "furthest.")
-    
-    o("-U", "--use-unicode", action="store_true",
-      help="Use unicode for labels. (Default False)")
-    
+
     o("--profile", action="store_true", 
       help="Turn on profiling (requires bootstrap_extenv to have been run)")
 
