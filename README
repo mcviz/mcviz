@@ -17,8 +17,8 @@ we could see the connections between everything before our eyes.
 .. very quickly we found ourselves knee-deep in ideas and desire to explore the
 beautiful mess infront of us. `MCViz` is the result of our exploration.
 
-`MCViz` is intended to really be a tool for novices to have a quick play around 
-in, or for more serious users and people who need to explore generator information
+`MCViz` is intended to be a tool for novices to have a quick play around in, or 
+for more serious users and people who need to explore generator information
 to make sense of what is going on.
 
 Getting Started
@@ -29,7 +29,8 @@ You will need:
 * [graphviz](http://graphviz.org). (Present on [lxplus](http://plus.web.cern.ch/plus/)
 * An SVG viewer. (We recommend [Inkscape](http://inkscape.org))
 * Life will be easier if you have a linux machine, since this is what we have 
-  developed and tested it on.
+  developed and tested it on. ([Feedback](http://github.com/pwaller/mcviz/issues) 
+  is encouraged and welcome !)
 
 The easy way:
     $ mkdir mcviz && cd mcviz
