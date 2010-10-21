@@ -51,7 +51,7 @@ def main(argv):
     # Load the first event from the given file 
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)
-    with timer('to read one event from "%s"' % filename):
+    with timer('read one event from "%s"' % filename):
         event_graph = EventGraph.load(filename)
     log.info('drawing the first event from "%s" to "%s"' % (filename, options.output_file))
 
@@ -61,15 +61,15 @@ def main(argv):
 
     # Apply view tools on it
     
-    with timer("to apply all tools", log.VERBOSE):
+    with timer("apply all tools", log.VERBOSE):
         for tool in options.tool:
             log.verbose('applying tool: %s' % tool)
-            with timer('to apply %s' % tool):
+            with timer('apply %s' % tool):
                 apply_tool(tool, graph_view)
 
         # Apply all Taggers on the graph
         log.debug('tagging graph')
-        with timer('to tag the graph'):
+        with timer('tag the graph'):
             tag(graph_view)
    
     # Determine which Painter gets to paint this graph
@@ -85,7 +85,7 @@ def main(argv):
     log.debug('creating painter class')
     painter = painter_class(graph_view, options.output_file, options)
     log.verbose('painting the graph')
-    with timer('to paint the graph', log.VERBOSE):
+    with timer('paint the graph', log.VERBOSE):
         painter.paint()
 
     return 0

@@ -32,7 +32,7 @@ class SVGPainter(GraphvizPainter):
         plain = self.graphviz_pass(engine, opts, self.layout.dot)
         self.layout.update_from_plain(plain)
     
-        with timer("to create the SVG document"):
+        with timer("create the SVG document"):
             self.doc = SVGDocument(self.layout.width, self.layout.height, self.layout.scale)
             for edge in self.layout.edges:
                 if not edge.spline:

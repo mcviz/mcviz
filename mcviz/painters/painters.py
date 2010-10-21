@@ -32,17 +32,17 @@ class Painter(object):
 
     def layout(self):
         # Get the specified layout class and create a layout of the graph
-        log.verbose('applying layout classes %s' % self.options.layout)
+        log.verbose("applying layout classes %s" % self.options.layout)
         layout_class = get_layout(self.options.layout)
-        with timer("to layout the graph", log.VERBOSE):
+        with timer("layout the graph", log.VERBOSE):
             self.layout = layout_class(self.graph, self.res_x, self.res_y, self.ratio, self.options)
 
     def style(self):
         # Apply any specified styles onto the layouted graph
-        with timer("to apply all styles", log.VERBOSE):
+        with timer("apply all styles", log.VERBOSE):
             for style in self.options.style:
-                log.verbose('applying style: %s' % style)
-                with timer('to apply %s' % style):
+                log.verbose("applying style: %s" % style)
+                with timer("apply %s" % style):
                     apply_style(style, self.layout)
 
     def write_data(self, data_string):
@@ -89,7 +89,7 @@ class GraphvizPainter(Painter):
 
         # Process the DOT data with graphviz
         log.verbose("Calling '%s' with options %s" % (engine, graphviz_options))
-        with timer("to run graphviz", log.VERBOSE):
+        with timer("run graphviz", log.VERBOSE):
             output, errors = run_graphviz(engine, dot_data, graphviz_options)
         errors = map(str.strip, errors.split("\n"))
         errors = filter(lambda e : e and not "Warning: gvrender" in e, errors)
