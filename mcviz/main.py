@@ -59,6 +59,8 @@ def main(argv):
     log.debug('creating a graph view')
     graph_view = GraphView(event_graph)
 
+    log.debug("Graph state (before tools): %s", graph_view)
+    
     # Apply view tools on it
     
     with timer("apply all tools", log.VERBOSE):
@@ -71,6 +73,8 @@ def main(argv):
         log.debug('tagging graph')
         with timer('tag the graph'):
             tag(graph_view)
+    
+    log.debug("Graph state (after tools): %s", graph_view)
    
     # Determine which Painter gets to paint this graph
     outfile_extension = basename(options.output_file).split(".")[-1]

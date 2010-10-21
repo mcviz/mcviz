@@ -16,6 +16,13 @@ class GraphView(object):
             ViewParticleSingle(self, p)
 
         self.init_cache()
+        
+    def __str__(self):
+        args = (sum(isinstance(p, ViewParticleSingle) for p in self.p_map.values()),
+                sum(isinstance(v, ViewVertexSingle) for v in self.v_map.values()),
+                sum(isinstance(p, ViewParticleSummary) for p in self.p_map.values()),
+                sum(isinstance(v, ViewVertexSummary) for v in self.v_map.values()))
+        return "GraphView contains: %i particles, %i vertices (%i, %i summarized)" % args
 
     def init_cache(self):
         """ cache input graph topology """
