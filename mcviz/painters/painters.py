@@ -47,6 +47,7 @@ class Painter(object):
 
     def write_data(self, data_string):
         # Dump the data to stdout if required
+        log.debug("data hash: 0x%0X", hash(data_string))
         if self.output_file == "-":
             print data_string
         else:
@@ -83,9 +84,13 @@ class Painter(object):
 
 class GraphvizPainter(Painter):
     def graphviz_pass(self, engine, graphviz_options, dot_data):
+        log.debug("dot_data hash: 0x%0X", hash(dot_data))
+    
         # Dump the whole dot file before passing it to graphviz if requested
         if self.options.dump_dot:
-            log.debug("Data passed to %s:\n%s" % (engine, dot_data))
+            log.debug("Data passed to %s:" % engine)
+            # TODO: flush log FD
+            print dot_data
 
         # Process the DOT data with graphviz
         log.verbose("Calling '%s' with options %s" % (engine, graphviz_options))
