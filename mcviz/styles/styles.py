@@ -1,3 +1,4 @@
+from math import log
 
 def subscripts(layout):
     # Label particles by id if --show-id is on the command line.
@@ -69,4 +70,10 @@ def fancylines(layout):
             edge.style_line_type = "boson"
         else:
             edge.style_line_type = "hadron"
+            
+def linewidth_pt(layout):
+    for edge in layout.edges:
+        particle = edge.item
+        particle.subscripts.append("%.3f" % particle.item.pt)
+        edge.style_args["stroke-width"] = log(particle.pt+1)*0.1+0.01
 
