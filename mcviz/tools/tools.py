@@ -1,4 +1,5 @@
 from functools import wraps
+from collections import defaultdict
 
 from ..view_object import Summary
 
@@ -29,6 +30,7 @@ def remove_kinks(graph_view):
     These are, for example, recoil vertices in pythia events which are the
     particle recoiling against the whole event.
     """
+    pdgid_changes = defaultdict(int)
     for vertex in graph_view.vertices:
         if not (len(vertex.incoming) == 1 and len(vertex.outgoing) == 1):
             # Only consider particles with one particle entering and exiting
@@ -43,7 +45,11 @@ def remove_kinks(graph_view):
             # Oops, we have a particle changing pdgid on the way through.. 
             # It could be a graph inconsistency or it could be a K meson. Warn.
             arg = list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid
-            log.debug("kink removal: observed pdgid %s changing into pdgid %s" % arg)
+            pdgid_changes[arg] += 1
+            
+    for change, count in sorted(pdgid_changes.iteritems()):
+        arg = change + (count,)
+        log.debug("kink removal: observed pdgid %s change to %s %i time(s)" % arg)
 
 @retrying
 def gluballs(graph_view, Retry):
