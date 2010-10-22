@@ -32,6 +32,7 @@ from xml.dom import minidom
 from shutil import rmtree
 from textwrap import dedent
 from cPickle import dumps, loads
+from pkg_resources import resource_string, resource_exists
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
@@ -64,7 +65,8 @@ PARTICLE_MATCH = re.compile(r"".join(re_groups))
 
 def read_pythia_particle_db():
     particles = {}
-    particle_data = minidom.parse("mcviz/svg/ParticleData.xml")
+    xml_data = resource_string("mcviz.svg", "ParticleData.xml")
+    particle_data = minidom.parseString(xml_data)
     for particle in particle_data.getElementsByTagName("particle"):
         name = particle.getAttribute("name")
         antiName = particle.getAttribute("antiName")
@@ -225,17 +227,18 @@ class TexGlyph(object):
 
     @classmethod
     def get_library(cls):
-        fn = "mcviz/svg/texglyph.cache"
-        if not cls.library:
-            try:
-                if os.path.exists(fn + ".bz2"):
-                    cls.library = loads(file(fn+".bz2").read().decode("bz2"))
-                else:
-                    cls.library = loads(file(fn).read())
-            except IOError:
-                cls.make_library()
-                with file(fn, "w") as f:
-                    f.write(dumps(cls.library, 2))
+        if cls.library:
+            return cls.library
+        
+        if resource_exists("mcviz.svg", "texglyph.cache.bz2"):
+            cls.library = loads(resource_string("mcviz.svg", "texglyph.cache.bz2").decode("bz2"))
+        elif resource_exists("mcviz.svg", "texglyph.cache"):
+            cls.library = loads(resource_string("mcviz.svg", "texglyph.cache"))
+        else:
+            cls.make_library()
+            with file(fn, "w") as f:
+                f.write(dumps(cls.library, 2))
+                
         return cls.library
 
     @classmethod
