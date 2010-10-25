@@ -32,7 +32,7 @@ class SVGDocument(object):
         self.scale = scale
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
         self.svg = XMLNode("svg", 'version="1.1" viewBox="%s" '\
-                        'xmlns="http://www.w3.org/2000/svg"'\
+                        'xmlns="http://www.w3.org/2000/svg" '\
                         'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
         self.defs = XMLNode("defs")
         self.svg.appendChild(self.defs)
