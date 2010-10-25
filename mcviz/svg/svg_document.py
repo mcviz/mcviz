@@ -29,23 +29,21 @@ class RawNode(XMLNode):
 class SVGDocument(object):
     def __init__(self, wx, wy, scale = 1):
 
+        self.scale = scale
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
-        self.root = XMLNode("svg", 'version="1.1" viewBox="%s" '\
+        self.svg = XMLNode("svg", 'version="1.1" viewBox="%s" '\
                         'xmlns="http://www.w3.org/2000/svg"'\
                         'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
-
-        if scale != 1:
-            g = XMLNode("g", 'transform="scale(%.5f)"' % scale)
-            self.root.appendChild(g)
-            self.svg = g
-        else:
-            self.svg = self.root
-
         self.defs = XMLNode("defs")
         self.svg.appendChild(self.defs)
 
     def add_glyph(self, pdgid, center, font_size, subscript = None):
         x, y = center
+
+        # Total scale
+        font_size *= self.scale
+        x *= self.scale
+        y *= self.scale
 
         if not TexGlyph.exists(pdgid):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
@@ -105,8 +103,12 @@ class SVGDocument(object):
         self.svg.appendChild(txt)
 
     def add_object(self, element):
+        if element.getAttribute("transform"):
+            raise
+        else:
+            element.setAttribute("transform", "scale(%.3f)" % (self.scale))
         self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return "".join(['<?xml version="1.0" ?>', str(self.root)])
+        return "".join(['<?xml version="1.0" ?>', str(self.svg)])
 
