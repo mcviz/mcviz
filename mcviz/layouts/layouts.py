@@ -80,6 +80,7 @@ class BaseLayout(object):
     def dot(self):
         out = ["digraph pythia {"]
         out.append(self.options.extra_dot)
+        out.append('dpi=1;')
         if self.width and self.height:
             out.append('size="%s,%s!";' % (self.width, self.height))
         if self.ratio:
