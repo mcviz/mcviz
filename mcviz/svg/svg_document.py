@@ -35,6 +35,7 @@ class SVGDocument(object):
                         'xmlns="http://www.w3.org/2000/svg" '\
                         'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
         self.defs = XMLNode("defs")
+        self.defined_pdgids = []
         self.svg.appendChild(self.defs)
 
     def add_glyph(self, pdgid, center, font_size, subscript = None):
@@ -49,8 +50,9 @@ class SVGDocument(object):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
 
         glyph = TexGlyph.from_pdgid(pdgid)
-        if not glyph.xml in self.defs.children:
+        if not pdgid in self.defined_pdgids:
             self.defs.appendChild(RawNode(glyph.xml))
+            self.defined_pdgids.append(pdgid)
 
         if False: #options.debug_labels:
             wx, wy = glyph.dimensions
