@@ -34,6 +34,12 @@ class SVGDocument(object):
         self.svg = XMLNode("svg", 'version="1.1" viewBox="%s" '\
                         'xmlns="http://www.w3.org/2000/svg" '\
                         'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
+        
+        # Adds a white background rect
+        self.svg.appendChild(RawNode('<rect x="0" y="0" width="%.1f" '
+                                     'height="%.1f" style="fill:white;" />'
+                                      % ((wx * scale), (wy * scale))))
+        
         self.defs = XMLNode("defs")
         self.defined_pdgids = []
         self.svg.appendChild(self.defs)
