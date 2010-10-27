@@ -1,12 +1,11 @@
-from styles import svg, simple, fancylines, linewidth_pt
-from color import color, rainbow
+from styles import svg_setup, simple_colors, fancylines, linewidth_pt
+from qcd import qcd_rgb, qcd_rainbow
 
 styles = {}
-styles["SVG"] = svg
-styles["Simple"] = simple
+styles["Color"] = simple_colors
 styles["FancyLines"] = fancylines
-styles["Color"] = color
-styles["Rainbow"] = rainbow
+styles["QCDColor"] = qcd_rgb
+styles["QCDRainbow"] = qcd_rainbow
 styles["LineWidthPt"] = linewidth_pt
 
 def list_styles():

@@ -12,7 +12,7 @@ def subscripts(layout):
         layout.annotate_particles(graph.particles, lambda p: p.color)
         layout.annotate_particles(graph.particles, lambda p: -p.anticolor)
 
-def svg(layout):
+def svg_setup(layout):
     edge_args = {}
     edge_args["energy"] = 0.2
     edge_args["stroke"] = "black"
@@ -28,7 +28,7 @@ def svg(layout):
     for node in layout.nodes:
         node.style_args.update(node_args)
 
-def simple(layout):
+def simple_colors(layout):
     """ just do some simple coloring of lines """
     for edge in layout.edges:
         particle = edge.item

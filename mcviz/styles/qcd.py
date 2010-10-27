@@ -2,7 +2,7 @@ from __future__ import division
 
 from random import shuffle
 
-def color(layout):
+def qcd_rgb(layout):
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))
@@ -10,7 +10,7 @@ def color(layout):
     amap = dict(zip(unique_colors, ["cyan", "magenta", "yellow"]*(len(unique_colors)//3+1)))
     set_color(layout, cmap, amap) 
 
-def rainbow(layout):
+def qcd_rainbow(layout):
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))
