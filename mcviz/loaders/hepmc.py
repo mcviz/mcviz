@@ -138,11 +138,12 @@ def load_event(ev):
 
     vno = min(vertices.keys()) - 1
         
-    for vertex_barcode, incoming_particles in vertex_incoming.iteritems():
+    for vertex_barcode in sorted(vertex_incoming.keys()):
+        incoming_particles = vertex_incoming[vertex_barcode]
         if not vertex_barcode:
             # Final state particle
             # Horrendous HACK, but I want it to work _now_
-            for p in incoming_particles:
+            for p in sorted(incoming_particles):
                 vertices[vno] = Vertex(vno, [p])
                 vno -= 1 
         else:
