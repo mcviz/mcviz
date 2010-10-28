@@ -52,6 +52,14 @@ def run(options, n_argv, args):
     log.info("under the conditions of the GNU AGPL version 3")
     log.info("-------------------------------------------------------------")
     
+    if options.demo:
+        from mcviz.utils.demo import run_demo
+        if n_argv != len(args) + 1:
+            log.warning("For --demo, all arguments are ignored except input "
+                        "files")
+        for input_file in args[1:]:
+            run_demo(input_file)
+    
     # Load the first event from the given file 
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)

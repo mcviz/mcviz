@@ -31,6 +31,9 @@ def get_option_parser():
 
     o("-v", "--verbose", action="count", help="Be more verbose. Specify -vv for debug output")
 
+    o("--demo", action="store_true", 
+      help="Create many demo svgs in the current directory (takes a while)")
+
     g = OptionGroup(p, "Additional Options", "")
     p.add_option_group(g)
     o = g.add_option
