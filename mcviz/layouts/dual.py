@@ -13,11 +13,15 @@ class DualLayout(BaseLayout):
     def get_particle(self, particle):
         lo = LayoutNode(particle)
         lo.subgraph = self.get_subgraph(particle)
-        lo.label = self.get_label_string(particle.pdgid)
+
+        lo.label = particle.pdgid
+        lo.label_size = self.options.label_size
          
         if particle.initial_state:
             # Big red initial vertices
             lo.width = lo.height = 1.0
+        elif "jet" in particle.tags:
+            lo.label = "jet (%.1f GeV)" % particle.pt
         
         return lo
    

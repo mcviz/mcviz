@@ -38,7 +38,8 @@ class FeynmanLayout(BaseLayout):
     def get_vertex(self, vertex, node_style=None):
 
         lo = LayoutNode(vertex, width = 0.1, height = 0.1)
-        lo.label = False
+        lo.label = None
+        lo.label_size = self.options.label_size
         lo.subgraph = self.get_subgraph(vertex)
 
         if node_style:
@@ -57,7 +58,7 @@ class FeynmanLayout(BaseLayout):
                 lo.width = 2 + n_gluons_in*0.5
                 lo.height = 1
                 lo.dot_args["shape"] = "record"
-                lo.dot_label = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
+                lo.dot_args["label"] = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
             else:
                 lo.width = lo.height = 1.0
             
@@ -73,13 +74,14 @@ class FeynmanLayout(BaseLayout):
     def get_particle(self, particle):
 
         lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
+        lo.label_size = self.options.label_size
 
         if "jet" in particle.tags:
             lo.label = "jet (%.1f GeV)" % particle.pt
         elif particle.gluon or particle.photon:
-            lo.label = ""
+            lo.label = None
         else:
-            lo.label = self.get_label_string(particle.pdgid)
+            lo.label = particle.pdgid
 
         lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
 
@@ -119,10 +121,10 @@ class InlineLabelsLayout(FeynmanLayout):
     def get_particle(self, particle):
             
         down = super(InlineLabelsLayout, self).get_particle(particle)
-        if down.item.gluon or down.item.photon or "jet" in down.item.tags:
+        if down.item.gluon or down.item.photon:
             return down
-        
-        middle = LayoutNode(down.item, label=self.get_label_string(down.item.pdgid))
+       
+        middle = LayoutNode(down.item, label=down.label)
         middle.show = False
         middle.dot_args["margin"] = "0,0"
         #middle.dot_args["shape"] = "square"
@@ -130,7 +132,7 @@ class InlineLabelsLayout(FeynmanLayout):
         
         up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
         down.coming = middle.item
-        up.label = down.label = ""
+        up.label = down.label = None
         up.port_going = None
         
         return [up, middle, down] 

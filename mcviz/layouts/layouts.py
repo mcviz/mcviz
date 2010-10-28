@@ -8,6 +8,7 @@ from ..svg import TexGlyph
 from ..graphviz import make_node, make_edge, PlainOutput
 from ..utils import latexize_particle_name, make_unicode_name, Point2D
 
+label_scale_factor = 72.0
 
 class BaseLayout(object):
     """
@@ -86,7 +87,7 @@ class BaseLayout(object):
         if self.ratio:
             out.append("ratio=%s;" % self.ratio)
 
-        out.append("edge [labelangle=90, fontsize=%.2f]" % (72*self.options.label_size))
+        out.append("edge [labelangle=90]")
 
         for name in self.subgraph_names:
             nodelist = self.subgraphs.get(name, [])
@@ -117,18 +118,6 @@ class BaseLayout(object):
                 node.center, size = data.nodes[node.item.reference]
                 node.width, node.height = size
     
-    def get_label_string(self, pdgid):
-        if TexGlyph.exists(pdgid):
-            w, h = TexGlyph.from_pdgid(pdgid).dimensions
-            w *= self.options.label_size
-            h *= self.options.label_size
-            table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
-            td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
-            label = table % td
-        else:
-            # a pure number here leads graphviz to ignore the edge
-            label = "|%i|" % pdgid
-        return label
 
     def annotate_particles(self, particles, annotate_function):
         """
@@ -144,9 +133,29 @@ class LayoutObject(object):
     def __init__(self, item):
         self.item = item
         self.show = True
-        self.label = True
-        self.dot_label = False # special dot_only label
+        self.label = None
+        self.label_size = 1.0
         self.style_args = {}
+
+    def get_label_string(self):
+        if self.label is None:
+            return ""
+        elif isinstance(self.label, str):
+            return self.label
+        elif isinstance(self.label, int):
+            if TexGlyph.exists(self.label):
+                w, h = TexGlyph.from_pdgid(self.label).dimensions
+                w *= self.label_size
+                h *= self.label_size
+                table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
+                td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
+                return table % td
+            else:
+                # a pure number here leads graphviz to ignore the edge
+                return "|%i|" % self.label
+        else:
+            return str(self.label) # WTF?
+        
 
 class LayoutEdge(LayoutObject):
     def __init__(self, item, coming, going, **args):
@@ -155,7 +164,6 @@ class LayoutEdge(LayoutObject):
         self.port_coming, self.port_going = None, None
         self.dot_args = {}
         self.spline = None
-        self.label = ""
         self.label_center = None
         self.args = args
         self.style_line_type = None
@@ -173,12 +181,18 @@ class LayoutEdge(LayoutObject):
             return ":".join((to, port)) if port else to 
         coming = join_port(self.coming.reference, self.port_coming)
         going = join_port(self.going.reference, self.port_going)
-        
+
+        kwargs = {}
+        if self.label_size is not None:
+            if self.label:# or ("label" in self.dot_args):
+                kwargs["fontsize"] = self.label_size * label_scale_factor
+        kwargs["label"] = self.get_label_string()
+        kwargs.update(self.dot_args)
+
         return make_edge(coming, going,
-            label=self.label,
             style=self.reference,
             arrowhead="none",
-            **self.dot_args
+            **kwargs
             # consider this for the future
             #constraint=not particle.decends_one)
         )
@@ -188,7 +202,6 @@ class LayoutNode(LayoutObject):
     def __init__(self, item, **args):
         super(LayoutNode, self).__init__(item)
         self.dot_args = {}
-        self.label = ""
         self.subgraph = None
         self.center = None
         self.width = self.height = None
@@ -197,14 +210,16 @@ class LayoutNode(LayoutObject):
 
     @property
     def dot(self):
-        kwargs = ({"width":self.width, "height":self.height} 
-                  if self.width and self.height else {})
+        kwargs = {}
+        if self.width and self.height:
+            kwargs["width"] = self.width
+            kwargs["height"] = self.height
+        kwargs["style"] = "" if self.show else "invis"
+        if self.label_size is not None:
+            if self.label:# or ("label" in self.dot_args):
+                kwargs["fontsize"] = self.label_size * label_scale_factor
+
+            kwargs["label"] = self.get_label_string()
         kwargs.update(self.dot_args)
-        if self.dot_label:
-            label = self.dot_label
-        elif self.label:
-            label = self.label
-        else:
-            label = ""
-        return make_node(self.item.reference, label=label, 
-            style="" if self.show else "invis", **kwargs)
+
+        return make_node(self.item.reference, **kwargs)

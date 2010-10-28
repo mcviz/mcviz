@@ -54,14 +54,9 @@ class SVGPainter(GraphvizPainter):
             self.doc.add_object(display_func(spline=edge.spline, **edge.style_args))
 
         if edge.label and edge.label_center:
-            if "<" in edge.label:
-                self.doc.add_glyph(edge.item.pdgid, edge.label_center,
-                               self.options.label_size,
-                               ", ".join(map(str, edge.item.subscripts)))
-            else:
-                self.doc.add_text_glyph(edge.label, edge.label_center,
-                               self.options.label_size,
-                               ", ".join(map(str, edge.item.subscripts)))
+            self.doc.add_glyph(edge.label, edge.label_center,
+                           self.options.label_size,
+                           ", ".join(map(str, edge.item.subscripts)))
 
 
     def paint_vertex(self, node):
@@ -70,9 +65,7 @@ class SVGPainter(GraphvizPainter):
                         **node.style_args)
             self.doc.add_object(vx)
            
-        if node.label and node.center:
-            # This needs fixing for the Feynman layout, if we want node labels.
-            self.doc.add_glyph(node.item.pdgid, node.center.tuple(),
+        if not node.label is None and node.center:
+            self.doc.add_glyph(node.label, node.center.tuple(),
                                self.options.label_size,
                                ", ".join(map(str, node.item.subscripts)))
-
