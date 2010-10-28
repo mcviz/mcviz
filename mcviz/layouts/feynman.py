@@ -44,7 +44,10 @@ class FeynmanLayout(BaseLayout):
         if node_style:
             lo.dot_args.update(node_style)
        
-        if "summary" in vertex.tags:
+        if vertex.final:
+            # Don't show final particle vertices
+            lo.show = False
+        elif "summary" in vertex.tags:
             lo.width = 1.0
             lo.height = 1.0
         elif vertex.hadronization:
@@ -61,11 +64,6 @@ class FeynmanLayout(BaseLayout):
         elif vertex.initial:
             # Big red initial vertices
             lo.width = lo.height = 1.0
-
-        elif vertex.final:
-            # Don't show final particle vertices
-            lo.show = False
-        
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
             lo.width = lo.height = nr_particles * 0.04
@@ -76,9 +74,12 @@ class FeynmanLayout(BaseLayout):
 
         lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
 
-        lo.label = self.get_label_string(particle.pdgid)
-        if particle.gluon or particle.photon:
+        if "jet" in particle.tags:
+            lo.label = "jet (%.1f GeV)" % particle.pt
+        elif particle.gluon or particle.photon:
             lo.label = ""
+        else:
+            lo.label = self.get_label_string(particle.pdgid)
 
         lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
 
@@ -118,7 +119,7 @@ class InlineLabelsLayout(FeynmanLayout):
     def get_particle(self, particle):
             
         down = super(InlineLabelsLayout, self).get_particle(particle)
-        if down.item.gluon or down.item.photon:
+        if down.item.gluon or down.item.photon or "jet" in down.item.tags:
             return down
         
         middle = LayoutNode(down.item, label=self.get_label_string(down.item.pdgid))
