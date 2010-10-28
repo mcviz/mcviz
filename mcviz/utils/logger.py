@@ -1,5 +1,6 @@
 import os
 import logging
+from contextlib import contextmanager
 
 log_level = logging.INFO
 VERBOSE_LEVEL = 15
@@ -69,8 +70,20 @@ class ColoredLogger(logging.Logger):
 
 all_loggers = []
 
-def set_logger_level(quiet, verbose):
+@contextmanager
+def log_level(level):
+    previous_levels = [(log, log.level) for log in all_loggers]
+    try:
+        for log in all_loggers:
+            log.setLevel(log_level)
+        yield
+    finally:
+        for logger, old_level in previous_levels:
+            logger.setLevel(old_level)
+
+def get_logger_level(quiet, verbose):
     global log_level
+    
     logging.addLevelName(VERBOSE_LEVEL, "VERBOSE")
     logging.addLevelName(logging.CRITICAL, "FATAL")
     if quiet:
@@ -81,9 +94,8 @@ def set_logger_level(quiet, verbose):
         log_level = VERBOSE_LEVEL
     elif verbose > 1:
         log_level = logging.DEBUG
-
-    for log in all_loggers:
-        log.setLevel(log_level)
+        
+    return log_level
 
 def get_logger(name):
     log = ColoredLogger(name, log_level)

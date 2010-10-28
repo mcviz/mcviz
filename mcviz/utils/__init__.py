@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from .orderedset import OrderedSet
 from .point import Point2D
 from .graph import walk
-from .logger import set_logger_level, get_logger
+from .logger import get_logger_level, log_level, get_logger
 from .timer import timer
 
 def fixup_unicodedata_name(x):

@@ -23,13 +23,17 @@ from mcviz import EventGraph, GraphView, parse_options
 from mcviz.tools import apply_tool, tag
 from mcviz.painters import get_painter
 
-from mcviz.utils import set_logger_level, get_logger, timer
+from mcviz.utils import get_logger_level, log_level, get_logger, timer
+log = get_logger("mcviz")
 
 def main(argv):
     options, args = parse_options(argv)
+    n_argv = len(argv[1:])
+    with timer("complete run"):
+        with log_level(get_logger_level(options.quiet, options.verbose)):
+            run(options, n_argv, args)
 
-    set_logger_level(options.quiet, options.verbose)
-    log = get_logger("mcviz")
+def run(options, n_argv, args):
 
     # Activate the python debugger if requested
     if options.debug:
