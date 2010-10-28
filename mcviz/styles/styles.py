@@ -1,4 +1,6 @@
 from math import log
+from ..view_particle import ViewParticle
+from ..view_vertex import ViewVertex
 
 def subscripts(layout):
     # Label particles by id if --show-id is on the command line.
@@ -28,23 +30,41 @@ def svg_setup(layout):
     for node in layout.nodes:
         node.style_args.update(node_args)
 
+def particle_color(particle):
+    if particle.gluon:
+        return "green"
+    elif particle.photon:
+        return "orange"
+    elif particle.colored:
+        if particle.color:
+            return "red"
+        else:
+            return "blue"
+    else:
+        return "black"
+
 def simple_colors(layout):
     """ just do some simple coloring of lines """
     for edge in layout.edges:
-        particle = edge.item
-        if particle.gluon:
-            edge.style_args["stroke"] = edge.style_args["fill"] = "green"
-        elif particle.photon:
-            edge.style_args["stroke"] = edge.style_args["fill"] = "orange"
-        elif particle.colored:
-            if particle.color:
-                edge.style_args["stroke"] = edge.style_args["fill"] = "red"
-            else:
-                edge.style_args["stroke"] = edge.style_args["fill"] = "blue"
-        elif particle.lepton:
-            edge.style_args["stroke"] = edge.style_args["fill"] = "black"
+        if isinstance(edge.item, ViewParticle):
+            edge.style_args["stroke"] = edge.style_args["fill"] = particle_color(edge.item)
         else:
-            edge.style_args["stroke"] = edge.style_args["fill"] = "black"
+            pass
+            # no coloring for vertices-as-lines
+
+    initial_color = "cyan"
+    for node in layout.nodes:
+        if isinstance(node.item, ViewVertex):
+            if node.item.initial:
+                node.style_args["fill"] = initial_color
+        else:
+            # label in Inline; particle in Dual
+            # fill will be ignored in inline
+            node.style_args["stroke"] = node.style_args["fill"] = particle_color(node.item)
+            node.style_args["fill"] = node.style_args["fill"].replace("black", "white")
+            if node.item.initial_state:
+                node.style_args["fill"] = initial_color
+
 
 def fancylines(layout):
     """ set fancy line types, curly gluons, wavy photons etc."""
