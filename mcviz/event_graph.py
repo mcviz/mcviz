@@ -34,7 +34,7 @@ class EventGraph(object):
                 log.fatal('loading file "%s" failed!' % filename)
                 raise
                 
-        raise MCVizParseError("No loaders succeeded")
+        raise MCVizParseError("No loaders succeeded on %s" % filename)
     
     @classmethod
     def from_hepmc(cls, filename):
