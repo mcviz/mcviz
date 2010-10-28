@@ -68,5 +68,7 @@ class OrderedSet(collections.MutableSet):
             return len(self) == len(other) and list(self) == list(other)
         return set(self) == set(other)
 
-    def __del__(self):
-        self.clear()                    # remove circular references
+    # We hope to never hit this..
+    # We only store simple types inside us. MutableSet.clear() is expensive..
+    # def __del__(self):
+        # self.clear()                    # remove circular references
