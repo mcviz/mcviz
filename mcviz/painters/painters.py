@@ -2,11 +2,12 @@ from __future__ import division
 
 from os.path import basename
 
+from logging import getLogger; log = getLogger("mcviz.painters")
+
 from ..layouts import get_layout
 from ..styles import apply_style
 from ..graphviz import run_graphviz
-
-from ..utils import get_logger, timer; log = get_logger("mcviz.painters")
+from ..utils import timer
 
 class Painter(object):
     def __init__(self, graph_view, output_file, options):

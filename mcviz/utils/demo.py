@@ -1,7 +1,8 @@
 from os.path import basename, exists
 
+from logging import getLogger; log = getLogger("mcviz.demo")
+
 from mcviz import main
-from logger import get_logger, log_level; log = get_logger("mcviz.demo")
 
 DEMOS = []
 define_demo = DEMOS.append

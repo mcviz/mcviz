@@ -1,10 +1,11 @@
+from logging import getLogger; log = getLogger("mcviz.painters.svg")
+
 from ..svg import SVGDocument
 from ..svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
 from ..styles import svg_setup
+from ..utils import timer
 
 from painters import GraphvizPainter
-
-from ..utils import get_logger, timer; log = get_logger("mcviz.painters.svg")
 
 class SVGPainter(GraphvizPainter):
 

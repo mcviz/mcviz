@@ -1,9 +1,9 @@
 from functools import wraps
 from collections import defaultdict
 
-from ..view_object import Summary
+from logging import getLogger; log = getLogger("mcviz.tools")
 
-from ..utils import get_logger; log = get_logger("mcviz.tools")
+from ..view_object import Summary
 
 def retrying(func):
     """

@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-from mcviz import MCVizParseError
+from logging import getLogger; log = getLogger("mcviz.event_graph")
 
-from .utils import get_logger; log = get_logger("mcviz.event_graph")
+from mcviz import MCVizParseError
 
 class EventGraph(object):
     def __init__(self, vertices, particles):

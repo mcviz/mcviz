@@ -19,18 +19,19 @@
 from os.path import basename
 from textwrap import dedent
 
+from logging import getLogger; log = getLogger("mcviz.main")
+
 from mcviz import EventGraph, GraphView, parse_options
 from mcviz.tools import apply_tool, tag
 from mcviz.painters import get_painter
 
-from mcviz.utils import get_logger_level, log_level, get_logger, timer
-log = get_logger("mcviz")
+from mcviz.utils import get_logger_level, log_level, timer
 
 def main(argv):
     options, args = parse_options(argv)
     n_argv = len(argv[1:])
-    with timer("complete run"):
-        with log_level(get_logger_level(options.quiet, options.verbose)):
+    with log_level(get_logger_level(options.quiet, options.verbose)):
+        with timer("complete run"):
             run(options, n_argv, args)
 
 def run(options, n_argv, args):
