@@ -116,7 +116,7 @@ class SVGDocument(object):
         self.svg.appendChild(txt)
 
         if subscript:
-            self.add_subscript(subscript, x + width_est/2, y + font_size/3, 
+            self.add_subscript(subscript, (x + width_est/2, y + font_size/3), 
                                font_size)
 
     def add_subscript(self, subscript, point, font_size):
