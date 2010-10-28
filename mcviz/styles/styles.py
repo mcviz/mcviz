@@ -94,6 +94,6 @@ def fancylines(layout):
 def linewidth_pt(layout):
     for edge in layout.edges:
         particle = edge.item
-        particle.subscripts.append("%.3f" % particle.item.pt)
+        particle.subscripts.append("%.3f" % particle.pt)
         edge.style_args["stroke-width"] = log(particle.pt+1)*0.1+0.01
 
