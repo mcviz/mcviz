@@ -45,15 +45,15 @@ class SVGDocument(object):
         self.svg.appendChild(self.defs)
 
     def add_glyph(self, pdgid, center, font_size, subscript = None):
-        x, y = center
-
-        # Total scale
-        font_size *= self.scale
-        x *= self.scale
-        y *= self.scale
 
         if not TexGlyph.exists(pdgid):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
+
+        x, y = center
+        # Apply total scale
+        font_size *= self.scale
+        x *= self.scale
+        y *= self.scale
 
         glyph = TexGlyph.from_pdgid(pdgid)
         if not pdgid in self.defined_pdgids:
@@ -89,11 +89,28 @@ class SVGDocument(object):
             self.add_subscript(subscript, (x_sub, y_sub), font_size)
 
     def add_text_glyph(self, label, center, font_size, subscript = None):
+
         x, y = center
-        width_est = len(label) * font_size * 0.6
+
+        # Apply total scale
+        font_size *= self.scale
+        x *= self.scale
+        y *= self.scale
+
+        width_est = len(label) * font_size * 0.5 # 0.5 is a fudge factor
+
+        if False: #options.debug_labels:
+            wx, wy = width_est, font_size
+            box = XMLNode("rect")
+            box.setAttribute("x", "%.3f" % (x - wx/2))
+            box.setAttribute("y", "%.3f" % (y - wy/2))
+            box.setAttribute("width", "%.3f" % wx)
+            box.setAttribute("height", "%.3f" % wy)
+            box.setAttribute("fill", "red")
+            self.svg.appendChild(box)
         txt = XMLNode("text")
         txt.setAttribute("x", "%.3f" % (x - width_est / 2))
-        txt.setAttribute("y", "%.3f" % (y))
+        txt.setAttribute("y", "%.3f" % (y + font_size / 3)) # 3 is a fudge factor
         txt.setAttribute("font-size", "%.2f" % (font_size))
         txt.appendChild(RawNode(label))
         self.svg.appendChild(txt)
