@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from ..view_object import Summary
 
-from ..utils import get_logger; log = get_logger("event_graph")
+from ..utils import get_logger; log = get_logger("mcviz.tools")
 
 def retrying(func):
     """

@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from time import time
 
-from .logger import get_logger; log = get_logger("timing")
+from .logger import get_logger; log = get_logger("mcviz.utils")
 
 timer_depth = 0
 

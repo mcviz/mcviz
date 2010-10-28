@@ -7,7 +7,7 @@ from mcviz import MCVizParseError
 from ..particle import Particle
 from ..vertex import Vertex
 
-from ..utils import get_logger; log = get_logger("pythialog_parser")
+from ..utils import get_logger; log = get_logger("mcviz.loaders.pythialog")
 
 START_COMPLETE = ("--------  "
     "PYTHIA Event Listing  (complete event)  ---------"

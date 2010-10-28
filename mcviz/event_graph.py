@@ -2,7 +2,7 @@
 
 from mcviz import MCVizParseError
 
-from .utils import get_logger; log = get_logger("event_graph")
+from .utils import get_logger; log = get_logger("mcviz.event_graph")
 
 class EventGraph(object):
     def __init__(self, vertices, particles):
