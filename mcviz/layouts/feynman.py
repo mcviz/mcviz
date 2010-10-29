@@ -65,7 +65,7 @@ class FeynmanLayout(BaseLayout):
 
         if "cluster" in particle.tags:
             lo.label = "cluster (%.1f GeV)" % particle.pt
-        elif particle.gluon or particle.photon:
+        elif (particle.gluon or particle.photon) and not "gluid" in self.options.subscript:
             lo.label = None
         else:
             lo.label = particle.pdgid

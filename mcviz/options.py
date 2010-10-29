@@ -40,7 +40,7 @@ def get_option_parser():
     #
     # Presentation
     #
-    o("--subscript", choices=["id","color"], action="append", default=[],
+    o("--subscript", choices=["id", "gluid", "color"], action="append", default=[],
       help="Add a subscript specifying a property to the label (id, color)")
     
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],

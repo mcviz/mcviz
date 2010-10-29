@@ -26,8 +26,11 @@ class BaseLayout(object):
         # Label particles by id if --show-id is on the command line.
         if "id" in self.options.subscript:
             def label_particle_no(particle):
-                if not particle.gluon:
-                    return particle.reference
+                if particle.gluon:
+                    if not "gluid" in self.options.subscript:
+                        # Don't label gluons unless 'gluid' subscript specified
+                        return
+                return particle.reference
             self.annotate_particles(graph.particles, label_particle_no)
 
         if "color" in self.options.subscript:

@@ -6,7 +6,7 @@ def subscripts(layout):
     # Label particles by id if --show-id is on the command line.
     if "id" in layout.options.subscript:
         def label_particle_no(particle):
-            if not particle.gluon:
+            if particle.gluon and not "gluid" in layout.options.subscript:
                 return particle.reference
         layout.annotate_particles(graph.particles, label_particle_no)
 
