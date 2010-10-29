@@ -29,20 +29,20 @@ def go(output_file, *args):
         log.exception("Caught an exception whilst generating demos")
         raise SkipFile
 
-def generate_simple(input_file, toolarg, tools):
-    for tool in sorted(tools):
-        strargs = basename(input_file), toolarg.lstrip("--"), tool
+def generate_simple(input_file, transformarg, transforms):
+    for transform in sorted(transforms):
+        strargs = basename(input_file), transformarg.lstrip("--"), transform
         output_file = "mcv-demo-%s-%s-%s.svg" % strargs
         
-        if tool in SKIP:
+        if transform in SKIP:
             continue
         
         try:
-            go(output_file, input_file, toolarg, tool)
+            go(output_file, input_file, transformarg, transform)
         except SkipFile:
             break
 
-def generate_multitool(input_file, *args):
+def generate_multitransform(input_file, *args):
     from re import sub
     namefragment = sub("-.", "_", "".join(args)).lstrip("_")
     strargs = basename(input_file), namefragment
@@ -53,16 +53,16 @@ def generate_multitool(input_file, *args):
 
 @define_demo
 def contract_kink_gluball_jet_style_color_fixhad(input_file):
-    generate_multitool(input_file, 
+    generate_multitransform(input_file, 
         "-tKinks", "-tClusters", "-tGluballs", "-tLoops",
         "-lFixHad",
         "-sColor"
     )
 
 @define_demo
-def gen_simple_tools(input_file):
-    from mcviz.tools import tools
-    generate_simple(input_file, "--tool", sorted(tools))
+def gen_simple_transforms(input_file):
+    from mcviz.transforms import transforms
+    generate_simple(input_file, "--transform", sorted(transforms))
 
 @define_demo
 def gen_simple_layouts(input_file):

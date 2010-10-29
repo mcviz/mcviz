@@ -22,7 +22,7 @@ from textwrap import dedent
 from logging import getLogger; log = getLogger("mcviz.main")
 
 from mcviz import EventGraph, GraphView, parse_options
-from mcviz.tools import apply_tool, tag
+from mcviz.transforms import apply_transform, tag
 from mcviz.painters import get_painter
 
 from mcviz.utils import get_logger_level, log_level, timer
@@ -73,22 +73,22 @@ def run(options, n_argv, args):
     log.debug('creating a graph view')
     graph_view = GraphView(event_graph)
 
-    log.debug("Graph state (before tools): %s", graph_view)
+    log.debug("Graph state (before transforms): %s", graph_view)
     
-    # Apply view tools on it
+    # Apply view transforms on it
     
-    with timer("apply all tools", log.VERBOSE):
-        for tool in options.tool:
-            log.verbose('applying tool: %s' % tool)
-            with timer('apply %s' % tool):
-                apply_tool(tool, graph_view)
+    with timer("apply all transforms", log.VERBOSE):
+        for transform in options.transform:
+            log.verbose('applying transform: %s' % transform)
+            with timer('apply %s' % transform):
+                apply_transform(transform, graph_view)
 
         # Apply all Taggers on the graph
         log.debug('tagging graph')
         with timer('tag the graph'):
             tag(graph_view)
     
-    log.debug("Graph state (after tools): %s", graph_view)
+    log.debug("Graph state (after transforms): %s", graph_view)
    
     # Determine which Painter gets to paint this graph
     outfile_extension = basename(options.output_file).split(".")[-1]

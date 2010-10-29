@@ -4,7 +4,7 @@ import sys
 
 from mcviz.layouts import list_layouts
 from mcviz.styles import list_styles
-from mcviz.tools import list_tools
+from mcviz.transforms import list_transforms
 from mcviz.painters import list_painters, list_extensions
 
 
@@ -16,9 +16,9 @@ def get_option_parser():
     #
     # Program control
     #
-    o("-t", "--tool", choices=list_tools(), action="append", default=[],
-      help="Select a that is applied to the graph (%s) "
-           "Can be applied multiple times." % ", ".join(list_tools()))
+    o("-t", "--transform", choices=list_transforms(), action="append", default=[],
+      help="Select a transform that is applied to the graph (%s) "
+           "Can be applied multiple times." % ", ".join(list_transforms()))
 
     o("-l", "--layout", choices=list_layouts(), action="append", default=[],
       help="Select layout classes that are used to layout the graph (%s) "
@@ -41,6 +41,9 @@ def get_option_parser():
     # Presentation
     #
     o("--subscript", choices=["index", "gluid", "color"], action="append", default=[],
+      help="Add a subscript specifying a property to the label (id, color)")
+
+    o("-a", "--annotate", action="append", default=[],
       help="Add a subscript specifying a property to the label (id, color)")
     
     o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],

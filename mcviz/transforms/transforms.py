@@ -1,7 +1,7 @@
 from functools import wraps
 from collections import defaultdict
 
-from logging import getLogger; log = getLogger("mcviz.tools")
+from logging import getLogger; log = getLogger("mcviz.transforms")
 
 from ..view_object import Summary
 
@@ -156,7 +156,7 @@ def pluck(graph_view, vno_keep=3):
 def unsummarize(graph_view, Retry):
     """
     Undo a summarization.
-    Useful when used in combination with other tools, 
+    Useful when used in combination with other transforms, 
     e.g. -v{gluballs,pluck,unsummarize}
     """
     retry = False
