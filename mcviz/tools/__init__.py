@@ -2,11 +2,11 @@ from tools import contract_clusters, remove_kinks, gluballs, chainmail, contract
 from tagging import tag
 
 tools = {}
-tools["Kinks"] = remove_kinks
-tools["Gluballs"] = gluballs
-tools["Chainmail"] = chainmail
 tools["Clusters"] = contract_clusters
-tools["Loops"] = contract_loops
+tools["Gluballs"] = gluballs
+tools["NoKinks"] = remove_kinks
+tools["NoLoops"] = contract_loops
+tools["NoSiblings"] = chainmail
 tools["Pluck"] = pluck
 tools["Unsummarize"] = unsummarize
 
