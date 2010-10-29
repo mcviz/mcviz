@@ -24,7 +24,7 @@ class BaseLayout(object):
         self.ratio = ratio
 
         # Label particles by id if --show-id is on the command line.
-        if "id" in self.options.subscript:
+        if "index" in self.options.subscript:
             def label_particle_no(particle):
                 if particle.gluon:
                     if not "gluid" in self.options.subscript:
