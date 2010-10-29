@@ -1,6 +1,6 @@
 from __future__ import division
 
-from random import shuffle
+from random import shuffle, seed
 
 def qcd_rgb(layout):
     colors = [e.item.color for e in layout.edges]
@@ -15,6 +15,7 @@ def qcd_rainbow(layout):
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))
     color_values = [i/len(unique_colors) for i in range(len(unique_colors))]
+    seed(42) # Determinism, please.
     shuffle(color_values)
     cmap = dict([(unique_colors[i], rainbow_color(color_values[i], 0.5)) for i in range(len(unique_colors))])
     amap = dict([(unique_colors[i], rainbow_color(color_values[i], 0.8)) for i in range(len(unique_colors))])
