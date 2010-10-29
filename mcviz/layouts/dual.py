@@ -16,8 +16,8 @@ class DualLayout(BaseLayout):
         if particle.initial_state:
             # Big red initial vertices
             lo.width = lo.height = 1.0
-        elif "jet" in particle.tags:
-            lo.label = "jet (%.1f GeV)" % particle.pt
+        elif "cluster" in particle.tags:
+            lo.label = "cluster (%.1f GeV)" % particle.pt
         
         return lo
    

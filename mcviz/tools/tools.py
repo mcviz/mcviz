@@ -92,7 +92,7 @@ def chainmail(graph_view, Retry):
             summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
             raise Retry
 
-def contract_jets(graph_view):
+def contract_clusters(graph_view):
     """
     Summarize all particles and vertices which decend from hadronization 
     vertices and tag them.
@@ -116,13 +116,13 @@ def contract_jets(graph_view):
         if Walk.failed:
             continue
             
-        jet_ends = set(p.end_vertex for p in Walk.particles if p.final_state)
-        vsummary = graph_view.summarize_vertices(jet_ends)
-        vsummary.tag("jet")
-        vsummary.jet_nvertices = len(Walk.vertices)
+        cluster_ends = set(p.end_vertex for p in Walk.particles if p.final_state)
+        vsummary = graph_view.summarize_vertices(cluster_ends)
+        vsummary.tag("cluster")
+        vsummary.cluster_nvertices = len(Walk.vertices)
         psummary = graph_view.summarize_particles(Walk.particles)
-        psummary.tag("jet")
-        psummary.jet_nparticles = len(Walk.particles)
+        psummary.tag("cluster")
+        psummary.cluster_nparticles = len(Walk.particles)
 
 def contract_loops(graph_view):
     """

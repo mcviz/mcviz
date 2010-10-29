@@ -63,8 +63,8 @@ class FeynmanLayout(BaseLayout):
         lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
         lo.label_size = self.options.label_size
 
-        if "jet" in particle.tags:
-            lo.label = "jet (%.1f GeV)" % particle.pt
+        if "cluster" in particle.tags:
+            lo.label = "cluster (%.1f GeV)" % particle.pt
         elif particle.gluon or particle.photon:
             lo.label = None
         else:

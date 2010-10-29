@@ -54,7 +54,7 @@ def generate_multitool(input_file, *args):
 @define_demo
 def contract_kink_gluball_jet_style_color_fixhad(input_file):
     generate_multitool(input_file, 
-        "-tKinks", "-tJets", "-tGluballs", "-tLoops",
+        "-tKinks", "-tClusters", "-tGluballs", "-tLoops",
         "-lFixHad",
         "-sColor"
     )

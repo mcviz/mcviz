@@ -71,7 +71,7 @@ def fancylines(layout):
     for edge in layout.edges:
         particle = edge.item
         # colouring
-        if "jet" in particle.tags:
+        if "cluster" in particle.tags:
             edge.style_line_type = "hadron"
             edge.style_args["scale"] = 0.8
             edge.style_args["stroke-width"] = 0.4

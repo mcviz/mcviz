@@ -114,7 +114,7 @@ class ViewParticleSingle(ViewParticle):
 
 class ViewParticleSummary(ViewParticle, Summary):
     """
-    Represents a view of a summary of particles ("jet", "gluball")
+    Represents a view of a summary of particles ("cluster", "gluball")
     """
     def __init__(self, graph, summarized_particle_numbers):
         super(ViewParticleSummary, self).__init__(graph)
