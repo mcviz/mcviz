@@ -60,6 +60,7 @@ def run(options, n_argv, args):
                         "files")
         for input_file in args[1:]:
             run_demo(input_file)
+        return 0
     
     # Load the first event from the given file 
     filename = args[1]
