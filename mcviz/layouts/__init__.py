@@ -26,6 +26,6 @@ def get_layout(names):
     elif len(names) == 1:
         layout_class = layouts[names[0]]
     else:
-        bases = tuple(reversed(layouts[x] for x in names))
+        bases = tuple(reversed([layouts[x] for x in names]))
         layout_class = classobj("Layout_specific", bases, {})
     return layout_class
