@@ -55,11 +55,8 @@ def get_option_parser():
     p.add_option_group(g)
     o = g.add_option
 
-    o("-F", "--fix-initial", action="store_true",
-      help="Fix the initial vertex positions. Requires resolution to be set if you use 'fdp'")
-
     o("--stretch", default=0.2, type=float,
-      help="Ranges from 0 to 1; 0 pulls the initial particles apart the furthest.")
+      help="for -lFixIni: Ranges from 0 to 1; 0 pulls the initial particles apart the furthest.")
 
     o("--label-size", type=float, default=1.,
       help="scale of the labels in the output SVG file")

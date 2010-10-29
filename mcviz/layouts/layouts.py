@@ -48,6 +48,12 @@ class BaseLayout(object):
         for particle in graph.particles:
             self.add_object(self.get_particle(particle))
 
+    def process_node(self, node):
+        return node
+
+    def process_edge(self, edge):
+        return edge
+
     def add_object(self, obj):
         if obj is None:
             return
@@ -58,9 +64,13 @@ class BaseLayout(object):
             
         obj.item.layout_objects.append(obj)
         if isinstance(obj, LayoutNode):
-            self.subgraphs.setdefault(obj.subgraph, []).append(obj)
+            obj = self.process_node(obj)
+            if obj:
+                self.subgraphs.setdefault(obj.subgraph, []).append(obj)
         elif isinstance(obj, LayoutEdge):
-            self.edges.append(obj)
+            obj = self.process_edge(obj)
+            if obj:
+                self.edges.append(obj)
         else:
             raise NotImplementedError()
 

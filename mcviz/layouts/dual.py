@@ -6,10 +6,6 @@ class DualLayout(BaseLayout):
         if particle.initial_state:
             return "initial"
 
-    @property
-    def subgraph_names(self):
-        return ["initial", None]
-
     def get_particle(self, particle):
         lo = LayoutNode(particle)
         lo.subgraph = self.get_subgraph(particle)

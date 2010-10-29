@@ -1,5 +1,6 @@
 from dual import DualLayout
-from feynman import FeynmanLayout, FixedHadronsLayout, InlineLabelsLayout
+from feynman import FeynmanLayout, InlineLabelsLayout
+from extra import FixedHadronsLayout, FixedInitialLayout
 from phi import PhiLayout
 from new import classobj
 
@@ -8,6 +9,7 @@ layouts["Dual"] = DualLayout
 layouts["Feynman"] = FeynmanLayout
 layouts["Phi"] = PhiLayout
 layouts["FixHad"] = FixedHadronsLayout
+layouts["FixIni"] = FixedInitialLayout
 layouts["InlineLabels"] = InlineLabelsLayout
 default = "InlineLabels"
 

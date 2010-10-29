@@ -13,19 +13,6 @@ class FeynmanLayout(BaseLayout):
 
     def process(self):
 
-        if self.options.fix_initial:
-            initial = self.subgraphs["initial"]
-            initial_pairs = len(initial) // 2
-            for i, p in enumerate(initial):
-                sg_options = self.subgraph_options.setdefault("initial", [])
-                sg_options.append('rank="source"')
-                pair = i // 2
-                if self.width and self.height:
-                    stretch = self.options.stretch * self.width / 2.0
-                    xposition = stretch + (i % 2) * (self.width - 2 * stretch)
-                    yposition = (1 + pair) * self.height / (initial_pairs + 1)
-                    p.dot_args["pos"] = "%s,%s!" % (xposition, yposition)
-        
         # sort the edges
         def ordering(edge): 
             order = (1 if edge.item.gluon else 
@@ -96,25 +83,6 @@ class FeynmanLayout(BaseLayout):
        
         return lo
 
-class FixedHadronsLayout(FeynmanLayout):
-    """
-    Place all of the hadronization vertices on the same rank.
-    """
-    def process(self):
-
-        sg_options = self.subgraph_options.setdefault("hadronization", [])
-        sg_options.append('rank="same"')
-        
-        return super(FixedHadronsLayout, self).process()
-        
-    @property
-    def subgraph_names(self):
-        return ["hadronization"] + super(FixedHadronsLayout, self).subgraph_names
-        
-    def get_subgraph(self, vertex):
-        if vertex.hadronization:
-            return "hadronization"
-        return super(FixedHadronsLayout, self).get_subgraph(vertex)
 
 class InlineLabelsLayout(FeynmanLayout):
     
@@ -128,7 +96,7 @@ class InlineLabelsLayout(FeynmanLayout):
         middle.show = False
         middle.dot_args["margin"] = "0,0"
         #middle.dot_args["shape"] = "square"
-        #middle.dot_args["group"] = "plabels"
+        middle.dot_args["group"] = "particlelabels"
         
         up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
         down.coming = middle.item
