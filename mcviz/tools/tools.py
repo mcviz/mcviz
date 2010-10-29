@@ -168,3 +168,20 @@ def unsummarize(graph_view, Retry):
     if retry:
         raise Retry
 
+def shallow(graph_view, drop_depth=10):
+    """
+    Take only the first `drop_depth`
+    """
+    keep_objects = set()
+    
+    def walker(obj, depth):
+        if depth <= drop_depth:
+            keep_objects.add(obj)
+    
+    for vertex in graph_view.vertices:
+        if vertex.initial:
+            graph_view.walk(vertex, vertex_action=walker, particle_action=walker)
+    
+    for obj in list(graph_view.particles) + list(graph_view.vertices):
+        if obj not in keep_objects:
+            graph_view.drop(obj)
