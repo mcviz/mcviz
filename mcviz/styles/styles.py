@@ -112,7 +112,7 @@ def thicken_color(layout, color_id=124):
 def pythia_status_color(layout):
     from mcviz.styles import rainbow_color
     
-    colors = [rainbow_color(i/10, 0.5 + 0.5*(i%2)) for i in xrange(10)]
+    colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
     log.warning("Colors are: %r", colors)
     
     for edge in layout.edges:
