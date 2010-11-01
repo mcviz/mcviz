@@ -95,5 +95,11 @@ def linewidth_pt(layout):
     for edge in layout.edges:
         particle = edge.item
         particle.subscripts.append("%.3f" % particle.pt)
-        edge.style_args["stroke-width"] = log(particle.pt+1)*0.1+0.01
+        edge.style_args["stroke-width"] = log(particle.pt+1)*0.1 + 0.01
+        
+def thicken_color(layout, color_id=124):
+    for edge in layout.edges:
+        particle = edge.item
+        if color_id in (particle.color, particle.anticolor):
+            edge.style_args["stroke-width"] = 0.5
 
