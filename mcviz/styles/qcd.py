@@ -37,8 +37,8 @@ def set_color(layout, cmap, amap):
                 edge.style_args["fill"] = amap[particle.anticolor]
 
 
-def rainbow_color(chromacity, brightness = 0.5):
-    """ get chromacity spectrum; chromacity in [0,1]:
+def rainbow_color(hue, brightness = 0.5):
+    """ get hue spectrum; hue in [0,1]:
         red ff-ff; green 00-ff; blue 00-00
         red ff-00; green ff-ff; blue 00-00
         red 00-00; green ff-ff; blue 00-ff
@@ -50,8 +50,8 @@ def rainbow_color(chromacity, brightness = 0.5):
     max_val = 0xff if brightness > 0.5 else 2 * brightness * 255
     c_range = max_val - min_val
 
-    num = int(chromacity * 6)
-    remainder = chromacity - num/6
+    num = int(hue * 6)
+    remainder = hue - num/6
     fixed_color = ((num + 1) // 2) % 3
     run_up = (num % 2 == 0)
     run_color = (num // 2 + 1 - (0 if run_up else 1)) % 3
@@ -70,6 +70,6 @@ def rainbow_color(chromacity, brightness = 0.5):
 
     res =  "#" + "".join('%02x' % get_val(c) for c in (0, 1, 2))
     #from sys import stderr
-    #print >> stderr, "%.3f %.3f => %s" % (chromacity,brightness, res)
+    #print >> stderr, "%.3f %.3f => %s" % (hue,brightness, res)
     return res
 
