@@ -1,6 +1,12 @@
+from __future__ import division
+
 from math import log as ln
+
+from logging import getLogger; log = getLogger("mcviz.styles")
+
 from ..view_particle import ViewParticle
 from ..view_vertex import ViewVertex
+
 
 def subscripts(layout):
     # Label particles by id if --show-id is on the command line.
@@ -103,3 +109,13 @@ def thicken_color(layout, color_id=124):
         if color_id in (particle.color, particle.anticolor):
             edge.style_args["stroke-width"] = 0.5
 
+def pythia_status_color(layout):
+    from mcviz.styles import rainbow_color
+    
+    colors = [rainbow_color(i/10, 0.5 + 0.5*(i%2)) for i in xrange(10)]
+    log.warning("Colors are: %r", colors)
+    
+    for edge in layout.edges:
+        particle = edge.item
+        edge.style_args["stroke"] = colors[abs(particle.status) // 10]
+    
