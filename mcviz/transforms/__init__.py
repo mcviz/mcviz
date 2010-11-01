@@ -1,4 +1,4 @@
-from tools import (contract_clusters, remove_kinks, gluballs, chainmail, 
+from transforms import (contract_clusters, remove_kinks, gluballs, chainmail, 
                    contract_loops, pluck, unsummarize, shallow)
 from tagging import tag
 
@@ -11,7 +11,7 @@ transforms["NoLoops"] = contract_loops
 transforms["NoSiblings"] = chainmail
 transforms["Pluck"] = pluck
 transforms["Unsummarize"] = unsummarize
-tools["Shallow"] = shallow
+transforms["Shallow"] = shallow
 
 def list_transforms():
     return sorted(transforms.keys())
