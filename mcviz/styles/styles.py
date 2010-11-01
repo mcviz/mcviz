@@ -115,7 +115,16 @@ def pythia_status_color(layout):
     colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
     log.warning("Colors are: %r", colors)
     
-    for edge in layout.edges:
-        particle = edge.item
-        edge.style_args["stroke"] = colors[abs(particle.status) // 10]
+    from mcviz.layouts import FeynmanLayout, DualLayout
+    if isinstance(layout, FeynmanLayout):
+        for edge in layout.edges:
+            particle = edge.item
+            edge.style_args["stroke"] = colors[abs(particle.status) // 10]
+            
+    elif isinstance(layout, DualLayout):
+        for node in layout.nodes:
+            particle = node.item
+            if hasattr(particle, "status"):
+                node.style_args["fill"] = colors[abs(particle.status) // 10]
+        
     
