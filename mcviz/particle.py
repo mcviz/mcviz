@@ -41,7 +41,7 @@ class Particle(object):
         p.no = int(hp.barcode)
         p.pdgid = int(hp.pdgid)
         p.name = "" 
-        p.status = int(-1)
+        p.status = int(hp.status)
         p.mothers = p.daughters = None
         p.color, p.anticolor = hp.flow.pop(1, 0), hp.flow.pop(2, 0)
         p.other_flow = hp.flow
