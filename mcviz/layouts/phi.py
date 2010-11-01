@@ -1,12 +1,11 @@
 from __future__ import division
 
-from math import sin, cos
+from sys import stderr
+from math import sin, cos, atan2, log as ln
 
 from .feynman import FeynmanLayout
 from ..utils import Point2D
 
-from sys import stderr
-from math import atan2, log
 
 def get_depth(particle):
     if particle.vertex_out.connecting:
@@ -64,7 +63,7 @@ class PhiLayout(FeynmanLayout):
                     signum = 1 if sin(phi)*edge.item.p[0] + cos(phi)*edge.item.p[1] > 0 else -1
                     theta = atan2(edge.item.p[2], edge.item.pt * signum)
                     phi = theta
-                    #scale = log(edge.item.e)
+                    #scale = ln(edge.item.e)
                     scale = edge.item.e / 1000.0 + edge.item.pt * 10
                     if scale < 0.1: 
                         scale = 0.1
