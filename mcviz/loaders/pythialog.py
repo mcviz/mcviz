@@ -9,6 +9,7 @@ from mcviz import MCVizParseError
 from ..particle import Particle
 from ..vertex import Vertex
 
+
 START_COMPLETE = ("--------  "
     "PYTHIA Event Listing  (complete event)  ---------"
     "------------------------------------------------------------------------")

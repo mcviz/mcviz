@@ -1,10 +1,12 @@
-#! /usr/bin/env python
-
 from collections import namedtuple
 import re
+
+from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
+
 from mcviz import MCVizParseError
 from ..particle import Particle
 from ..vertex import Vertex
+
 
 HEPMC_TEXT = re.compile("""
 HepMC::Version (?P<version>.*?)
@@ -172,14 +174,14 @@ def load_first_event(filename):
     """
     with open(filename) as fd:
         match = HEPMC_TEXT.search(fd.read())
-        
+
     if not match:
         raise MCVizParseError("Not obviously hepmc data.")
         
     result = match.groupdict()
     version = tuple(map(int, result["version"].split(".")))
     if version != (2, 06, 01):
-        print "Warning: Only tested with hepmc 2.06.01"
+        log.warning("Warning: Only tested with hepmc 2.06.01")
     lines = result["events"].split("\n")
     
     for event in event_generator(lines):
