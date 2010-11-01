@@ -9,6 +9,18 @@ from mcviz import MCVizParseError
 from ..particle import Particle
 from ..vertex import Vertex
 
+# Pythia status codes:
+# (taken from http://hep.ps.uci.edu/~arajaram/worksheet.pdf)
+# 11 - 19 beam particles
+# 21 - 29 particles of the hardest subprocess
+# 31 - 39 particles of subsequent subprocesses in multiple interactions
+# 41 - 49 particles produced by initial-state-showers
+# 51 - 59 particles produced by final-state-showers
+# 61 - 69 particles produced by beam-remnant treatment
+# 71 - 79 partons in preparation of hadronization process
+# 81 - 89 primary hadrons produced by hadronization process
+# 91 - 99 particles produced in decay process, or by Bose-Einstein effects
+
 
 START_COMPLETE = ("--------  "
     "PYTHIA Event Listing  (complete event)  ---------"

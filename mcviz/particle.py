@@ -26,7 +26,7 @@ class Particle(object):
         p.no = int(no)
         p.pdgid = pdgid
         p.name = name.strip("(").strip(")")
-        p.status = status
+        p.status = int(status)
         p.mothers = [int(m) for m in (mother1, mother2) if m != 0]
         p.daughters = [int(d) for d in (daughter1, daughter2) if d != 0]
         p.color, p.anticolor = int(color1), int(color2)
@@ -41,7 +41,7 @@ class Particle(object):
         p.no = int(hp.barcode)
         p.pdgid = int(hp.pdgid)
         p.name = "" 
-        p.status = "unknown"
+        p.status = int(-1)
         p.mothers = p.daughters = None
         p.color, p.anticolor = hp.flow.pop(1, 0), hp.flow.pop(2, 0)
         p.other_flow = hp.flow

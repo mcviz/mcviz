@@ -87,6 +87,7 @@ class ViewParticleSingle(ViewParticle):
         self.pdgid = self.event_particle.pdgid
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
+        self.status = self.event_particle.status
     
     def __repr__(self):
         args = self.pdgid, self.reference
@@ -180,7 +181,10 @@ class ViewParticleSummary(ViewParticle, Summary):
 
         self.pdgid = min(pdgids)
         self.color, self.anticolor = max(color), max(anticolor)
-
+        
+        particles = [graph.event.particles[p] for p in self.particle_numbers]
+        self.status = max(p.status for p in particles)
+        
     @property
     def start_vertex(self):
         svs = self.graph.numbers_to_vertices(self._start_vertices)
