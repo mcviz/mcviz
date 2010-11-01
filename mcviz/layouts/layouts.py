@@ -37,6 +37,10 @@ class BaseLayout(object):
             self.annotate_particles(graph.particles, lambda p: p.color)
             self.annotate_particles(graph.particles, lambda p: -p.anticolor)
 
+        if "status" in self.options.subscript:
+            self.annotate_particles(graph.particles, lambda p: p.status)
+            
+
         # create node and edge objects from the graph
         self.fill_objects(graph)
 
