@@ -31,7 +31,14 @@ class FeynmanLayout(BaseLayout):
 
         if node_style:
             lo.dot_args.update(node_style)
-         
+        
+        # Put clusters in the same graphviz "group".
+        if "after_cluster" in vertex.tags:        
+            lo.dot_args["group"] = "cluster_%i" % vertex.cluster_index
+        elif all("after_cluster" in p.tags for p in vertex.outgoing):
+            cluster_particle = (p for p in vertex.outgoing if "after_cluster" in p.tags).next()
+            lo.dot_args["group"] = "cluster_%i" % cluster_particle.cluster_index
+             
         if vertex.initial:
             # Big red initial vertices
             lo.width = lo.height = 1.0
