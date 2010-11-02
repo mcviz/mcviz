@@ -40,15 +40,7 @@ class FeynmanLayout(BaseLayout):
             lo.height = 1.0
         elif vertex.hadronization:
             # Big white hardronization vertices
-            if self.options.layout_engine == "dot":
-                n_gluons_in = sum(1 for p in vertex.incoming if p.gluon)
-                lo.width = 2 + n_gluons_in*0.5
-                lo.height = 1
-                lo.dot_args["shape"] = "record"
-                lo.dot_args["label"] = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
-            else:
-                lo.width = lo.height = 1.0
-            
+            lo.width = lo.height = 1.0
         elif vertex.initial:
             # Big red initial vertices
             lo.width = lo.height = 1.0
@@ -71,16 +63,7 @@ class FeynmanLayout(BaseLayout):
             lo.label = particle.pdgid
 
         #lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
-
-        if self.options.layout_engine == "dot":
-            if particle.end_vertex.hadronization:
-                if particle.gluon:
-                    lo.port_going = "middle"
-                elif particle.color:
-                    lo.port_going = "left"
-                elif particle.anticolor:
-                    lo.port_going = "right"
-       
+        
         return lo
 
 
@@ -104,3 +87,41 @@ class InlineLabelsLayout(FeynmanLayout):
         up.port_going = None
         
         return [up, middle, down] 
+
+
+class StringClustersLayout(FeynmanLayout):
+    def __init__(self, *args, **kwargs):
+        super(StringClustersLayout, self).__init__(*args, **kwargs)
+        
+        assert self.options.layout_engine == "dot", (
+            "StringClustersLayout is only meaningful with dot.")
+
+    def get_vertex(self, vertex, node_style=None):
+        lo = super(StringClustersLayout, self).get_vertex(vertex, node_style)
+        if vertex.hadronization:
+            n_gluons_in = sum(1 for p in vertex.incoming if p.gluon)
+            lo.width = 2 + n_gluons_in*0.5
+            lo.height = 1
+            lo.dot_args["shape"] = "record"
+            record_shape = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
+            lo.dot_args["label"] = record_shape
+        
+        return lo
+        
+    def get_particle(self, particle):
+        lo = super(StringClustersLayout, self).get_particle(particle)
+        if particle.end_vertex.hadronization:
+            if isinstance(lo, list):
+                # If it's a list, take the last one, assuming that that is the
+                # one which is going somewhere
+                this_particle = lo[-1]
+            else:
+                this_particle = lo
+            if particle.gluon:
+                this_particle.port_going = "middle"
+            elif particle.color:
+                this_particle.port_going = "left"
+            elif particle.anticolor:
+                this_particle.port_going = "right"
+                
+        return lo

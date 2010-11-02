@@ -1,7 +1,7 @@
 from new import classobj
 
 from dual import DualLayout, DualDecongestedHad
-from feynman import FeynmanLayout, InlineLabelsLayout
+from feynman import FeynmanLayout, InlineLabelsLayout, StringClustersLayout
 from extra import FixedHadronsLayout, FixedInitialLayout, HardProcessSubgraph
 from phi import PhiLayout
 
@@ -9,15 +9,18 @@ from phi import PhiLayout
 layouts = {}
 layouts["Dual"] = DualLayout
 layouts["DualDecongestedHad"] = DualDecongestedHad
+
 layouts["Feynman"] = FeynmanLayout
+layouts["StringClusters"] = StringClustersLayout
+layouts["InlineLabels"] = InlineLabelsLayout
+
 layouts["Phi"] = PhiLayout
+
 layouts["FixHad"] = FixedHadronsLayout
 layouts["FixIni"] = FixedInitialLayout
-layouts["InlineLabels"] = InlineLabelsLayout
 layouts["HardProcessSubgraph"] = HardProcessSubgraph
 
 default = "InlineLabels"
-
 # If the constructed layout doesn't inherit from one of these, we have a problem
 fundamental_layouts = DualLayout, FeynmanLayout
 
