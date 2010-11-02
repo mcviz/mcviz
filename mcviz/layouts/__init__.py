@@ -1,6 +1,6 @@
 from dual import DualLayout
 from feynman import FeynmanLayout, InlineLabelsLayout
-from extra import FixedHadronsLayout, FixedInitialLayout
+from extra import FixedHadronsLayout, FixedInitialLayout, HardProcessSubgraph
 from phi import PhiLayout
 from new import classobj
 
@@ -11,6 +11,8 @@ layouts["Phi"] = PhiLayout
 layouts["FixHad"] = FixedHadronsLayout
 layouts["FixIni"] = FixedInitialLayout
 layouts["InlineLabels"] = InlineLabelsLayout
+layouts["HardProcessSubgraph"] = HardProcessSubgraph
+
 default = "InlineLabels"
 
 def list_layouts():

@@ -1,5 +1,8 @@
+from logging import getLogger; log = getLogger("mcviz.layouts.extra")
+
 from .layouts import BaseLayout, LayoutNode
 from ..view_vertex import ViewVertex
+
 
 class FixedHadronsLayout(BaseLayout):
     """
@@ -48,3 +51,28 @@ class FixedInitialLayout(BaseLayout):
             if obj.dot_args.get("group","") != "particlelabels":
                 obj.subgraph = "initial"
         return super(FixedInitialLayout, self).process_node(obj)
+
+
+class HardProcessSubgraph(BaseLayout):
+    """
+    Place all of the hadronization vertices on the same rank.
+    """
+    
+    def process(self):
+        sg_options = self.subgraph_options.setdefault("cluster_hardproc", [])
+        sg_options.append("bgcolor=red;")
+        sg_options.append("clusterrank=local;")
+        super(HardProcessSubgraph, self).process()
+        
+    def process_node(self, obj):
+        # TODO:
+        # We need also to include any particles between two hard process vertices
+        if isinstance(obj.item, ViewVertex):
+            if any(21 <= abs(p.status) <= 29 for p in obj.item.through):
+                log.info("Making hardproc graph")
+                obj.subgraph = "cluster_hardproc"
+            else:
+                log.info("Not making hardproc graph %r", [p.status for p in obj.item.through])
+        elif 21 <= abs(obj.item.status) <= 29:
+            obj.subgraph = "cluster_hardproc"
+        return super(HardProcessSubgraph, self).process_node(obj)
