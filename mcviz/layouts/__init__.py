@@ -18,6 +18,14 @@ layouts["HardProcessSubgraph"] = HardProcessSubgraph
 
 default = "InlineLabels"
 
+# If the constructed layout doesn't inherit from one of these, we have a problem
+fundamental_layouts = DualLayout, FeynmanLayout
+
+class LayoutCombinationError(RuntimeError): pass
+LAYOUT_ERRORMSG = ("You tried to construct a layout without including one of "
+                   "the base layouts. Please specify a layout which includes "
+                   "the bases (Feynman or Dual)")
+
 def list_layouts():
     return sorted(layouts.keys())
 
@@ -35,4 +43,9 @@ def get_layout(names):
     else:
         bases = tuple(reversed([layouts[x] for x in names]))
         layout_class = classobj("Layout_specific", bases, {})
+        
+    if not issubclass(layout_class, fundamental_layouts):
+        # We didn't include a fundamental layout!
+        raise LayoutCombinationError(LAYOUT_ERRORMSG)
+        
     return layout_class
