@@ -70,7 +70,7 @@ class FeynmanLayout(BaseLayout):
         else:
             lo.label = particle.pdgid
 
-        lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
+        #lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
 
         if self.options.layout_engine == "dot":
             if particle.end_vertex.hadronization:
