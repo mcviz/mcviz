@@ -1,11 +1,14 @@
-from dual import DualLayout
+from new import classobj
+
+from dual import DualLayout, DualDecongestedHad
 from feynman import FeynmanLayout, InlineLabelsLayout
 from extra import FixedHadronsLayout, FixedInitialLayout, HardProcessSubgraph
 from phi import PhiLayout
-from new import classobj
+
 
 layouts = {}
 layouts["Dual"] = DualLayout
+layouts["DualDecongestedHad"] = DualDecongestedHad
 layouts["Feynman"] = FeynmanLayout
 layouts["Phi"] = PhiLayout
 layouts["FixHad"] = FixedHadronsLayout

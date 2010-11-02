@@ -1,5 +1,6 @@
 from layouts import BaseLayout, LayoutEdge, LayoutNode
 
+
 class DualLayout(BaseLayout):
 
     def get_subgraph(self, particle):
@@ -22,10 +23,33 @@ class DualLayout(BaseLayout):
         return lo
    
     def get_vertex(self, vertex, node_style=None):
-
         edges = []
+        
         for particle in vertex.outgoing:
             for mother in particle.mothers:
                 edges.append(LayoutEdge(vertex, mother, particle))
         
         return edges
+
+
+class DualDecongestedHad(DualLayout):
+    """
+    Takes the all-to-all connections at the hadronization step and replaces it
+    with a all-to-one-to-all vertex labelled "A miracle occurs"
+    """
+    def get_vertex(self, vertex, node_style=None):
+        if vertex.hadronization:
+            items = []
+            had_node = LayoutNode(vertex, label="A miracle occurs")
+            had_node.width = 5.0
+            had_node.height = 1.0
+            items.append(had_node)
+            
+            for particle in vertex.incoming:
+                items.append(LayoutEdge(vertex, particle, vertex))
+            for particle in vertex.outgoing:
+                items.append(LayoutEdge(vertex, vertex, particle))
+                
+            return items
+        else:
+            return super(DualDecongestedHad, self).get_vertex(vertex, node_style)
