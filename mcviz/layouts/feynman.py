@@ -13,7 +13,7 @@ class FeynmanLayout(BaseLayout):
 
     def process(self):
 
-        # sort the edges
+        # TODO: do something with the edge ordering. It is currently nonsensical
         def ordering(edge): 
             order = (1 if edge.item.gluon else 
                      0 if edge.item.color else 
@@ -24,26 +24,28 @@ class FeynmanLayout(BaseLayout):
 
     def get_vertex(self, vertex, node_style=None):
 
-        lo = LayoutNode(vertex, width = 0.1, height = 0.1)
+        lo = LayoutNode(vertex, width=0.1, height=0.1)
         lo.label = None
         lo.label_size = self.options.label_size
         lo.subgraph = self.get_subgraph(vertex)
 
         if node_style:
             lo.dot_args.update(node_style)
-       
-        if vertex.final:
+         
+        if vertex.initial:
+            # Big red initial vertices
+            lo.width = lo.height = 1.0
+        elif vertex.final:
             # Don't show final particle vertices
             lo.show = False
+            
         elif "summary" in vertex.tags:
-            lo.width = 1.0
-            lo.height = 1.0
+            lo.width = lo.height = 1.0
+            
         elif vertex.hadronization:
             # Big white hardronization vertices
             lo.width = lo.height = 1.0
-        elif vertex.initial:
-            # Big red initial vertices
-            lo.width = lo.height = 1.0
+            
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
             lo.width = lo.height = nr_particles * 0.04
@@ -86,7 +88,7 @@ class InlineLabelsLayout(FeynmanLayout):
         up.label = down.label = None
         up.port_going = None
         
-        return [up, middle, down] 
+        return [up, middle, down]
 
 
 class StringClustersLayout(FeynmanLayout):

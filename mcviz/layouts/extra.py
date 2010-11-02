@@ -12,6 +12,8 @@ class FixedHadronsLayout(BaseLayout):
     """
     def process(self):
         sg_options = self.subgraph_options.setdefault("hadronization", [])
+        # rank=same means that the objects in this group should be laid out
+        # on the same line
         sg_options.append('rank="same"')
         return super(FixedHadronsLayout, self).process()
         
@@ -32,8 +34,8 @@ class FixedInitialLayout(BaseLayout):
     """
     def process(self):
         sg_options = self.subgraph_options.setdefault("initial", [])
+        # rank=source means "put these on the first rank" to graphviz
         sg_options.append('rank="source"')
-
         super(FixedInitialLayout, self).process()
 
         initial = self.subgraphs["initial"]
@@ -41,6 +43,8 @@ class FixedInitialLayout(BaseLayout):
         for i, p in enumerate(initial):
             pair = i // 2
             if self.width and self.height:
+                # Attempt to fix the initial particles on the left and right
+                # of the graph.
                 stretch = self.options.stretch * self.width / 2.0
                 xposition = stretch + (i % 2) * (self.width - 2 * stretch)
                 yposition = (1 + pair) * self.height / (initial_pairs + 1)
