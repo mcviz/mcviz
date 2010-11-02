@@ -2,6 +2,8 @@ from logging import getLogger; log = getLogger("mcviz.layouts.extra")
 
 from .layouts import BaseLayout, LayoutNode
 from ..view_vertex import ViewVertex
+from ..view_particle import ViewParticleSummary
+
 
 
 class FixedHadronsLayout(BaseLayout):
@@ -17,8 +19,9 @@ class FixedHadronsLayout(BaseLayout):
         if isinstance(obj.item, ViewVertex):
             if obj.item.hadronization:
                 obj.subgraph = "hadronization"
-        elif obj.item.start_vertex.hadronization:
-            if obj.dot_args.get("group","") != "particlelabels":
+        elif (obj.item.start_vertex.hadronization and 
+              not isinstance(obj.item, ViewParticleSummary)):
+            if obj.dot_args.get("group", "") != "particlelabels":
                 obj.subgraph = "hadronization"
         return super(FixedHadronsLayout, self).process_node(obj)
 
