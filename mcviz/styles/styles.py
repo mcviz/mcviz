@@ -1,4 +1,4 @@
-from math import log
+from math import log as ln
 from ..view_particle import ViewParticle
 from ..view_vertex import ViewVertex
 
