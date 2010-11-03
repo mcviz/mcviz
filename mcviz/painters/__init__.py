@@ -1,3 +1,6 @@
+from os.path import basename
+
+from logging import getLogger; log = getLogger("mcviz.painters")
 
 from painters import GraphvizPainter, DOTPainter
 from svg import SVGPainter
@@ -33,3 +36,17 @@ def get_painter(name, extension):
             return None
     return painters[name]
 
+def instantiate_painter(options, graph_view):
+    
+    # Determine which Painter gets to paint this graph
+    outfile_extension = basename(options.output_file).split(".")[-1]
+    painter_class = get_painter(options.painter, outfile_extension)
+    log.debug("file extension '%s', using painter class '%s'" % 
+                (outfile_extension, painter_class.__name__ ))
+                
+    if painter_class is None:
+        log.error("Unknown output file extension: %s" % outfile_extension)
+        return -1
+
+    log.debug('creating painter class')
+    return painter_class(graph_view, options.output_file, options)

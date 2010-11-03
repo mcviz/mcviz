@@ -16,23 +16,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from os.path import basename
 from textwrap import dedent
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
 from mcviz import EventGraph, GraphView, parse_options
-from mcviz.transforms import apply_transform, tag
-from mcviz.painters import get_painter
-
+from mcviz.transforms import apply_transforms, tag
+from mcviz.painters import instantiate_painter
 from mcviz.utils import get_logger_level, log_level, timer
 
-def main(argv):
-    options, args = parse_options(argv)
-    n_argv = len(argv[1:])
-    with log_level(get_logger_level(options.quiet, options.verbose)):
-        with timer("complete run"):
-            run(options, n_argv, args)
 
 def run(options, n_argv, args):
 
@@ -42,7 +34,8 @@ def run(options, n_argv, args):
         ip = IPShellEmbed(["-pdb"], rc_override=dict(quiet=True))
 
     if len(args) <= 1:
-        print "Please specify an HepMC file or Pythia log file to run on. Use --help for help."
+        log.fatal("Please specify an HepMC file or Pythia log file to run on. "
+                  "Use --help for help.")
         return -1
 
     log.info("-------------------------------------------------------------")
@@ -62,54 +55,32 @@ def run(options, n_argv, args):
             run_demo(input_file)
         return 0
     
-    # Load the first event from the given file 
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)
     with timer('read one event from "%s"' % filename):
         event_graph = EventGraph.load(filename)
     log.info('drawing the first event from "%s" to "%s"' % (filename, options.output_file))
 
-    # Create a view of the graph
-    log.debug('creating a graph view')
+    log.debug('Creating a graph view')
     graph_view = GraphView(event_graph)
-
-    log.debug("Graph state (before transforms): %s", graph_view)
     
-    # Apply view transforms on it
-    
-    with timer("apply all transforms", log.VERBOSE):
-        for transform in options.transform:
-            log.verbose('applying transform: %s' % transform)
-            with timer('apply %s' % transform):
-                apply_transform(transform, graph_view)
-
-        # Apply all Taggers on the graph
-        log.debug('tagging graph')
-        with timer('tag the graph'):
-            tag(graph_view)
-    
-    log.debug("Graph state (after transforms): %s", graph_view)
+    apply_transforms(options, graph_view)
    
-    # Determine which Painter gets to paint this graph
-    outfile_extension = basename(options.output_file).split(".")[-1]
-    painter_class = get_painter(options.painter, outfile_extension)
-    log.debug("file extension '%s', using painter class '%s'" % 
-                (outfile_extension, painter_class.__name__ ))
-    if painter_class is None:
-        log.error("Unknown output file extension: %s" % outfile_extension)
-        return -1
-
-    # Create a painter and paint
-    log.debug('creating painter class')
-    painter = painter_class(graph_view, options.output_file, options)
+    painter = instantiate_painter(options, graph_view)
     log.verbose('painting the graph')
     with timer('paint the graph', log.VERBOSE):
         painter.paint()
 
     return 0
 
+def main(argv):
+    options, args = parse_options(argv)
+    n_argv = len(argv[1:])
+    with log_level(get_logger_level(options.quiet, options.verbose)):
+        with timer("complete run"):
+            run(options, n_argv, args)
+            
 if __name__ == "__main__":
-
 
     from sys import argv, exit
     if "--profile" in argv:
