@@ -2,11 +2,7 @@
 from optparse import OptionParser, OptionGroup
 import sys
 
-from mcviz.layouts import list_layouts
-from mcviz.styles import list_styles
-from mcviz.transforms import list_transforms
-from mcviz.painters import list_painters, list_extensions
-
+from mcviz import tooltype_options
 
 def get_option_parser():
     usage = "usage: %prog [options] {hepmc_file|pythia_log}"
@@ -16,17 +12,6 @@ def get_option_parser():
     #
     # Program control
     #
-    o("-t", "--transform", choices=list_transforms(), action="append", default=[],
-      help="Select a transform that is applied to the graph (%s) "
-           "Can be applied multiple times." % ", ".join(list_transforms()))
-
-    o("-l", "--layout", choices=list_layouts(), action="append", default=[],
-      help="Select layout classes that are used to layout the graph (%s) "
-           "Can also be applied multiple times." % ", ".join(list_layouts()))
-
-    o("-s", "--style", choices=list_styles(), action="append", default=[],
-      help="Select styles that are applied to the graph (%s)" % ", ".join(list_styles()))
-
     o("-q", "--quiet", action="store_true", help="Do not print out anything except warnings and errors")
 
     o("-v", "--verbose", action="count", help="Be more verbose. Specify -vv for debug output")
@@ -34,25 +19,12 @@ def get_option_parser():
     o("--demo", action="store_true", 
       help="Create many demo svgs in the current directory (takes a while)")
 
-    g = OptionGroup(p, "Additional Options", "")
+    g = OptionGroup(p, "The MCViz Toolbox", "")
     p.add_option_group(g)
     o = g.add_option
-    #
-    # Presentation
-    #
-    o("--subscript", choices=["index", "gluid", "color", "status"], action="append", default=[],
-      help="Add a subscript specifying a property to the label (id, color)")
 
-    o("-a", "--annotate", action="append", default=[],
-      help="Add a subscript specifying a property to the label (id, color)")
-    
-    o("-E", "--layout-engine", choices=["fdp", "neato", "dot", "sfdp", "circo", "twopi"],
-      default="dot",
-      help="If specified, pipes output through specified graphviz engine")
-
-    o("--painter", type="string", default=None,
-      help="Override autodetect from outputfile extension (%s)" % ", ".join(list_painters()))
-
+    for shortopt, longopt, helptext in tooltype_options():
+        o(shortopt, longopt, action="append", default=[], help=helptext)
 
     g = OptionGroup(p, "Presentation", "Options that modify the presentation")
     p.add_option_group(g)
@@ -74,8 +46,8 @@ def get_option_parser():
     # Control the output file options
     #
     o("-o", "--output-file", type=str, default="mcviz.svg",
-      help="Output file for graph. (known file extensions: %s) "
-           "Note: Currently output as SVG is best by far" % ", ".join(list_extensions()))
+      help="Output file for graph. "
+           "Note: Currently output as SVG is best by far")
 
     o("--ratio", type=float, help="aspect ratio of output canvas")
       

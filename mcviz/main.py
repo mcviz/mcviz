@@ -20,8 +20,8 @@ from textwrap import dedent
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
-from mcviz import EventGraph, GraphView, parse_options
-from mcviz.transforms import apply_transforms, tag
+from mcviz import EventGraph, GraphView, ToolManager, parse_options
+from mcviz.transforms import tag
 from mcviz.painters import instantiate_painter
 from mcviz.utils import get_logger_level, log_level, timer
 
@@ -54,7 +54,7 @@ def run(options, n_argv, args):
         for input_file in args[1:]:
             run_demo(input_file)
         return 0
-    
+
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)
     with timer('read one event from "%s"' % filename):
@@ -64,7 +64,17 @@ def run(options, n_argv, args):
     log.debug('Creating a graph view')
     graph_view = GraphView(event_graph)
     
-    apply_transforms(options, graph_view)
+    # Create tool manager
+    tool_mgr = ToolManager.from_options(options)
+
+    log.debug("Graph state (before transforms): %s", graph_view)
+    tool_mgr.apply("transform", graph_view)
+    log.debug("Graph state (after transforms): %s", graph_view)
+
+    # Apply all Taggers on the graph
+    log.debug('tagging graph')
+    with timer('tag the graph'):
+        tag(graph_view)
    
     painter = instantiate_painter(options, graph_view)
     log.verbose('painting the graph')
