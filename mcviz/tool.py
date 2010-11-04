@@ -182,11 +182,9 @@ class Tool(object):
 
     def read_global_options(self, global_args):
 
-        arg_converters = dict(self.args())
-        arg_list = arg_converters.keys()
-    
         # Primary default for all options is None
-        self.options = dict(zip(arg_list, [None]*len(arg_list)))
+        args = self.args()
+        self.options = dict(zip(k for k,t in self.args(), [None]*len(args)))
 
         # Update with the specified defaults
         self.options.update(self.defaults())
@@ -205,7 +203,8 @@ class Tool(object):
         keyword_args = {}
 
         arg_converters = dict(self.args())
-        arg_list = arg_converters.keys()
+        unsorted_arg_list = arg_converters.keys()
+
         # Now update with local options
         for arg in args:
             # Try to find an unescaped equal sign
@@ -227,10 +226,10 @@ class Tool(object):
             else:
                 raise ToolParseError(self, "too many '=' in %s" % arg)
 
-        if len(positional_args) > len(arg_list):
+        if len(positional_args) > len(unsorted_arg_list):
             raise ToolParseError(self, "too many arguments!")
 
-        positional_args = dict(zip(arg_list, positional_args))
+        positional_args = dict(zip(unsorted_arg_list, positional_args))
         for arg in keyword_args:
             if arg in positional_args:
                 raise ToolParseError(self, "argument '%s' specified as both "
