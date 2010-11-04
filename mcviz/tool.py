@@ -215,10 +215,6 @@ class Tool(object):
                 if not arg in arg_converters:
                     raise ToolParseError(self, "unknown argument '%s'" % arg)
                 
-                if arg in choices and not val in choices[arg]:
-                    raise ToolParseError(self, "invalid choice '%s' (%s)" 
-                                    % (val, ", ".join(choices[arg])))
-
                 converter = arg_converters[arg]
                 try:
                     cval = converter(val)
@@ -242,6 +238,12 @@ class Tool(object):
 
         self.options.update(keyword_args)
         self.options.update(positional_args)
+
+        for arg, val in self.options.iteritems():
+            if arg in choices and not val in choices[arg]:
+                raise ToolParseError(self, "invalid choice '%s' (%s)" 
+                                % (val, ", ".join(choices[arg])))
+
         log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
 
 # The Tool types
