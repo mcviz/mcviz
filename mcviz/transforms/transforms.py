@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
+from ..tool import tool, Transform
 from ..view_object import Summary
 
 def retrying(func):
@@ -23,33 +24,36 @@ def retrying(func):
                 break
     return wrapped
 
-def remove_kinks(graph_view):
-    """
-    Remove vertices in the graph which have the same particle going in and out.
-    
-    These are, for example, recoil vertices in pythia events which are the
-    particle recoiling against the whole event.
-    """
-    pdgid_changes = defaultdict(int)
-    for vertex in graph_view.vertices:
-        if not (len(vertex.incoming) == 1 and len(vertex.outgoing) == 1):
-            # Only consider particles with one particle entering and exiting
-            continue
-            
-        if list(vertex.incoming)[0].pdgid == list(vertex.outgoing)[0].pdgid:
-            summary = graph_view.summarize_particles(vertex.through)
-            kinks = (getattr(x, "kink_number", 0) for x in vertex.through)
-            summary.kink_number = sum(kinks) + 1
-            summary.tag("kink")
-        else:
-            # Oops, we have a particle changing pdgid on the way through.. 
-            # It could be a graph inconsistency or it could be a K meson. Warn.
-            arg = list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid
-            pdgid_changes[arg] += 1
-            
-    for change, count in sorted(pdgid_changes.iteritems()):
-        arg = change + (count,)
-        log.debug("kink removal: observed pdgid %s change to %s %i time(s)" % arg)
+@tool
+class NoKinks(Transform):
+    _name = "NoKinks"
+    def __call__(self, graph_view):
+        """
+        Remove vertices in the graph which have the same particle going in and out.
+        
+        These are, for example, recoil vertices in pythia events which are the
+        particle recoiling against the whole event.
+        """
+        pdgid_changes = defaultdict(int)
+        for vertex in graph_view.vertices:
+            if not (len(vertex.incoming) == 1 and len(vertex.outgoing) == 1):
+                # Only consider particles with one particle entering and exiting
+                continue
+                
+            if list(vertex.incoming)[0].pdgid == list(vertex.outgoing)[0].pdgid:
+                summary = graph_view.summarize_particles(vertex.through)
+                kinks = (getattr(x, "kink_number", 0) for x in vertex.through)
+                summary.kink_number = sum(kinks) + 1
+                summary.tag("kink")
+            else:
+                # Oops, we have a particle changing pdgid on the way through.. 
+                # It could be a graph inconsistency or it could be a K meson. Warn.
+                arg = list(vertex.incoming)[0].pdgid, list(vertex.outgoing)[0].pdgid
+                pdgid_changes[arg] += 1
+                
+        for change, count in sorted(pdgid_changes.iteritems()):
+            arg = change + (count,)
+            log.debug("kink removal: observed pdgid %s change to %s %i time(s)" % arg)
 
 @retrying
 def gluballs(graph_view, Retry):

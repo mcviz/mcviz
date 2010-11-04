@@ -3,8 +3,14 @@ from __future__ import division
 from math import log10
 from layouts import BaseLayout, LayoutEdge, LayoutNode
 
-class FeynmanLayout(BaseLayout):
+from ..tool import tool, FundamentalTool
 
+@tool
+class FeynmanLayout(BaseLayout, FundamentalTool):
+    _name = "Feynman"
+    _global_args = ("label_size",)
+    _args = [("gluid", bool)]
+    
     def get_subgraph(self, vertex):
         if vertex.initial:
             return "initial"
@@ -26,7 +32,7 @@ class FeynmanLayout(BaseLayout):
 
         lo = LayoutNode(vertex, width=0.1, height=0.1)
         lo.label = None
-        lo.label_size = self.options.label_size
+        lo.label_size = self.options["label_size"]
         lo.subgraph = self.get_subgraph(vertex)
 
         if node_style:
@@ -63,11 +69,11 @@ class FeynmanLayout(BaseLayout):
     def get_particle(self, particle):
 
         lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
-        lo.label_size = self.options.label_size
+        lo.label_size = self.options["label_size"]
 
         if "cluster" in particle.tags:
             lo.label = "cluster (%.1f GeV)" % particle.pt
-        elif (particle.gluon or particle.photon) and not "gluid" in self.options.subscript:
+        elif (particle.gluon or particle.photon) and not self.options["gluid"]:
             lo.label = None
         else:
             lo.label = particle.pdgid

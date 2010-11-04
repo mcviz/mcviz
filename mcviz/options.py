@@ -1,8 +1,9 @@
+from __future__ import division
 
 from optparse import OptionParser, OptionGroup
 import sys
 
-from mcviz import tooltype_options
+from .tool import tool_type_options
 
 def get_option_parser():
     usage = "usage: %prog [options] {hepmc_file|pythia_log}"
@@ -23,7 +24,7 @@ def get_option_parser():
     p.add_option_group(g)
     o = g.add_option
 
-    for shortopt, longopt, helptext in tooltype_options():
+    for shortopt, longopt, helptext in tool_type_options():
         o(shortopt, longopt, action="append", default=[], help=helptext)
 
     g = OptionGroup(p, "Presentation", "Options that modify the presentation")
@@ -85,6 +86,22 @@ def parse_options(argv=None):
         extra_gv_options = []
 
     result = options, args = p.parse_args(argv)
+
     options.extra_gv_options = extra_gv_options
+
+    # resolve resolutions
+    res_x, res_y = None, None
+    if options.resolution:
+        try:
+            res_x, res_y = map(int, options.resolution.split("x"))
+        except ValueError:
+            log.fatal("resolution must be given as AxB, i.e. 800x400")
+            raise Exception()
+        options.ratio = res_y / res_x
+    elif options.width:
+        res_x = options.width
+        if options.ratio:
+            res_y = int(options.ratio*res_x)
+    options.resolution = (res_x, res_y)
 
     return result

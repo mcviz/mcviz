@@ -1,21 +1,6 @@
-from styles import (svg_setup, simple_colors, fancylines, linewidth_pt, 
-    thicken_color, pythia_status_color)
+from styles import (Default, SimpleColors, FancyLines, LineWidthPt, 
+    ThickenColor, StatusColor)
 from qcd import qcd_rgb, qcd_rainbow
-
-styles = {}
-styles["Color"] = simple_colors
-styles["FancyLines"] = fancylines
-styles["QCDColor"] = qcd_rgb
-styles["QCDRainbow"] = qcd_rainbow
-styles["LineWidthPt"] = linewidth_pt
-styles["ThickenColor"] = thicken_color
-styles["PythiaStatusColor"] = pythia_status_color
-
-def list_styles():
-    return sorted(styles.keys())
-
-def apply_style(name, layout):
-    styles[name](layout)
 
 def rainbow_color(hue, brightness = 0.5):
     """ get hue spectrum; hue in [0,1]:

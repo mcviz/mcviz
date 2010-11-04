@@ -2,12 +2,15 @@ from logging import getLogger; log = getLogger("mcviz.painters.svg")
 
 from ..svg import SVGDocument
 from ..svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
-from ..styles import svg_setup
 from ..utils import timer
+from ..tool import tool, FundamentalTool
 
-from painters import GraphvizPainter
+from painters import StdPainter
 
-class SVGPainter(GraphvizPainter):
+@tool
+class SVGPainter(StdPainter, FundamentalTool):
+    _name = "svg"
+    _global_args = ("label_size",)
 
     type_map = {"identity": identity,
                 "photon": photon, 
@@ -20,27 +23,15 @@ class SVGPainter(GraphvizPainter):
                 "vertex": vertex
                 }
 
-    def paint(self):
-        self.layout()
-        svg_setup(self.layout) # apply svg style
-        self.style()
-        engine = self.options.layout_engine
-        engine = engine if engine else "dot"
-        opts = self.options.extra_gv_options
-        if not any(opt.startswith("-T") for opt in opts):
-            opts.append("-Tplain")
-        assert "-Tplain" in opts, "For SVG painting with the internal painter only -Tplain is supported"
-        plain = self.graphviz_pass(engine, opts, self.layout.dot)
-        self.layout.update_from_plain(plain)
-    
+    def __call__(self, layout):
         with timer("create the SVG document"):
-            self.doc = SVGDocument(self.layout.width, self.layout.height, self.layout.scale)
-            for edge in self.layout.edges:
+            self.doc = SVGDocument(layout.width, layout.height, layout.scale)
+            for edge in layout.edges:
                 if not edge.spline:
                     # Nothing to paint!
                     continue
                 self.paint_edge(edge)
-            for node in self.layout.nodes:
+            for node in layout.nodes:
                 self.paint_vertex(node)
 
         self.write_data(self.doc.toprettyxml())
@@ -56,7 +47,7 @@ class SVGPainter(GraphvizPainter):
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.label, edge.label_center,
-                           self.options.label_size,
+                           self.options["label_size"],
                            ", ".join(map(str, edge.item.subscripts)))
 
 
@@ -68,5 +59,6 @@ class SVGPainter(GraphvizPainter):
            
         if not node.label is None and node.center:
             self.doc.add_glyph(node.label, node.center.tuple(),
-                               self.options.label_size,
+                               self.options["label_size"],
                                ", ".join(map(str, node.item.subscripts)))
+

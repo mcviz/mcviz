@@ -20,9 +20,7 @@ from textwrap import dedent
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
-from mcviz import EventGraph, GraphView, ToolManager, parse_options
-from mcviz.transforms import tag
-from mcviz.painters import instantiate_painter
+from mcviz import EventGraph, GraphWorkspace, FatalError, parse_options
 from mcviz.utils import get_logger_level, log_level, timer
 
 
@@ -61,42 +59,26 @@ def run(options, n_argv, args):
         event_graph = EventGraph.load(filename)
     log.info('drawing the first event from "%s" to "%s"' % (filename, options.output_file))
 
-    log.debug('Creating a graph view')
-    graph_view = GraphView(event_graph)
-    
-    # Create tool manager
-    tool_mgr = ToolManager.from_options(options)
-
-    log.debug("Graph state (before transforms): %s", graph_view)
-    tool_mgr.apply("transform", graph_view)
-    log.debug("Graph state (after transforms): %s", graph_view)
-
-    # Apply all Taggers on the graph
-    log.debug('tagging graph')
-    with timer('tag the graph'):
-        tag(graph_view)
-   
-    painter = instantiate_painter(options, graph_view)
-    log.verbose('painting the graph')
-    with timer('paint the graph', log.VERBOSE):
-        painter.paint()
-
+    gw = GraphWorkspace("mcviz.graph", event_graph)
+    gw.load_tools(options)
+    gw.run()
     return 0
 
-def main(argv):
+def real_main(argv):
     options, args = parse_options(argv)
     n_argv = len(argv[1:])
-    with log_level(get_logger_level(options.quiet, options.verbose)):
-        with timer("complete run"):
-            run(options, n_argv, args)
+    try:
+        with log_level(get_logger_level(options.quiet, options.verbose)):
+            with timer("complete run"):
+                run(options, n_argv, args)
+    except FatalError:
+        pass
             
-if __name__ == "__main__":
-
-    from sys import argv, exit
+def main(argv):
     if "--profile" in argv:
         try:
             from profilestats import profile
-            main = profile(main)
+            to_run = profile(real_main)
         except:
             print dedent("""
             #######
@@ -106,8 +88,8 @@ if __name__ == "__main__":
             mcviz/utils/extenv/bin/activate
             #######""").strip()
             raise
+    else:
+        to_run = real_main
 
-    exit(main(argv))
+    exit(to_run(argv))
 
-if __name__ == "__main__":
-    main()

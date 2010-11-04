@@ -1,7 +1,7 @@
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
 from ..utils import timer
-from transforms import (contract_clusters, remove_kinks, gluballs, chainmail, 
+from transforms import (contract_clusters, NoKinks, gluballs, chainmail, 
                    contract_loops, pluck, unsummarize, shallow)
 from tagging import tag
 
@@ -9,7 +9,7 @@ from tagging import tag
 transforms = {}
 transforms["Clusters"] = contract_clusters
 transforms["Gluballs"] = gluballs
-transforms["NoKinks"] = remove_kinks
+transforms["NoKinks"] = NoKinks
 transforms["NoLoops"] = contract_loops
 transforms["NoSiblings"] = chainmail
 transforms["Pluck"] = pluck

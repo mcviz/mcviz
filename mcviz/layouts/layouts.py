@@ -3,6 +3,7 @@ from __future__ import division
 from math import log10
 from itertools import chain
 
+from ..tool import Layout
 from ..svg import TexGlyph
 
 from ..graphviz import make_node, make_edge, PlainOutput
@@ -10,42 +11,30 @@ from ..utils import latexize_particle_name, make_unicode_name, Point2D
 
 label_scale_factor = 72.0
 
-class BaseLayout(object):
+class BaseLayout(Layout):
     """
     Class that encapsulates the layout and styling information of the graph
     """
+    _global_args = ("resolution", "ratio", "extra_dot")
+    _defaults = {"resolution" : (800, 600), "ratio" : None}
 
-    def __init__(self, graph, width, height, ratio, options):
-        self.options = options
+    def __call__(self, graph):
+
+        self.width, self.height = self.options["resolution"]
+        self.ratio = self.options["ratio"]
+        self.scale = 1.0
+
         self.subgraphs = {None: []}
         self.subgraph_options = {}
         self.edges = []
-        self.width, self.height, self.scale = width, height, 1.0
-        self.ratio = ratio
-
-        # Label particles by id if --show-id is on the command line.
-        if "index" in self.options.subscript:
-            def label_particle_no(particle):
-                if particle.gluon:
-                    if not "gluid" in self.options.subscript:
-                        # Don't label gluons unless 'gluid' subscript specified
-                        return
-                return particle.reference
-            self.annotate_particles(graph.particles, label_particle_no)
-
-        if "color" in self.options.subscript:
-            self.annotate_particles(graph.particles, lambda p: p.color)
-            self.annotate_particles(graph.particles, lambda p: -p.anticolor)
-
-        if "status" in self.options.subscript:
-            self.annotate_particles(graph.particles, lambda p: p.status)
-            
 
         # create node and edge objects from the graph
         self.fill_objects(graph)
 
         # do custom processing of the layout objects here
         self.process()
+
+        return self
 
     def fill_objects(self, graph):
 
@@ -97,7 +86,7 @@ class BaseLayout(object):
     @property
     def dot(self):
         out = ["digraph pythia {"]
-        out.append(self.options.extra_dot)
+        out.append(self.options["extra_dot"])
         out.append('dpi=1;')
         if self.width and self.height:
             out.append('size="%s,%s!";' % (self.width, self.height))
@@ -136,15 +125,6 @@ class BaseLayout(object):
                 node.width, node.height = size
     
 
-    def annotate_particles(self, particles, annotate_function):
-        """
-        Add a subscript for all particles. annotate_function(particle) should
-        return a value to be added.
-        """
-        for particle in particles:
-            subscript = annotate_function(particle)
-            if subscript:
-                particle.subscripts.append(subscript)
 
 class LayoutObject(object):
     def __init__(self, item):
