@@ -184,7 +184,7 @@ class Tool(object):
 
         # Primary default for all options is None
         args = self.args()
-        self.options = dict(zip(k for k,t in self.args(), [None]*len(args)))
+        self.options = dict(zip((k for k,t in self.args()), [None]*len(args)))
 
         # Update with the specified defaults
         self.options.update(self.defaults())
