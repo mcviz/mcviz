@@ -4,12 +4,15 @@ from .layouts import BaseLayout, LayoutNode
 from ..view_vertex import ViewVertex
 from ..view_particle import ViewParticleSummary
 
+from ..tool import tool
 
-
+@tool
 class FixedHadronsLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
     """
+    _name = "FixHad"
+
     def process(self):
         sg_options = self.subgraph_options.setdefault("hadronization", [])
         # rank=same means that the objects in this group should be laid out
@@ -28,10 +31,15 @@ class FixedHadronsLayout(BaseLayout):
         return super(FixedHadronsLayout, self).process_node(obj)
 
 
+@tool
 class FixedInitialLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
     """
+    _name = "FixIni"
+    _args = [("stretch", float)]
+    _defaults = {"stretch" : 0.8}
+    
     def process(self):
         sg_options = self.subgraph_options.setdefault("initial", [])
         # rank=source means "put these on the first rank" to graphviz
@@ -45,7 +53,7 @@ class FixedInitialLayout(BaseLayout):
             if self.width and self.height:
                 # Attempt to fix the initial particles on the left and right
                 # of the graph.
-                stretch = self.options.stretch * self.width / 2.0
+                stretch = self.options["stretch"] * self.width / 2.0
                 xposition = stretch + (i % 2) * (self.width - 2 * stretch)
                 yposition = (1 + pair) * self.height / (initial_pairs + 1)
                 p.dot_args["pos"] = "%s,%s!" % (xposition, yposition)
@@ -60,10 +68,12 @@ class FixedInitialLayout(BaseLayout):
         return super(FixedInitialLayout, self).process_node(obj)
 
 
+@tool
 class HardProcessSubgraph(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
     """
+    _name = "HardProcessSubgraph"
     
     def process(self):
         sg_options = self.subgraph_options.setdefault("cluster_hardproc", [])

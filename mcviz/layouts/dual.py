@@ -1,7 +1,11 @@
 from layouts import BaseLayout, LayoutEdge, LayoutNode
 
+from ..tool import tool, FundamentalTool
 
-class DualLayout(BaseLayout):
+@tool
+class DualLayout(BaseLayout, FundamentalTool):
+    _name = "Dual"
+    _global_args = ("label_size",)
 
     def get_subgraph(self, particle):
         if particle.initial_state:
@@ -12,7 +16,7 @@ class DualLayout(BaseLayout):
         lo.subgraph = self.get_subgraph(particle)
 
         lo.label = particle.pdgid
-        lo.label_size = self.options.label_size
+        lo.label_size = self.options["label_size"]
          
         if particle.initial_state:
             # Big red initial vertices
@@ -31,16 +35,20 @@ class DualLayout(BaseLayout):
         
         return edges
 
-
+@tool
 class DualDecongestedHad(DualLayout):
     """
     Takes the all-to-all connections at the hadronization step and replaces it
     with a all-to-one-to-all vertex labelled "A miracle occurs"
     """
+    _name = "DualDecongestedHad"
+    _args = [("label",str)]
+    _defaults = {"label": "A miracle occurs"}
+
     def get_vertex(self, vertex, node_style=None):
         if vertex.hadronization:
             items = []
-            had_node = LayoutNode(vertex, label="A miracle occurs")
+            had_node = LayoutNode(vertex, label=self.options["label"])
             had_node.width = 5.0
             had_node.height = 1.0
             items.append(had_node)
