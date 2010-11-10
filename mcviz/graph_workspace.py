@@ -3,7 +3,7 @@ from logging import getLogger
 from mcviz import FatalError
 
 from .tool import Tool, ArgParseError, debug_tools
-from .transforms import tag
+from mcviz.tools.transforms.tagging import tag
 from .graph_view import GraphView
 from .utils import timer
 

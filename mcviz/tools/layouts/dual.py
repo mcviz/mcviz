@@ -1,8 +1,8 @@
 from layouts import BaseLayout, LayoutEdge, LayoutNode
 
-from mcviz.tool import tool, FundamentalTool
+from mcviz.tool import FundamentalTool
 
-@tool
+
 class DualLayout(BaseLayout, FundamentalTool):
     _name = "Dual"
     _global_args = ("label_size",)
@@ -35,7 +35,7 @@ class DualLayout(BaseLayout, FundamentalTool):
         
         return edges
 
-@tool
+
 class DualDecongestedHad(DualLayout):
     """
     Takes the all-to-all connections at the hadronization step and replaces it

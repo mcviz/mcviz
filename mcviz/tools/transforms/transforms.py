@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
-from mcviz.tool import tool, Transform
+from mcviz.tool import Transform
 from mcviz.view_object import Summary
 
 def retrying(func):
@@ -24,7 +24,7 @@ def retrying(func):
                 break
     return wrapped
 
-@tool
+
 class NoKinks(Transform):
     _name = "NoKinks"
     def __call__(self, graph_view):

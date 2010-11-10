@@ -3,11 +3,11 @@ from logging import getLogger; log = getLogger("mcviz.painters.svg")
 from mcviz.utils.svg import SVGDocument
 from mcviz.utils.svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
 from mcviz.utils import timer
-from mcviz.tool import tool, FundamentalTool
+from mcviz.tool import FundamentalTool
 
 from painters import StdPainter
 
-@tool
+
 class SVGPainter(StdPainter, FundamentalTool):
     _name = "svg"
     _global_args = ("label_size",)

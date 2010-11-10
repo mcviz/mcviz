@@ -9,9 +9,9 @@ from mcviz.utils import rainbow_color
 from mcviz.view_particle import ViewParticle
 from mcviz.view_vertex import ViewVertex
 
-from mcviz.tool import Style, tool
+from mcviz.tool import Style
 
-@tool
+
 class Default(Style):
     _name = "Default"
     def __call__(self, layout):
@@ -45,7 +45,7 @@ def particle_color(particle):
         return "black"
 
 
-@tool
+
 class SimpleColors(Style):
     _name = "SimpleColors"
     def __call__(self, layout):
@@ -70,7 +70,7 @@ class SimpleColors(Style):
                 if node.item.initial_state:
                     node.style_args["fill"] = initial_color
 
-@tool
+
 class FancyLines(Style):
     _name = "FancyLines"
     def __call__(self, layout):
@@ -98,7 +98,7 @@ class FancyLines(Style):
             else:
                 edge.style_line_type = "hadron"
                 
-@tool
+
 class LineWidthPt(Style):
     _name = "LineWidthPt"
     def __call__(self, layout):
@@ -107,7 +107,7 @@ class LineWidthPt(Style):
 
             edge.style_args["stroke-width"] = ln(particle.pt+1)*0.1 + 0.01
             
-@tool
+
 class ThickenColor(Style):
     _name = "ThickenColor"
     _args = [("color_id", int)]
@@ -118,7 +118,7 @@ class ThickenColor(Style):
             if color_id in (particle.color, particle.anticolor):
                 edge.style_args["stroke-width"] = 0.5
 
-@tool
+
 class StatusColor(Style):
     _name = "StatusColor"
     def __call__(self, layout):

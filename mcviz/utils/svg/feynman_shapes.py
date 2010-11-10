@@ -3,7 +3,7 @@ from __future__ import division
 from xml.dom.minidom import getDOMImplementation
 svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
-from ..utils import Spline, SplineLine, Point2D
+from ..spline import Spline, SplineLine, Point2D
 
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
     N = n_waves * 2

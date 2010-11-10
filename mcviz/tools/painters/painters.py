@@ -2,7 +2,7 @@ from __future__ import division
 
 from os.path import basename
 
-from mcviz.tool import Painter, FundamentalTool, tool
+from mcviz.tool import Painter, FundamentalTool
 
 from logging import getLogger; log = getLogger("mcviz.painters")
 
@@ -49,7 +49,7 @@ class StdPainter(Painter):
         else:
             self.layout.scale = min(self.width/wx, self.height/wy)
 
-@tool
+
 class DOTPainter(StdPainter, FundamentalTool):
     _name = "dot"
     def __call__(self, layout):

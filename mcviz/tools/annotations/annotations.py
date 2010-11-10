@@ -1,11 +1,11 @@
 
-from mcviz import Tool, tooltype, tool
+from mcviz import Tool
 
 def test():
     from helper import test2
     return test2()
 
-@tooltype
+
 class Annotation(Tool):
     _type = "annotation"
     _short_opt = "a"
@@ -25,7 +25,7 @@ class Annotation(Tool):
             if subscript:
                 particle.subscripts.append((subscript, self.options["position"]))
 
-@tool
+
 class Index(Annotation):
     _name = "index"
     def __call__(self, graph):
@@ -37,20 +37,20 @@ class Index(Annotation):
             return particle.reference
         self.annotate_particles(graph.particles, label_particle_no)
 
-@tool
+
 class Color(Annotation):
     _name = "color"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: p.color)
         self.annotate_particles(graph.particles, lambda p: -p.anticolor)
 
-@tool
+
 class Status(Annotation):
     _name = "status"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: p.status)
             
-@tool
+
 class Pt(Annotation):
     _name = "pt"
     def __call__(self, graph):

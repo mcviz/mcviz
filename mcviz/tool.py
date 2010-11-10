@@ -26,19 +26,6 @@ class ToolParseError(ArgParseError):
         new_msg = "%s %s: %s" % (tool._type, tool._name, msg)
         super(ToolParseError, self).__init__(new_msg)
 
-def tooltype(cls):
-    """
-    Decorator for tool-type base classes.
-    Each Tool must derive from one tooltype class.
-    """
-    tool_types[cls._type] = cls
-    tool_classes.setdefault(cls._type, {})
-    return cls
-
-def tool(cls):
-    tool_classes[cls._type][cls._name] = cls
-    return cls
-
 def debug_tools():
     for name, cls in tool_types.iteritems():
         log.debug("Tool-Type '%s'; short option: %s; merge: %s"
@@ -50,9 +37,25 @@ def debug_tools():
             log.debug("   defaults are: %s" % str(cls.defaults()))
             log.debug("   restricting choices are: %s" % str(cls.choices()))
 
+class ToolCreator(type):
+    def __new__(cls, name, baseClasses, classdict):
+        ncls = type.__new__(cls, name, baseClasses, classdict)
+        if hasattr(ncls, "_type"):
+            if hasattr(ncls, "_name"):
+                tool_classes.setdefault(ncls._type, {})[ncls._name] = ncls
+            else:
+                tool_classes.setdefault(ncls._type, {})
+                tool_types[ncls._type] = ncls
+        elif not "__metaclass__" in classdict: 
+            # only "Tool" is allowed to have no _type
+            print "WARNING: Found Tool without type: %s" % name
+        return ncls
+
 class Tool(object):
+    __metaclass__ = ToolCreator
+
     """Name of this tool"""
-    _name = "Empty"
+    #_name = "Empty"
 
     """list of (<argument_name>, <converter>) tuples
        <converter> can be float, int, str, or even a function
@@ -247,14 +250,12 @@ class Tool(object):
 
 # The Tool types
 # Special members: _type, _short_opt, _short_help, _merge_classes
-@tooltype
 class Transform(Tool):
     _type = "transform"
     _short_opt = "t"
     _short_help = ("Select a transform that is applied to the graph (%s) "
                    "Can be applied multiple times.")
 
-@tooltype
 class Layout(Tool):
     _type = "layout"
     _short_opt = "l"
@@ -262,7 +263,6 @@ class Layout(Tool):
                    "Can also be applied multiple times.")
     _merge_classes = True
 
-@tooltype
 class LayoutEngine(Tool):
     _type = "layout-engine"
     _short_opt = "e"
@@ -270,14 +270,12 @@ class LayoutEngine(Tool):
                    "graphviz engine")
 
 
-@tooltype
 class Style(Tool):
     _type = "style"
     _short_opt = "s"
     _short_help = "Select styles that are applied to the graph"
 
 
-@tooltype
 class Painter(Tool):
     _type = "painter"
     _short_opt = "p"

@@ -4,9 +4,7 @@ from .layouts import BaseLayout, LayoutNode
 from mcviz.view_vertex import ViewVertex
 from mcviz.view_particle import ViewParticleSummary
 
-from mcviz.tool import tool
 
-@tool
 class FixedHadronsLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
@@ -31,7 +29,7 @@ class FixedHadronsLayout(BaseLayout):
         return super(FixedHadronsLayout, self).process_node(obj)
 
 
-@tool
+
 class FixedInitialLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
@@ -68,7 +66,7 @@ class FixedInitialLayout(BaseLayout):
         return super(FixedInitialLayout, self).process_node(obj)
 
 
-@tool
+
 class HardProcessSubgraph(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.

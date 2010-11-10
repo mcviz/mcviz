@@ -13,6 +13,7 @@ from .graph import walk
 from .logger import get_logger_level, log_level
 from .timer import timer
 from .colors import rainbow_color
+from .spline import Spline, SplineLine, Line
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
