@@ -3,8 +3,8 @@ from collections import defaultdict
 
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
-from ..tool import tool, Transform
-from ..view_object import Summary
+from mcviz.tool import tool, Transform
+from mcviz.view_object import Summary
 
 def retrying(func):
     """

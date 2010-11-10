@@ -3,11 +3,11 @@ from __future__ import division
 from math import log10
 from itertools import chain
 
-from ..tool import Layout
-from ..svg import TexGlyph
+from mcviz.tool import Layout
+from mcviz.svg import TexGlyph
 
-from ..graphviz import make_node, make_edge, PlainOutput
-from ..utils import latexize_particle_name, make_unicode_name, Point2D
+from mcviz.graphviz import make_node, make_edge, PlainOutput
+from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
 
 label_scale_factor = 72.0
 

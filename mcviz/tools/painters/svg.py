@@ -1,9 +1,9 @@
 from logging import getLogger; log = getLogger("mcviz.painters.svg")
 
-from ..svg import SVGDocument
-from ..svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
-from ..utils import timer
-from ..tool import tool, FundamentalTool
+from mcviz.svg import SVGDocument
+from mcviz.svg import identity, photon, final_photon, gluon, multigluon, boson, fermion, hadron, vertex
+from mcviz.utils import timer
+from mcviz.tool import tool, FundamentalTool
 
 from painters import StdPainter
 

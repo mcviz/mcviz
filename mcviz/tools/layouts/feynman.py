@@ -3,7 +3,7 @@ from __future__ import division
 from math import log10
 from layouts import BaseLayout, LayoutEdge, LayoutNode
 
-from ..tool import tool, FundamentalTool
+from mcviz.tool import tool, FundamentalTool
 
 @tool
 class FeynmanLayout(BaseLayout, FundamentalTool):

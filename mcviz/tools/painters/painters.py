@@ -2,7 +2,7 @@ from __future__ import division
 
 from os.path import basename
 
-from ..tool import Painter, FundamentalTool, tool
+from mcviz.tool import Painter, FundamentalTool, tool
 
 from logging import getLogger; log = getLogger("mcviz.painters")
 

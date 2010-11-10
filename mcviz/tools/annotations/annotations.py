@@ -1,5 +1,9 @@
 
-from ..tool import Tool, tooltype, tool
+from mcviz import Tool, tooltype, tool
+
+def test():
+    from helper import test2
+    return test2()
 
 @tooltype
 class Annotation(Tool):

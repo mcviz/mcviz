@@ -4,7 +4,7 @@ from sys import stderr
 from math import sin, cos, atan2, log as ln
 
 from .feynman import FeynmanLayout
-from ..utils import Point2D
+from mcviz.utils import Point2D
 
 
 def get_depth(particle):
