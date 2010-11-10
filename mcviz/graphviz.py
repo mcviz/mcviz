@@ -1,6 +1,5 @@
 from subprocess import Popen, PIPE
-from svg import Spline, SplineLine 
-from utils import Point2D, timer
+from utils import Spline, SplineLine, Point2D, timer
 from new import classobj
 
 from tool import LayoutEngine, tool
