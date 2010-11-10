@@ -1,7 +1,8 @@
 from __future__ import division
 
 from random import shuffle, seed
-
+    
+from mcviz.utils import rainbow_color
 
 def qcd_rgb(layout):
     colors = [e.item.color for e in layout.edges]
@@ -12,9 +13,6 @@ def qcd_rgb(layout):
     set_color(layout, cmap, amap) 
 
 def qcd_rainbow(layout):
-    # In here to prevent circular import
-    from mcviz.styles import rainbow_color
-    
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))

@@ -4,6 +4,8 @@ from math import log as ln
 
 from logging import getLogger; log = getLogger("mcviz.styles")
 
+from mcviz.utils import rainbow_color
+
 from ..view_particle import ViewParticle
 from ..view_vertex import ViewVertex
 
@@ -120,8 +122,7 @@ class ThickenColor(Style):
 class StatusColor(Style):
     _name = "StatusColor"
     def __call__(self, layout):
-        from mcviz.styles import rainbow_color
-        
+
         colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
         log.warning("Colors are: %r", colors)
         
