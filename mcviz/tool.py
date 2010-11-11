@@ -90,6 +90,14 @@ class Tool(object):
         return zip(args_list, type_list)
 
     @classmethod
+    def decorate(cls, name, title=None):
+        if title is None:
+            title = name
+        def decorated(func):
+            return classobj(name, (cls,), dict(_name=title, __call__=func))
+        return decorated
+
+    @classmethod
     def global_args(cls):
         args = set()
         for base_class in cls.mro():

@@ -1,5 +1,6 @@
 from functools import wraps
 from collections import defaultdict
+from new import classobj
 
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
@@ -55,8 +56,9 @@ class NoKinks(Transform):
             arg = change + (count,)
             log.debug("kink removal: observed pdgid %s change to %s %i time(s)" % arg)
 
+@Transform.decorate("Gluballs")
 @retrying
-def gluballs(graph_view, Retry):
+def gluballs(self, graph_view, Retry):
     """
     Remove gluon self-interaction, replacing them all with one glu-vertex.
     """
@@ -78,8 +80,9 @@ def gluballs(graph_view, Retry):
             summary.gluball_nvertices = nv
             raise Retry
 
+@Transform.decorate("Chainmail")
 @retrying
-def chainmail(graph_view, Retry):
+def chainmail(self, graph_view, Retry):
     """
     So named because lots of gluons all going the same way looks like chainmail.
     
@@ -96,7 +99,8 @@ def chainmail(graph_view, Retry):
             summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
             raise Retry
 
-def contract_clusters(graph_view):
+@Transform.decorate("Clusters")
+def contract_clusters(self, graph_view):
     """
     Summarize all particles and vertices which decend from hadronization 
     vertices and tag them.
@@ -128,7 +132,8 @@ def contract_clusters(graph_view):
         psummary.tag("cluster")
         psummary.cluster_nparticles = len(Walk.particles)
 
-def contract_loops(graph_view):
+@Transform.decorate("NoLoops")
+def contract_loops(self, graph_view):
     """
     Drop loops from the graph
     """
@@ -136,9 +141,13 @@ def contract_loops(graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
-def pluck(graph_view, vno_keep=3):
+@Transform.decorate("Pluck") #, args=[Arg("vno_keep", int)])
+def pluck(self, graph_view, vno_keep=3):
     """
     Keep a specific vertex and particles travelling through it
+    
+    Arguments:
+        vno_keep: This is stuff.
     """
     
     keep_objects = set()
@@ -156,8 +165,9 @@ def pluck(graph_view, vno_keep=3):
         if obj not in keep_objects:
             graph_view.drop(obj)
 
+@Transform.decorate("Unsummarize")
 @retrying
-def unsummarize(graph_view, Retry):
+def unsummarize(self, graph_view, Retry):
     """
     Undo a summarization.
     Useful when used in combination with other transforms, 
@@ -172,7 +182,8 @@ def unsummarize(graph_view, Retry):
     if retry:
         raise Retry
 
-def shallow(graph_view, drop_depth=10):
+@Transform.decorate("Shallow")
+def shallow(self, graph_view, drop_depth=10):
     """
     Take only the first `drop_depth`
     """
