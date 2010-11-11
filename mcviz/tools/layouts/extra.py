@@ -29,6 +29,30 @@ class FixedHadronsLayout(BaseLayout):
                 obj.subgraph = "hadronization"
         return super(FixedHadronsLayout, self).process_node(obj)
 
+class FixedJetsLayout(BaseLayout):
+    """
+    Place all of the hadronization vertices on the same rank.
+    """
+    def process(self):
+        for i in xrange(5):
+            sg_options = self.subgraph_options.setdefault("jet%i" % i, [])
+            sg_options.append('rank="sink"')
+        return super(FixedJetsLayout, self).process()
+        
+    def process_node(self, obj):
+        if isinstance(obj.item, ViewVertex):
+            for d in obj.item.outgoing:
+                for t in d.tags:
+                    if t.startswith("jet"):
+                        obj.subgraph = t
+                        
+        elif (obj.item.start_vertex.hadronization and 
+              not isinstance(obj.item, ViewParticleSummary)):
+            if obj.dot_args.get("group", "") != "particlelabels":
+                for t in obj.item.tags:
+                    if t.startswith("jet"):
+                        obj.subgraph = t
+        return super(FixedJetsLayout, self).process_node(obj)
 
 class FixedInitialLayout(BaseLayout):
     """
