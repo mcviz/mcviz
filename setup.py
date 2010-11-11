@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from textwrap import dedent
 
 version = "0.1"
@@ -21,7 +21,6 @@ setup(name='mcviz',
       author_email='dev@mcviz.net',
       url='http://mcviz.net',
       license='Affero GPLv3',
-      py_modules=['mcviz'],
-      packages=['mcviz'],
+      packages=find_packages(),
       scripts=['bin/mcviz'],
       )
