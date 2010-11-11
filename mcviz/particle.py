@@ -22,7 +22,7 @@ class Particle(object):
         (no, pdgid, name, status, mother1, mother2, daughter1, daughter2, 
          color1, color2, px, py, pz, e, m) = record
           
-        p = cls(px,py,pz,e,m)
+        p = cls(px, py, pz, e, m)
         p.no = int(no)
         p.pdgid = pdgid
         p.name = name.strip("(").strip(")")
