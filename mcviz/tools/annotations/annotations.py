@@ -1,11 +1,6 @@
 
 from mcviz import Tool
 
-def test():
-    from helper import test2
-    return test2()
-
-
 class Annotation(Tool):
     _type = "annotation"
     _short_opt = "a"
