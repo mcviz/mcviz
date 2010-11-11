@@ -33,27 +33,30 @@ class FixedJetsLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
     """
-    def process(self):
-        for i in xrange(5):
-            sg_options = self.subgraph_options.setdefault("jet%i" % i, [])
-            sg_options.append('rank="sink"')
-        return super(FixedJetsLayout, self).process()
+    def __init__(self, *args, **kwargs):
+        super(FixedJetsLayout, self).__init__(*args, **kwargs)
+        self.jetnodes = {}
+    
+    def get_jetnode(self, tag, particle):
+        if tag in self.jetnodes: return self.jetnodes[tag]
+        result = LayoutNode(particle.item, label="CLUSTER")
+        self.jetnodes[tag] = result
+        return result
         
-    def process_node(self, obj):
-        if isinstance(obj.item, ViewVertex):
-            for d in obj.item.outgoing:
-                for t in d.tags:
-                    if t.startswith("jet"):
-                        obj.subgraph = t
-                        
-        elif (obj.item.start_vertex.hadronization and 
-              not isinstance(obj.item, ViewParticleSummary)):
-            if obj.dot_args.get("group", "") != "particlelabels":
-                for t in obj.item.tags:
-                    if t.startswith("jet"):
-                        obj.subgraph = t
-        return super(FixedJetsLayout, self).process_node(obj)
-
+    def get_particle(self, particle):
+        part = super(FixedJetsLayout, self).get_particle(particle)
+        if particle.final:
+            for t in particle.tags:
+                if "jet" in t:
+                    cluster = self.get_jetnode(t, part)
+                    
+                    # I have no idea what I'm doing here.
+                    
+                    up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
+                    
+                    break
+        
+        return part
 class FixedInitialLayout(BaseLayout):
     """
     Place all of the initial vertices on the same rank.
