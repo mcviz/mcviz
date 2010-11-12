@@ -1,3 +1,12 @@
+"""
+The Graph package of MCViz
+
+Note to developers: Try to keep this package clean of imports
+from all other packages except mcviz.utils
+
+This way the loading order of packages will not grow too convoluted.
+
+"""
 class EventParseError(Exception):
     """
     Raised when an event file cannot be parsed
