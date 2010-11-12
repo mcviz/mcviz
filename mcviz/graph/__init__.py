@@ -1,3 +1,8 @@
+class EventParseError(Exception):
+    """
+    Raised when an event file cannot be parsed
+    """
+
 from .graph import EventGraph
 from .particle import Particle
 from .vertex import Vertex

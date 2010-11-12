@@ -2,7 +2,7 @@
 
 from logging import getLogger; log = getLogger("mcviz.event_graph")
 
-from mcviz import MCVizParseError
+from . import EventParseError
 #from mcviz.tests.test_graph import graph_is_consistent
 
 class EventGraph(object):
@@ -28,13 +28,13 @@ class EventGraph(object):
         for loader in loaders:
             try:
                 return loader(filename)
-            except MCVizParseError:
+            except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
             except IOError:
                 log.fatal('loading file "%s" failed!' % filename)
                 raise
                 
-        raise MCVizParseError("No loaders succeeded on %s" % filename)
+        raise EventParseError("No loaders succeeded on %s" % filename)
     
     @classmethod
     def from_hepmc(cls, filename):

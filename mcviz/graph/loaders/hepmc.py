@@ -3,9 +3,7 @@ import re
 
 from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
-from mcviz import MCVizParseError
-from ..particle import Particle
-from ..vertex import Vertex
+from .. import EventParseError, Particle, Vertex
 
 
 HEPMC_TEXT = re.compile("""
@@ -103,7 +101,7 @@ def load_event(ev):
     
     # Loop over event records.
     # Read a vertex, then read N particles. When we get to the next vertex, 
-    # associate the N particles with the previous vertexMCVizParseError
+    # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
         if isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
@@ -176,7 +174,7 @@ def load_first_event(filename):
         match = HEPMC_TEXT.search(fd.read())
 
     if not match:
-        raise MCVizParseError("Not obviously hepmc data.")
+        raise EventParseError("Not obviously hepmc data.")
         
     result = match.groupdict()
     version = tuple(map(int, result["version"].split(".")))

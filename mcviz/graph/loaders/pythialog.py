@@ -4,10 +4,7 @@ This whole module is begging for a refactor, but by some miracle it works.
 
 from logging import getLogger; log = getLogger("mcviz.loaders.pythialog")
 
-from mcviz import MCVizParseError
-
-from ..particle import Particle
-from ..vertex import Vertex
+from .. import EventParseError, Particle, Vertex
 
 # Pythia status codes:
 # (taken from http://hep.ps.uci.edu/~arajaram/worksheet.pdf)
@@ -127,7 +124,7 @@ def load_event(filename):
         first = lines.index(START_HARD) + 2
         last = first + lines[first:].index(END_LIST) - 1
     else:
-        raise MCVizParseError("Failed to read pythia log file: "
+        raise EventParseError("Failed to read pythia log file: "
                                "no complete event listing found")
 
     def maybe_num(s):

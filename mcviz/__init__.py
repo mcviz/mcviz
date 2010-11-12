@@ -1,8 +1,5 @@
 
-class MCVizParseError(Exception):
-    """
-    Raised when MCViz can't parse
-    """
+
 class FatalError(Exception):
     """
     Raised when a subsystem of MCViz has encountered an error
