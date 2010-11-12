@@ -6,8 +6,7 @@ from logging import getLogger; log = getLogger("mcviz.styles")
 
 from mcviz.utils import rainbow_color
 
-from mcviz.view_particle import ViewParticle
-from mcviz.view_vertex import ViewVertex
+from mcviz.graph import ViewParticle, ViewVertex
 
 from mcviz.tool import Style
 

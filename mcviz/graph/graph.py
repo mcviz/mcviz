@@ -3,6 +3,7 @@
 from logging import getLogger; log = getLogger("mcviz.event_graph")
 
 from mcviz import MCVizParseError
+#from mcviz.tests.test_graph import graph_is_consistent
 
 class EventGraph(object):
     def __init__(self, vertices, particles):
@@ -12,8 +13,7 @@ class EventGraph(object):
         self.vertices = vertices
         self.particles = particles
         # Graph consistency checks
-        from .tests.test_graph import graph_is_consistent
-        graph_is_consistent(self)
+        #graph_is_consistent(self)
 
     @property
     def initial_particles(self):
@@ -38,14 +38,14 @@ class EventGraph(object):
     
     @classmethod
     def from_hepmc(cls, filename):
-        from loaders.hepmc import load_first_event
+        from .loaders.hepmc import load_first_event
         vertices, particles = load_first_event(filename)
         return cls(vertices, particles)
 
         
     @classmethod
     def from_pythia_log(cls, filename):
-        from loaders.pythialog import load_event
+        from .loaders.pythialog import load_event
         vertices, particles = load_event(filename)
         return cls(vertices, particles)
 

@@ -12,11 +12,11 @@ class FatalError(Exception):
     """
 from utils import logger
 
-from tool import Tool
+from tool import Tool, ArgParseError, debug_tools
 import tools
 
-from event_graph import EventGraph
-from graph_workspace import GraphWorkspace
+from graph import EventGraph
+from workspace import GraphWorkspace
 
 from options import parse_options
 from main import main

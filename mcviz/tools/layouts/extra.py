@@ -1,8 +1,7 @@
 from logging import getLogger; log = getLogger("mcviz.layouts.extra")
 
+from mcviz.graph import ViewVertex, ViewParticleSummary
 from .layouts import BaseLayout, LayoutNode
-from mcviz.view_vertex import ViewVertex
-from mcviz.view_particle import ViewParticleSummary
 
 
 class FixedHadronsLayout(BaseLayout):

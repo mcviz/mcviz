@@ -1,11 +1,10 @@
 from logging import getLogger
 
-from mcviz import FatalError
-
-from .tool import Tool, ArgParseError, debug_tools
+from mcviz import Tool, ArgParseError, FatalError, debug_tools
+from mcviz.graph import GraphView
 from mcviz.tools.transforms.tagging import tag
-from .graph_view import GraphView
-from .utils import timer
+from mcviz.utils import timer
+
 
 class GraphWorkspace(object):
 

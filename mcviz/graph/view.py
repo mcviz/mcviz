@@ -1,4 +1,4 @@
-from utils import walk, OrderedSet
+from mcviz.utils import walk, OrderedSet
 
 from .view_object import ViewObject, Summary
 from .view_particle import ViewParticle, ViewParticleSingle, ViewParticleSummary

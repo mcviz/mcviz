@@ -5,7 +5,7 @@ from new import classobj
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
 from mcviz.tool import Transform
-from mcviz.view_object import Summary
+from mcviz.graph import Summary
 
 def retrying(func):
     """
