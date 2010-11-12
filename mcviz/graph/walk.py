@@ -1,5 +1,6 @@
-from orderedset import OrderedSet
 from itertools import takewhile
+
+from mcviz.utils import OrderedSet
 
 
 def walk(node,

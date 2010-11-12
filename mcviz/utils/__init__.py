@@ -9,7 +9,6 @@ from contextlib import contextmanager
 
 from .orderedset import OrderedSet
 from .point import Point2D
-from .graph import walk
 from .logger import get_logger_level, log_level
 from .timer import timer
 from .colors import rainbow_color

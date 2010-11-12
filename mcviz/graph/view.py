@@ -1,8 +1,9 @@
-from mcviz.utils import walk, OrderedSet
+from mcviz.utils import OrderedSet
 
 from .view_object import ViewObject, Summary
 from .view_particle import ViewParticle, ViewParticleSingle, ViewParticleSummary
 from .view_vertex import ViewVertex, ViewVertexSingle, ViewVertexSummary
+from .walk import walk
 
 class GraphView(object):
     def __init__(self, event_graph):
