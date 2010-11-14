@@ -2,10 +2,11 @@ from functools import wraps
 from collections import defaultdict
 from new import classobj
 
-from logging import getLogger; log = getLogger("mcviz.transforms")
-
 from mcviz.tool import Transform
 from mcviz.graph import Summary
+
+from logging import getLogger; log = getLogger("mcviz.transforms")
+
 
 def retrying(func):
     """

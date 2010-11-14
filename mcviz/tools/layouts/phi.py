@@ -3,8 +3,9 @@ from __future__ import division
 from sys import stderr
 from math import sin, cos, atan2, log as ln
 
-from .feynman import FeynmanLayout
 from mcviz.utils import Point2D
+
+from .feynman import FeynmanLayout
 
 
 def get_depth(particle):

@@ -1,6 +1,6 @@
-from layouts import BaseLayout, LayoutEdge, LayoutNode
-
 from mcviz.tool import FundamentalTool
+
+from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
 
 class DualLayout(BaseLayout, FundamentalTool):

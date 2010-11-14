@@ -2,13 +2,11 @@ from __future__ import division
 
 from math import log as ln
 
-from logging import getLogger; log = getLogger("mcviz.styles")
-
+from mcviz.tool import Style
 from mcviz.utils import rainbow_color
-
 from mcviz.graph import ViewParticle, ViewVertex
 
-from mcviz.tool import Style
+from logging import getLogger; log = getLogger("mcviz.styles")
 
 
 class Default(Style):
