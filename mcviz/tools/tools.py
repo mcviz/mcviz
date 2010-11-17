@@ -173,7 +173,9 @@ class Tool(object):
 
             raise ArgParseError(msg)
         
-        return classobj("%s_specific" % tool_type, bases, {})
+        classname = "%s_specific" % tool_type
+        log.debug("Creating %s with bases %r", classname, bases)
+        return classobj(classname, bases, {})
 
     def read_global_options(self, global_args):
 
