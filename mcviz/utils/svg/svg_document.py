@@ -1,3 +1,5 @@
+from pkg_resources import resource_string
+
 from .texglyph import TexGlyph
 
 class XMLNode(object):
@@ -27,15 +29,16 @@ class RawNode(XMLNode):
 
 
 class SVGDocument(object):
-    def __init__(self, wx, wy, scale = 1):
+    def __init__(self, wx, wy, scale=1):
 
         self.scale = scale
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
-        self.svg = XMLNode("svg", 'version="1.1" viewBox="%s" '\
-                        'xmlns="http://www.w3.org/2000/svg" '\
-                        'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
+        self.svg = XMLNode("svg", 
+            'version="1.1" viewBox="%s" '
+            'xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
         
-        # Adds a white background rect
+        # Adds a big white background rect
         self.svg.appendChild(RawNode('<rect x="0" y="0" width="%.1f" '
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
@@ -128,12 +131,32 @@ class SVGDocument(object):
         self.svg.appendChild(txt)
 
     def add_object(self, element):
-        if element.getAttribute("transform"):
-            raise
-        else:
-            element.setAttribute("transform", "scale(%.3f)" % (self.scale))
+        assert not element.getAttribute("transform")
+        element.setAttribute("transform", "scale(%.3f)" % (self.scale))
         self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
         return "".join(['<?xml version="1.0" ?>', str(self.svg)])
 
+
+class NavigableSVGDocument(SVGDocument):
+    def __init__(self, *args, **kwargs):
+        super(NavigableSVGDocument, self).__init__(*args, **kwargs)
+        
+        # No viewbox for a NavigableSVGDocument
+        self.svg.attrs = ['version="1.1" '
+                          'xmlns="http://www.w3.org/2000/svg" '
+                          'xmlns:xlink="http://www.w3.org/1999/xlink" '
+                          'id="whole_document"']
+        self.full_svg_document = self.svg
+        self.svg = XMLNode("g", 'id="everything"')
+        
+    def toprettyxml(self):
+        javascript_text = resource_string("mcviz.utils.svg.data", 
+                                          "navigable_svg_fragment.xml")
+                                          
+        self.full_svg_document.appendChild(self.svg)
+        self.full_svg_document.appendChild(RawNode(javascript_text))
+        self.svg = self.full_svg_document
+        result = super(NavigableSVGDocument, self).toprettyxml()
+        return result

@@ -3,7 +3,7 @@ from logging import getLogger; log = getLogger("mcviz.painters.svg")
 from mcviz.tools import FundamentalTool
 
 from mcviz.utils import timer
-from mcviz.utils.svg import SVGDocument
+from mcviz.utils.svg import SVGDocument, NavigableSVGDocument
 from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
                              boson, fermion, hadron, vertex)
 
@@ -13,6 +13,8 @@ from painters import StdPainter
 class SVGPainter(StdPainter, FundamentalTool):
     _name = "svg"
     _global_args = ("label_size",)
+    
+    document_creator = SVGDocument
 
     type_map = {"identity": identity,
                 "photon": photon, 
@@ -27,7 +29,8 @@ class SVGPainter(StdPainter, FundamentalTool):
 
     def __call__(self, layout):
         with timer("create the SVG document"):
-            self.doc = SVGDocument(layout.width, layout.height, layout.scale)
+            args = layout.width, layout.height, layout.scale
+            self.doc = self.document_creator(*args)
             for edge in layout.edges:
                 if not edge.spline:
                     # Nothing to paint!
@@ -64,3 +67,7 @@ class SVGPainter(StdPainter, FundamentalTool):
                                self.options["label_size"],
                                ", ".join(map(str, node.item.subscripts)))
 
+
+class NavigableSVGPainter(SVGPainter):
+    _name = "navisvg"
+    document_creator = NavigableSVGDocument
