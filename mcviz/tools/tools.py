@@ -3,6 +3,16 @@ from new import classobj
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
+class Arg(object):
+    def __init__(self, name, type, doc, default=None, choices=None, web=True):
+        self.name = name
+        self.type = type
+        self.doc = doc
+        self.default = default
+        self.choices = choices
+        self.web = web
+
+
 tool_types = {}
 tool_classes = {}
 
@@ -257,7 +267,7 @@ class Tool(object):
         log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
 
 class FundamentalTool(object):
-    """Needed for tool types which merge classes. 
+    """
+    Needed for tool types which merge classes. 
     At least one class must have this.
     """
-    pass

@@ -2,10 +2,10 @@ from functools import wraps
 from collections import defaultdict
 from new import classobj
 
-from mcviz.tools import Transform
-from mcviz.graph import Summary
-
 from logging import getLogger; log = getLogger("mcviz.transforms")
+
+from mcviz.tools import Transform # , Arg
+from mcviz.graph import Summary
 
 
 def retrying(func):
@@ -25,7 +25,7 @@ def retrying(func):
             else:
                 break
     return wrapped
-
+    
 
 class NoKinks(Transform):
     _name = "NoKinks"

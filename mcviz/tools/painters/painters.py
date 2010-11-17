@@ -17,6 +17,8 @@ class StdPainter(Painter):
         log.debug("data hash: 0x%0X", hash(data_string))
         if output_file == "-":
             print data_string
+        elif hasattr(output_file, "write"):
+            output_file.write(data_string)
         else:
             # Write the data to file otherwise
             log.info('writing "%s"' % output_file)

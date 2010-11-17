@@ -3,11 +3,12 @@
 *.ps
 *.dot
 *~
-*.dotsvg
-*.dotpng
-*.fdpsvg
 *.pdf
 *.png
 *.aux
 *.log
 *.tex
+env/
+dist/
+build/
+*.egg-info/
