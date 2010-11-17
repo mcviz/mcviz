@@ -53,4 +53,7 @@ class Painter(Tool):
     _merge_classes = True
     pass
 
-
+class OptionSet(Tool):
+    _type = "optionset"
+    _short_opt = False
+    _short_help = "option set (hidden since we do not specify short_opt)"

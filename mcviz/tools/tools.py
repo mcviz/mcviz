@@ -34,7 +34,8 @@ def tool_type_options():
         cls = tool_types[tool_type]
         tlist = sorted(tool_classes[tool_type].keys())
         helptext = "%s (%s)" % (cls._short_help, ", ".join(tlist))
-        res.append(("-%s" % cls._short_opt, "--%s" % cls._type, helptext))
+        if cls._short_opt:
+            res.append(("-%s" % cls._short_opt, "--%s" % cls._type, helptext))
     return res
 
 def debug_tools():
@@ -79,6 +80,12 @@ class Tool(object):
     You need one FundamentalTool in the list!"""
     _merge_classes = False
 
+
+    def __init__(self):
+        # Primary default for all options is None
+        args = self.args()
+        self.options = dict(((name, arg.default) for name, arg in args))
+
     @classmethod
     def args(cls):
         args_names = []
@@ -112,13 +119,12 @@ class Tool(object):
         res = {}
         for tool_type in sorted(tool_types.keys()):
             tool_strings = getattr(options, tool_type.replace("-","_"))
-            tools = cls.tools_from_strings(tool_type, tool_strings, options)
+            tools = cls.tools_from_strings(tool_type, tool_strings)
             res[tool_type] = tools
         return res
 
     @classmethod
-    def tools_from_strings(cls, tool_type, tool_strings, options):
-        type_cls = tool_types[tool_type]
+    def tools_from_strings(cls, tool_type, tool_strings):
         tools = []
         # Regex: Require ":" but without an (unescaped) backslash
         ts_split = [re.split(r"(?<!\\)\:", s) for s in tool_strings]
@@ -130,7 +136,11 @@ class Tool(object):
                 raise ArgParseError("no such %s: %s\npossible choices are: %s" % 
                     (tool_type, tool_name, choices))
             class_args.append((tool_classes[tool_type][tool_name], args))
-            
+        return class_args
+
+    @classmethod
+    def build_tools(cls, tool_type, class_args, options):
+        type_cls = tool_types[tool_type]
         classes = [c for c, a in class_args]
         if type_cls._merge_classes:
             specific_class = cls.create_specific_class(tool_type, classes)
@@ -180,10 +190,6 @@ class Tool(object):
         return classobj(classname, bases, {})
 
     def read_global_options(self, global_args):
-
-        # Primary default for all options is None
-        args = self.args()
-        self.options = dict(((name, arg.default) for name, arg in args))
 
         # Use any global args that are specified
         for arg in self.global_args():

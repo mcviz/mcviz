@@ -57,7 +57,7 @@ def run(options, n_argv, args):
     log.verbose('trying to read the first event from "%s"' % filename)
     with timer('read one event from "%s"' % filename):
         event_graph = EventGraph.load(filename)
-    log.info('drawing the first event from "%s" to "%s"' % (filename, options.output_file))
+    log.info('drawing the first event from "%s"' % (filename))
 
     gw = GraphWorkspace("mcviz.graph", event_graph)
     gw.load_tools(options)

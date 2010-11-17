@@ -27,6 +27,8 @@ def get_option_parser():
     for shortopt, longopt, helptext in tool_type_options():
         o(shortopt, longopt, action="append", default=[], help=helptext)
 
+    o("", "--optionset", action="append", default=["cl"], help="Select a set of default settings to use. Currently only 'cl'")
+
     g = OptionGroup(p, "Presentation", "Options that modify the presentation")
     p.add_option_group(g)
     o = g.add_option

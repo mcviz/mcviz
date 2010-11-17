@@ -24,13 +24,21 @@ class GraphWorkspace(object):
         self.log.debug('Loading tools...')
         with timer('load all tools'):
             try:
-                self.tools = Tool.tools_from_options(options)
+                parsed_tools = Tool.tools_from_options(options)
             except ArgParseError, e:
                 self.log.fatal("Parse error in arguments: %s" % e.args[0])
                 raise FatalError
+            optionsets = parsed_tools.pop("optionset")
+            for optionset in Tool.build_tools("optionset", optionsets, options):
+                optionset(parsed_tools)
+            for tool_type in parsed_tools:
+                cls_args = parsed_tools[tool_type]
+                tools = Tool.build_tools(tool_type, cls_args, options)
+                self.tools[tool_type] = tools
 
     def apply_tools(self, tool_type, *args):
-        for tool in self.tools.get(tool_type, ()):
+        tools = self.tools.get(tool_type, ())
+        for tool in tools:
             self.log.verbose('applying %s: %s' % (tool_type, tool))
             with timer('apply %s' % tool):
                 tool(*args)
@@ -72,6 +80,12 @@ class GraphWorkspace(object):
         with timer("applied all styles"):
             self.apply_tools("style", self.layout)
 
+    def apply_optionsets(self):
+        # Apply any specified styles onto the layouted graph
+        self.log.verbose("applying optionsets")
+        with timer("applied all optionsets"):
+            self.apply_tools("optionset", self.tools)
+
     def paint(self):
         self.log.verbose("painting the graph")
         with timer("painted the graph"):
@@ -82,6 +96,7 @@ class GraphWorkspace(object):
         self.apply_styles()
 
     def run(self):
+        self.apply_optionsets()
         self.apply_transforms()
         self.apply_tags()
         self.apply_annotations()
