@@ -1,4 +1,4 @@
-from mcviz.tools import Annotation
+from mcviz.tools import Annotation, Arg
 
 class Index(Annotation):
     _name = "index"

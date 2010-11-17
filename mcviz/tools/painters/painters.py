@@ -2,14 +2,13 @@ from __future__ import division
 
 from os.path import basename
 
-from mcviz.tools import Painter, FundamentalTool
+from mcviz.tools import Painter, FundamentalTool, Arg
 
 from logging import getLogger; log = getLogger("mcviz.painters")
 
 class StdPainter(Painter):
 
-    _args = (("output_file", str),)
-    _defaults = {"output_file" : "mcviz.svg"}
+    _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
 
     def write_data(self, data_string):
         output_file = self.options["output_file"]

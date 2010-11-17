@@ -1,16 +1,14 @@
 
 # The Tool types
 # Special members: _type, _short_opt, _short_help, _merge_classes
-from .tools import Tool
+from .tools import Tool, Arg
 
 class Annotation(Tool):
     _type = "annotation"
     _short_opt = "a"
     _short_help = "Add an annotation specifying a property to the label "
-
-    _args = [("position", str)]
-    _defaults = {"position" : "sub"}
-    _choices = {"position" : ("sub", "super", "under", "over")}
+    _args = (Arg("position", str, "position of the label", default="super", 
+                 choices=("super", "sub", "over", "under")),)
 
     def annotate_particles(self, particles, annotate_function):
         """

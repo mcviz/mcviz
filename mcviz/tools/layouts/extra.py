@@ -1,9 +1,10 @@
-from mcviz.graph import ViewVertex, ViewParticleSummary
-
-from .layouts import BaseLayout, LayoutNode
 
 from logging import getLogger; log = getLogger("mcviz.layouts.extra")
 
+from mcviz.graph import ViewVertex, ViewParticleSummary
+from mcviz.tools import Arg
+
+from .layouts import BaseLayout, LayoutNode
 
 class FixedHadronsLayout(BaseLayout):
     """
@@ -35,8 +36,8 @@ class FixedInitialLayout(BaseLayout):
     Place all of the hadronization vertices on the same rank.
     """
     _name = "FixIni"
-    _args = [("stretch", float)]
-    _defaults = {"stretch" : 0.8}
+    _args = [Arg("stretch", float, "pull initial vertices apart, 1 is max", 
+                 default=0.8)]
     
     def process(self):
         sg_options = self.subgraph_options.setdefault("initial", [])

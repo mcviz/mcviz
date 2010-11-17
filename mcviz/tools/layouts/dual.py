@@ -1,4 +1,4 @@
-from mcviz.tools import FundamentalTool
+from mcviz.tools import FundamentalTool, Arg
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
@@ -42,8 +42,8 @@ class DualDecongestedHad(DualLayout):
     with a all-to-one-to-all vertex labelled "A miracle occurs"
     """
     _name = "DualDecongestedHad"
-    _args = [("label",str)]
-    _defaults = {"label": "A miracle occurs"}
+    _args = [Arg("label",str,"label for the hadronization vertex",
+                 default="A miracle occurs")]
 
     def get_vertex(self, vertex, node_style=None):
         if vertex.hadronization:

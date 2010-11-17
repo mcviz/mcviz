@@ -1,6 +1,6 @@
 from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
 
-from mcviz.tools import LayoutEngine
+from mcviz.tools import LayoutEngine, Arg
 from mcviz.utils.graphviz import run_graphviz
 from mcviz.utils import timer
 
@@ -8,7 +8,7 @@ from new import classobj
 
 class GraphvizEngine(LayoutEngine):
     _global_args = [("extra_gv_options")]
-    _args = [("dump", bool)]
+    _args = [Arg("dump", bool, "dump raw graphviz input", default=False)]
 
     def graphviz_pass(self, engine, graphviz_options, dot_data):
         log.debug("dot_data hash: 0x%0X", hash(dot_data))

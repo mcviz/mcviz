@@ -2,7 +2,7 @@ from __future__ import division
 
 from math import log10
 
-from mcviz.tools import FundamentalTool
+from mcviz.tools import FundamentalTool, Arg
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
@@ -10,7 +10,7 @@ from .layouts import BaseLayout, LayoutEdge, LayoutNode
 class FeynmanLayout(BaseLayout, FundamentalTool):
     _name = "Feynman"
     _global_args = ("label_size",)
-    _args = [("gluid", bool)]
+    _args = [Arg("gluid", bool, "label gluons")]
     
     def get_subgraph(self, vertex):
         if vertex.initial:

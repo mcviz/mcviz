@@ -3,28 +3,8 @@ from new import classobj
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
-class Arg(object):
-    def __init__(self, name, type, doc, default=None, choices=None, web=True):
-        self.name = name
-        self.type = type
-        self.doc = doc
-        self.default = default
-        self.choices = choices
-        self.web = web
-
-
 tool_types = {}
 tool_classes = {}
-
-def tool_type_options():
-    res = []
-
-    for tool_type in sorted(tool_types.keys()):
-        cls = tool_types[tool_type]
-        tlist = sorted(tool_classes[tool_type].keys())
-        helptext = "%s (%s)" % (cls._short_help, ", ".join(tlist))
-        res.append(("-%s" % cls._short_opt, "--%s" % cls._type, helptext))
-    return res
 
 class ArgParseError(Exception):
     pass
@@ -36,6 +16,27 @@ class ToolParseError(ArgParseError):
         new_msg = "%s %s: %s" % (tool._type, tool._name, msg)
         super(ToolParseError, self).__init__(new_msg)
 
+class Arg(object):
+    def __init__(self, name, converter, doc, default=None, choices=None, web=True):
+        """<converter> can be float, int, str, or even a function
+        WARNING: Any function put in here will receive a user input string
+        and must treat the string as TAINTED"""
+        self.name = name
+        self.converter = converter
+        self.doc = doc
+        self.default = default
+        self.choices = choices
+        self.web = web
+
+def tool_type_options():
+    res = []
+    for tool_type in sorted(tool_types.keys()):
+        cls = tool_types[tool_type]
+        tlist = sorted(tool_classes[tool_type].keys())
+        helptext = "%s (%s)" % (cls._short_help, ", ".join(tlist))
+        res.append(("-%s" % cls._short_opt, "--%s" % cls._type, helptext))
+    return res
+
 def debug_tools():
     for name, cls in tool_types.iteritems():
         log.debug("Tool-Type '%s'; short option: %s; merge: %s"
@@ -44,8 +45,6 @@ def debug_tools():
             log.debug(" %s '%s'" % (cls._type, cls._name))
             log.debug("   using global arguments: %s" % str(cls.global_args()))
             log.debug("   local arguments: %s" % str(cls.args()))
-            log.debug("   defaults are: %s" % str(cls.defaults()))
-            log.debug("   restricting choices are: %s" % str(cls.choices()))
 
 class ToolCreator(type):
     def __new__(cls, name, baseClasses, classdict):
@@ -67,20 +66,11 @@ class Tool(object):
     """Name of this tool"""
     #_name = "Empty"
 
-    """list of (<argument_name>, <converter>) tuples
-       <converter> can be float, int, str, or even a function
-       WARNING: Any function put in here will receive a user input string
-       and must treat the string as TAINTED"""
+    """list of Arguments to this tool (Arg class)"""
     _args = ()
 
-    """list of global arguments which are used - they are copied into options"""
+    """list of (string) global arguments which are used - they are copied into options"""
     _global_args = ()
-
-    """Dictionary of arguments to default values, both local and global"""
-    _defaults = None
-
-    """Dictionary mapping local arguments to lists of choices"""
-    _choices = None
 
     """Set to true for example in Layout; if the classes should be merged
     and one tool created instead of instantiating every class.
@@ -89,15 +79,15 @@ class Tool(object):
 
     @classmethod
     def args(cls):
+        args_names = []
         args_list = []
-        type_list = []
         for base_class in reversed(cls.mro()):
             if hasattr(base_class, "_args"):
-                for arg, a_type in base_class._args:
-                    if not arg in args_list:
+                for arg in base_class._args:
+                    if not arg.name in args_names:
+                        args_names.append(arg.name)
                         args_list.append(arg)
-                        type_list.append(a_type)
-        return zip(args_list, type_list)
+        return zip(args_names, args_list)
 
     @classmethod
     def decorate(cls, name, title=None):
@@ -114,22 +104,6 @@ class Tool(object):
             if hasattr(base_class, "_global_args"):
                 args.update(base_class._global_args)
         return args
-
-    @classmethod
-    def defaults(cls):
-        defs = {}
-        for base_class in reversed(cls.mro()):
-            if hasattr(base_class, "_defaults") and base_class._defaults:
-                defs.update(base_class._defaults)
-        return defs
-
-    @classmethod
-    def choices(cls):
-        res = {}
-        for base_class in reversed(cls.mro()):
-            if hasattr(base_class, "_choices") and base_class._choices:
-                res.update(base_class._choices)
-        return res
 
     @classmethod
     def tools_from_options(cls, options):
@@ -205,10 +179,7 @@ class Tool(object):
 
         # Primary default for all options is None
         args = self.args()
-        self.options = dict(zip((k for k,t in self.args()), [None]*len(args)))
-
-        # Update with the specified defaults
-        self.options.update(self.defaults())
+        self.options = dict(((name, arg.default) for name, arg in args))
 
         # Use any global args that are specified
         for arg in self.global_args():
@@ -219,12 +190,11 @@ class Tool(object):
         log.debug("%s %s options after global args: %s" % (self._type, self._name, self.options))
 
     def read_options(self, args):
-        choices = self.choices()
-        positional_args = []
-        keyword_args = {}
+        my_args = self.args()
+        my_args_dict = dict(my_args)
 
-        arg_converters = dict(self.args())
-        unsorted_arg_list = arg_converters.keys()
+        keyword_args = {}
+        positional_args = {}
 
         # Now update with local options
         for arg in args:
@@ -232,25 +202,22 @@ class Tool(object):
             tp = re.split(r"(?<!\\)\=", arg)
             if len(tp) == 2:
                 arg, val = tp
-                if not arg in arg_converters:
+                if not arg in my_args_dict:
                     raise ToolParseError(self, "unknown argument '%s'" % arg)
-                
-                converter = arg_converters[arg]
                 try:
-                    cval = converter(val)
+                    cval = my_args_dict[arg].converter(val)
                 except Exception, x:
                     raise ToolParseError(self, "cannot convert '%s'" % val)
-
                 keyword_args[arg] = cval
             elif len(tp) == 1:
                 positional_args.append(arg)
             else:
                 raise ToolParseError(self, "too many '=' in %s" % arg)
 
-        if len(positional_args) > len(unsorted_arg_list):
+        if len(positional_args) > len(my_args):
             raise ToolParseError(self, "too many arguments!")
 
-        positional_args = dict(zip(unsorted_arg_list, positional_args))
+        positional_args = dict(zip((n for n, arg in my_args), positional_args))
         for arg in keyword_args:
             if arg in positional_args:
                 raise ToolParseError(self, "argument '%s' specified as both "
@@ -260,9 +227,10 @@ class Tool(object):
         self.options.update(positional_args)
 
         for arg, val in self.options.iteritems():
-            if arg in choices and not val in choices[arg]:
-                raise ToolParseError(self, "invalid choice '%s' (%s)" 
-                                % (val, ", ".join(choices[arg])))
+            if arg in my_args_dict and my_args_dict[arg].choices:
+                if not val in my_args_dict[arg].choices:
+                    raise ToolParseError(self, "invalid choice '%s' (%s)" 
+                                % (val, ", ".join(my_args_dict[arg].choices)))
 
         log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
 
