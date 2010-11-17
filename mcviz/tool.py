@@ -256,6 +256,7 @@ class Tool(object):
 
         log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
 
+
 # The Tool types
 # Special members: _type, _short_opt, _short_help, _merge_classes
 class Transform(Tool):
@@ -289,11 +290,11 @@ class Painter(Tool):
     _short_opt = "p"
     _short_help = "Set the painter"
     _merge_classes = True
-    pass
+
 
 class FundamentalTool(object):
-    """Needed for tool types which merge classes. 
+    """
+    Needed for tool types which merge classes. 
     At least one class must have this.
     """
-    pass
 
