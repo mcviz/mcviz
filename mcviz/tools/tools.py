@@ -204,7 +204,7 @@ class Tool(object):
         my_args_dict = dict(my_args)
 
         keyword_args = {}
-        positional_args = {}
+        positional_args = []
 
         # Now update with local options
         for arg in args:

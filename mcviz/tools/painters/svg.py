@@ -52,8 +52,7 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.label, edge.label_center,
-                           self.options["label_size"],
-                           ", ".join(map(str, edge.item.subscripts)))
+                           self.options["label_size"], edge.item.subscripts)
 
 
     def paint_vertex(self, node):

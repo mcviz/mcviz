@@ -86,10 +86,9 @@ class SVGDocument(object):
         use.setAttribute("xlink:href", "#pdg%i"%pdgid)
         self.svg.appendChild(use)
 
-        if subscript:
-            x_sub = x + glyph.xmax * glyph.default_scale * font_size
-            y_sub = y + glyph.ymax * glyph.default_scale * font_size
-            self.add_subscript(subscript, (x_sub, y_sub), font_size)
+        xw = glyph.xmax * glyph.default_scale * font_size
+        yw = glyph.ymax * glyph.default_scale * font_size
+        self.add_subscripts(subscript, (x, y), (xw, yw), font_size)
 
     def add_text_glyph(self, label, center, font_size, subscript = None):
 
@@ -118,17 +117,27 @@ class SVGDocument(object):
         txt.appendChild(RawNode(label))
         self.svg.appendChild(txt)
 
-        if subscript:
-            self.add_subscript(subscript, (x + width_est/2, y + font_size/3), 
-                               font_size)
+        self.add_subscripts(subscripts, (x, y), (width_est/2, font_size/3), font_size)
 
-    def add_subscript(self, subscript, point, font_size):
-        txt = XMLNode("text")
-        txt.setAttribute("x", "%.3f" % (point[0]))
-        txt.setAttribute("y", "%.3f" % (point[1]))
-        txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
-        txt.appendChild(subscript)
-        self.svg.appendChild(txt)
+    def add_subscripts(self, subscripts, center, dimensions, font_size):
+        for subscript, pos in subscripts:
+            x, y  = center
+            xw, yw = dimensions
+            if pos == "sub":
+                x, y = x + xw, y + yw + font_size*0.1
+            elif pos == "super":
+                x, y = x + xw, y - font_size*0.1
+            elif pos == "under":
+                x, y = x - xw/2, y + yw + font_size*0.4
+            elif pos == "over":
+                x, y = x - xw/2, y - font_size*0.4
+
+            txt = XMLNode("text")
+            txt.setAttribute("x", "%.3f" % (x))
+            txt.setAttribute("y", "%.3f" % (y))
+            txt.setAttribute("font-size", "%.2f" % (font_size*0.3))
+            txt.appendChild(subscript)
+            self.svg.appendChild(txt)
 
     def add_object(self, element):
         assert not element.getAttribute("transform")
