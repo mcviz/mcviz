@@ -9,6 +9,7 @@ from logging import getLogger; log = getLogger("mcviz.painters")
 class StdPainter(Painter):
 
     _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
+    _base = True
 
     def write_data(self, data_string):
         output_file = self.options["output_file"]

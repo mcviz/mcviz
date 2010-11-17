@@ -49,13 +49,15 @@ def debug_tools():
 class ToolCreator(type):
     def __new__(cls, name, baseClasses, classdict):
         ncls = type.__new__(cls, name, baseClasses, classdict)
-        if hasattr(ncls, "_type"):
-            if hasattr(ncls, "_name"):
-                tool_classes.setdefault(ncls._type, {})[ncls._name] = ncls
-            else:
-                tool_classes.setdefault(ncls._type, {})
-                tool_types[ncls._type] = ncls
-        elif not "__metaclass__" in classdict: 
+        if "_type" in classdict:
+            tool_classes.setdefault(ncls._type, {})
+            tool_types[ncls._type] = ncls
+        elif "_base" in classdict:
+            pass
+        elif hasattr(ncls, "_type"):
+            tool_name = classdict.get("_name", name)
+            tool_classes.setdefault(ncls._type, {})[tool_name] = ncls
+        elif not "__metaclass__" in classdict:
             # only "Tool" is allowed to have no _type
             print "WARNING: Found Tool without type: %s" % name
         return ncls

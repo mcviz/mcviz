@@ -19,7 +19,7 @@ def get_depth(particle):
         return -1 + max(get_depth(daughter) for daughter in particle.daughters)
 
 class PhiLayout(FeynmanLayout):
-
+    _name = "PhiLayout"
     def process(self):
         super(PhiLayout, self).process()
         incoming_counter = 0

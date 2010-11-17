@@ -15,7 +15,7 @@ class BaseLayout(Layout):
     Class that encapsulates the layout and styling information of the graph
     """
     _global_args = ("resolution", "ratio", "extra_dot")
-    _defaults = {"resolution" : (800, 600), "ratio" : None}
+    _base = True
 
     def __call__(self, graph):
 

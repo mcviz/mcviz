@@ -9,6 +9,7 @@ from new import classobj
 class GraphvizEngine(LayoutEngine):
     _global_args = [("extra_gv_options")]
     _args = [Arg("dump", bool, "dump raw graphviz input", default=False)]
+    _base = True
 
     def graphviz_pass(self, engine, graphviz_options, dot_data):
         log.debug("dot_data hash: 0x%0X", hash(dot_data))
