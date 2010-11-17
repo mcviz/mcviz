@@ -1,6 +1,12 @@
-from pkg_resources import resource_string
+import re
+
+from pkg_resources import resource_string, resource_exists
 
 from .texglyph import TexGlyph
+
+
+SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
+
 
 class XMLNode(object):
     def __init__(self, tag, attrs=None, children=None):
@@ -145,7 +151,7 @@ class SVGDocument(object):
         self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return "".join(['<?xml version="1.0" ?>', str(self.svg)])
+        return "".join(['<?xml version="1.0" encoding="ISO-8859-1"?>', str(self.svg)])
 
 
 class NavigableSVGDocument(SVGDocument):
@@ -163,6 +169,22 @@ class NavigableSVGDocument(SVGDocument):
     def toprettyxml(self):
         javascript_text = resource_string("mcviz.utils.svg.data", 
                                           "navigable_svg_fragment.xml")
+                
+        def match(m):
+            (javascript_filename,) = m.groups()
+            if not resource_exists("mcviz.utils.svg.data", javascript_filename):
+                return
+                
+            args = "mcviz.utils.svg.data", javascript_filename
+            
+            # ]]> is not allowed in CDATA and it appears in jquery!
+            # Try to prevent that..
+            javascript = resource_string(*args).replace("']]>'", "']' + ']>'")
+            stag = '<script type="text/javascript"><![CDATA[\n%s\n]]></script>'
+            
+            return stag % javascript
+        
+        javascript_text = SCRIPT_TAG.sub(match, javascript_text)
                                           
         self.full_svg_document.appendChild(self.svg)
         self.full_svg_document.appendChild(RawNode(javascript_text))
