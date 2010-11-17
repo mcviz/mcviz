@@ -1,7 +1,8 @@
 from logging import getLogger
 
-from mcviz import Tool, ArgParseError, FatalError, debug_tools
+from mcviz import Tool, FatalError
 from mcviz.graph import GraphView
+from mcviz.tools import ArgParseError, debug_tools
 from mcviz.tools.transforms.tagging import tag
 from mcviz.utils import timer
 

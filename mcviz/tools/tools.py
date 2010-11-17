@@ -256,44 +256,8 @@ class Tool(object):
 
         log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
 
-# The Tool types
-# Special members: _type, _short_opt, _short_help, _merge_classes
-class Transform(Tool):
-    _type = "transform"
-    _short_opt = "t"
-    _short_help = ("Select a transform that is applied to the graph (%s) "
-                   "Can be applied multiple times.")
-
-class Layout(Tool):
-    _type = "layout"
-    _short_opt = "l"
-    _short_help = ("Select layout classes that are used to layout the graph (%s) "
-                   "Can also be applied multiple times.")
-    _merge_classes = True
-
-class LayoutEngine(Tool):
-    _type = "layout-engine"
-    _short_opt = "e"
-    _short_help = ("If specified, pipes output through specified "
-                   "graphviz engine")
-
-
-class Style(Tool):
-    _type = "style"
-    _short_opt = "s"
-    _short_help = "Select styles that are applied to the graph"
-
-
-class Painter(Tool):
-    _type = "painter"
-    _short_opt = "p"
-    _short_help = "Set the painter"
-    _merge_classes = True
-    pass
-
 class FundamentalTool(object):
     """Needed for tool types which merge classes. 
     At least one class must have this.
     """
     pass
-

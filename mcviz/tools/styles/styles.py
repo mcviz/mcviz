@@ -2,7 +2,7 @@ from __future__ import division
 
 from math import log as ln
 
-from mcviz.tool import Style
+from mcviz.tools import Style
 from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 

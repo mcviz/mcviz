@@ -2,7 +2,7 @@ from functools import wraps
 from collections import defaultdict
 from new import classobj
 
-from mcviz.tool import Transform
+from mcviz.tools import Transform
 from mcviz.graph import Summary
 
 from logging import getLogger; log = getLogger("mcviz.transforms")

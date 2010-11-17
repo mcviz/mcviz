@@ -3,7 +3,7 @@ from __future__ import division
 from math import log10
 from itertools import chain
 
-from mcviz.tool import Layout
+from mcviz.tools import Layout
 from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
 from mcviz.utils.svg import TexGlyph
 from mcviz.utils.graphviz import make_node, make_edge, PlainOutput

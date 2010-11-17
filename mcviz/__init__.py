@@ -7,14 +7,11 @@ class FatalError(Exception):
     a full traceback.
     Must be accompanied by a FATAL log message.
     """
+
 from utils import logger
-
-from tool import Tool, ArgParseError, debug_tools
-import tools
-
 from graph import EventGraph
+from tools import Tool
 from workspace import GraphWorkspace
-
 from options import parse_options
 from main import main
 

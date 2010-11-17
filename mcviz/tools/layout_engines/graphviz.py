@@ -1,6 +1,6 @@
 from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
 
-from mcviz.tool import LayoutEngine
+from mcviz.tools import LayoutEngine
 from mcviz.utils.graphviz import run_graphviz
 from mcviz.utils import timer
 

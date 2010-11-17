@@ -1,25 +1,4 @@
-
-from mcviz import Tool
-
-class Annotation(Tool):
-    _type = "annotation"
-    _short_opt = "a"
-    _short_help = "Add an annotation specifying a property to the label "
-
-    _args = [("position", str)]
-    _defaults = {"position" : "sub"}
-    _choices = {"position" : ("sub", "super", "under", "over")}
-
-    def annotate_particles(self, particles, annotate_function):
-        """
-        Add a subscript for all particles. annotate_function(particle) should
-        return a value to be added.
-        """
-        for particle in particles:
-            subscript = annotate_function(particle)
-            if subscript:
-                particle.subscripts.append((subscript, self.options["position"]))
-
+from mcviz.tools import Annotation
 
 class Index(Annotation):
     _name = "index"

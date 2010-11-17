@@ -1,4 +1,4 @@
-from mcviz.tool import FundamentalTool
+from mcviz.tools import FundamentalTool
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 

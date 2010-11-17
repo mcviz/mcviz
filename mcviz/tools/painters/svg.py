@@ -1,6 +1,6 @@
 from logging import getLogger; log = getLogger("mcviz.painters.svg")
 
-from mcviz.tool import FundamentalTool
+from mcviz.tools import FundamentalTool
 
 from mcviz.utils import timer
 from mcviz.utils.svg import SVGDocument

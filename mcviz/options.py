@@ -3,7 +3,7 @@ from __future__ import division
 from optparse import OptionParser, OptionGroup
 import sys
 
-from .tool import tool_type_options
+from mcviz.tools import tool_type_options
 
 def get_option_parser():
     usage = "usage: %prog [options] {hepmc_file|pythia_log}"
