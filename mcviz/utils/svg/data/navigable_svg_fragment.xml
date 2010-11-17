@@ -26,8 +26,26 @@ $(function() {
     
     everything = $("#everything")[0];
     
-    main_trans = everything.vTranslate = [0, 0]; //300,100];
-    everything.vScale = 1;
+    doc = everything.getBBox();
+    winw = window.innerWidth; winh = window.innerHeight;
+    
+    // Set the scale 
+    if (winw / winh > doc.width / doc.height)
+    {
+        everything.vScale = 0.9 * window.innerHeight / doc.height;
+    } else
+    {
+        everything.vScale = 0.9 * window.innerWidth / doc.width;
+    }
+    
+    zoom_value = Math.log(everything.vScale)*20;
+    
+    // Center the document!
+    doc_window_w = everything.vScale * doc.width;
+    doc_window_h = everything.vScale * doc.height;
+    y = window.innerHeight / 2 - doc_window_h / 2;
+    x = window.innerWidth  / 2 - doc_window_w / 2;
+    main_trans = everything.vTranslate = [x, y];
     
     update_transform();
     
@@ -55,9 +73,9 @@ function update_zoom(scroll, ex, ey)
     s_before = s = everything.vScale;
     new_zoom = zoom_value+scroll;
     
-    if (new_zoom > 55) return; // too far zoomed in
+    //if (new_zoom > 55) return; // too far zoomed in
     
-    s = Math.exp(new_zoom / 10);
+    s = Math.exp(new_zoom / 20);
     if (s < 0.01) return; // Too far zoomed out (primitive)
     
     zoom_value += scroll;

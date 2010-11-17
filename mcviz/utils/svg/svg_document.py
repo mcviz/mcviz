@@ -39,7 +39,7 @@ class SVGDocument(object):
             'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
         
         # Adds a big white background rect
-        self.svg.appendChild(RawNode('<rect x="0" y="0" width="%.1f" '
+        self.svg.appendChild(RawNode('<rect id="background" x="0" y="0" width="%.1f" '
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
         
