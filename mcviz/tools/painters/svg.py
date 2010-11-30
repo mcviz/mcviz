@@ -64,7 +64,7 @@ class SVGPainter(StdPainter, FundamentalTool):
         if not node.label is None and node.center:
             self.doc.add_glyph(node.label, node.center.tuple(),
                                self.options["label_size"],
-                               ", ".join(map(str, node.item.subscripts)))
+                               node.item.subscripts)
 
 
 class NavigableSVGPainter(SVGPainter):

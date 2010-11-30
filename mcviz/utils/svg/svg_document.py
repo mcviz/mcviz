@@ -123,7 +123,7 @@ class SVGDocument(object):
         txt.appendChild(RawNode(label))
         self.svg.appendChild(txt)
 
-        self.add_subscripts(subscripts, (x, y), (width_est/2, font_size/3), font_size)
+        self.add_subscripts(subscript, (x, y), (width_est/2, font_size/3), font_size)
 
     def add_subscripts(self, subscripts, center, dimensions, font_size):
         for subscript, pos in subscripts:
