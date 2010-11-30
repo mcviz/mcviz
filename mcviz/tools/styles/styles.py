@@ -123,7 +123,7 @@ class StatusColor(Style):
         colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
         log.warning("Colors are: %r", colors)
         
-        from mcviz.layouts import FeynmanLayout, DualLayout
+        from mcviz.tools.layouts import FeynmanLayout, DualLayout
         if isinstance(layout, FeynmanLayout):
             for edge in layout.edges:
                 particle = edge.item
