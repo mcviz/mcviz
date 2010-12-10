@@ -34,7 +34,7 @@ def run(options, n_argv, args):
     if len(args) <= 1:
         log.fatal("Please specify an HepMC file or Pythia log file to run on. "
                   "Use --help for help.")
-        return -1
+        raise FatalError
 
     log.info("-------------------------------------------------------------")
     log.info("MCViz Copyright (C) 2010 Peter Waller & Johannes Ebke")
@@ -51,7 +51,7 @@ def run(options, n_argv, args):
                         "files")
         for input_file in args[1:]:
             run_demo(input_file)
-        return 0
+        return
 
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)
@@ -62,7 +62,6 @@ def run(options, n_argv, args):
     gw = GraphWorkspace("mcviz.graph", event_graph)
     gw.load_tools(options)
     gw.run()
-    return 0
 
 def real_main(argv):
     options, args = parse_options(argv)
@@ -71,8 +70,9 @@ def real_main(argv):
         with log_level(get_logger_level(options.quiet, options.verbose)):
             with timer("complete run"):
                 run(options, n_argv, args)
+        return 0
     except FatalError:
-        pass
+        return -1
             
 def main(argv):
     if "--profile" in argv:
@@ -91,5 +91,5 @@ def main(argv):
     else:
         to_run = real_main
 
-    exit(to_run(argv))
+    return to_run(argv)
 

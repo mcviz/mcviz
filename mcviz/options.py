@@ -3,6 +3,7 @@ from __future__ import division
 from optparse import OptionParser, OptionGroup
 import sys
 
+from mcviz import FatalError
 from mcviz.tools import tool_type_options
 
 def get_option_parser():
@@ -98,7 +99,7 @@ def parse_options(argv=None):
             res_x, res_y = map(int, options.resolution.split("x"))
         except ValueError:
             log.fatal("resolution must be given as AxB, i.e. 800x400")
-            raise Exception()
+            raise FatalError
         options.ratio = res_y / res_x
     elif options.width:
         res_x = options.width

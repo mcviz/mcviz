@@ -2,6 +2,7 @@
 
 from logging import getLogger; log = getLogger("mcviz.event_graph")
 
+from mcviz import FatalError
 from . import EventParseError
 #from mcviz.tests.test_graph import graph_is_consistent
 
@@ -32,7 +33,7 @@ class EventGraph(object):
                 log.debug("loader %s failed" % loader.__name__)
             except IOError:
                 log.fatal('loading file "%s" failed!' % filename)
-                raise
+                raise FatalError
                 
         raise EventParseError("No loaders succeeded on %s" % filename)
     
