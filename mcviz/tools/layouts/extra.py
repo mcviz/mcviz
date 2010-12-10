@@ -85,10 +85,10 @@ class HardProcessSubgraph(BaseLayout):
         # We need also to include any particles between two hard process vertices
         if isinstance(obj.item, ViewVertex):
             if any(21 <= abs(p.status) <= 29 for p in obj.item.through):
-                log.info("Making hardproc graph")
+                log.verbose("Making hardproc graph")
                 obj.subgraph = "cluster_hardproc"
             else:
-                log.info("Not making hardproc graph %r", [p.status for p in obj.item.through])
+                log.verbose("Not making hardproc graph %r", [p.status for p in obj.item.through])
         elif 21 <= abs(obj.item.status) <= 29:
             obj.subgraph = "cluster_hardproc"
         return super(HardProcessSubgraph, self).process_node(obj)
