@@ -4,6 +4,9 @@ from random import shuffle, seed
     
 from mcviz.utils import rainbow_color
 
+from mcviz.tools import Style, Arg
+
+@Style.decorate("QCDRGB")
 def qcd_rgb(layout):
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
@@ -12,6 +15,7 @@ def qcd_rgb(layout):
     amap = dict(zip(unique_colors, ["cyan", "magenta", "yellow"]*(len(unique_colors)//3+1)))
     set_color(layout, cmap, amap) 
 
+@Style.decorate("QCDRainbow")
 def qcd_rainbow(layout):
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
