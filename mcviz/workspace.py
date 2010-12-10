@@ -48,6 +48,9 @@ class GraphWorkspace(object):
         self.log.debug('tagging graph')
         with timer('tag the graph'):
             tag(self.graph_view)
+
+    def clear_tags(self):
+        self.log.debug('TODO: remove tags from graph')
     
     def apply_transforms(self):
         self.log.debug("Graph state (before transforms): %s", self.graph_view)
@@ -56,11 +59,18 @@ class GraphWorkspace(object):
             self.apply_tools("transform", self.graph_view)
         self.log.debug("Graph state (after transforms): %s", self.graph_view)
 
+    def clear_transforms(self):
+        self.log.debug('Recreating graph view')
+        self.graph_view = GraphView(self.event_graph)
+
     def apply_annotations(self):
-        # Apply any specified styles onto the layouted graph
+        # Apply any specified annotations onto the layouted graph
         self.log.verbose("applying annotations")
         with timer("applied all annotations"):
             self.apply_tools("annotation", self.graph_view)
+
+    def clear_annotations(self):
+        self.log.debug('TODO: remove annotations from graph')
 
     def create_layout(self):
         # Get the specified layout class and create a layout of the graph
@@ -80,6 +90,9 @@ class GraphWorkspace(object):
         with timer("applied all styles"):
             self.apply_tools("style", self.layout)
 
+    def clear_styles(self):
+        self.log.debug('TODO: remove styles from graph')
+
     def apply_optionsets(self):
         # Apply any specified styles onto the layouted graph
         self.log.verbose("applying optionsets")
@@ -92,7 +105,11 @@ class GraphWorkspace(object):
             self.apply_tools("painter", self.layout)
        
     def restyle(self):
+        self.clear_tags()
+        self.clear_styles()
+        self.clear_annotations()
         self.apply_tags()
+        self.apply_annotations()
         self.apply_styles()
 
     def run(self):
