@@ -22,5 +22,5 @@ setup(name='mcviz',
       url='http://mcviz.net',
       license='Affero GPLv3',
       packages=find_packages(),
-      scripts=['bin/mcviz'],
+      entry_points={"console_scripts" : ["mcviz = mcviz:main"]}
       )
