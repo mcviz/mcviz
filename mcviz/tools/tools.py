@@ -133,6 +133,15 @@ class Tool(object):
             tools = cls.tools_from_strings(tool_type, tool_strings)
             res[tool_type] = tools
         return res
+        
+    @classmethod
+    def tools_from_dictionary(cls, options):
+        res = {}
+        for tool_type in sorted(tool_types.keys()):
+            tool_strings = options.get(tool_type, [])
+            tools = cls.tools_from_strings(tool_type, tool_strings)
+            res[tool_type] = tools
+        return res
 
     @classmethod
     def tools_from_strings(cls, tool_type, tool_strings):
