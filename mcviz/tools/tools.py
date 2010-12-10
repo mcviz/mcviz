@@ -28,6 +28,12 @@ class Arg(object):
         self.choices = choices
         self.web = web
 
+    def convert(self, in_string):
+        try:
+            return self.converter(in_string)
+        except Exception, x:
+            raise ToolParseError(self, "cannot convert '%s' to %s" % (in_string, self.converter) )
+
 def tool_type_options():
     res = []
     for tool_type in sorted(tool_types.keys()):
@@ -219,11 +225,7 @@ class Tool(object):
                 arg, val = tp
                 if not arg in my_args_dict:
                     raise ToolParseError(self, "unknown argument '%s'" % arg)
-                try:
-                    cval = my_args_dict[arg].converter(val)
-                except Exception, x:
-                    raise ToolParseError(self, "cannot convert '%s'" % val)
-                keyword_args[arg] = cval
+                keyword_args[arg] = my_args_dict[arg].convert(val)
             elif len(tp) == 1:
                 positional_args.append(arg)
             else:
@@ -232,14 +234,17 @@ class Tool(object):
         if len(positional_args) > len(my_args):
             raise ToolParseError(self, "too many arguments!")
 
-        positional_args = dict(zip((n for n, arg in my_args), positional_args))
+        positional_arg_d = {}
+        for (n, arg), in_string in zip(my_args, positional_args):
+            positional_arg_d[n] = arg.convert(in_string)
+
         for arg in keyword_args:
-            if arg in positional_args:
+            if arg in positional_arg_d:
                 raise ToolParseError(self, "argument '%s' specified as both "
                                      "positional and keyword argument" % arg)
 
         self.options.update(keyword_args)
-        self.options.update(positional_args)
+        self.options.update(positional_arg_d)
 
         for arg, val in self.options.iteritems():
             if arg in my_args_dict and my_args_dict[arg].choices:
