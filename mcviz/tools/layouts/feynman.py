@@ -85,11 +85,12 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
 
 
 class InlineLabelsLayout(FeynmanLayout):
+    _name = "InlineLabels"
     
     def get_particle(self, particle):
             
         down = super(InlineLabelsLayout, self).get_particle(particle)
-        if (down.item.gluon or down.item.photon) and "gluid" not in self.options.subscript:
+        if (down.item.gluon or down.item.photon):
             return down
        
         middle = LayoutNode(down.item, label=down.label)
