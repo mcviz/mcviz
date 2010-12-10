@@ -108,11 +108,13 @@ class InlineLabelsLayout(FeynmanLayout):
 
 
 class StringClustersLayout(FeynmanLayout):
+    _name = "StringClusters"
+
     def __init__(self, *args, **kwargs):
         super(StringClustersLayout, self).__init__(*args, **kwargs)
         
-        assert self.options.layout_engine == "dot", (
-            "StringClustersLayout is only meaningful with dot.")
+        #assert self.options.layout_engine == "dot", (
+        #    "StringClustersLayout is only meaningful with dot.")
 
     def get_vertex(self, vertex, node_style=None):
         lo = super(StringClustersLayout, self).get_vertex(vertex, node_style)

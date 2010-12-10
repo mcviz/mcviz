@@ -43,7 +43,7 @@ def debug_tools():
         log.debug("Tool-Type '%s'; short option: %s; merge: %s"
             % (cls._type, cls._short_opt, cls._merge_classes))
         for tname, cls in tool_classes[name].iteritems():
-            log.debug(" %s '%s'" % (cls._type, cls._name))
+            log.debug(" %s '%s'" % (cls._type, name))
             log.debug("   using global arguments: %s" % str(cls.global_args()))
             log.debug("   local arguments: %s" % str(cls.args()))
 
