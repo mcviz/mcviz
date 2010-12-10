@@ -23,13 +23,13 @@ class Annotation(Tool):
 class Transform(Tool):
     _type = "transform"
     _short_opt = "t"
-    _short_help = ("Select a transform that is applied to the graph (%s) "
+    _short_help = ("Select a transform that is applied to the graph "
                    "Can be applied multiple times.")
 
 class Layout(Tool):
     _type = "layout"
     _short_opt = "l"
-    _short_help = ("Select layout classes that are used to layout the graph (%s) "
+    _short_help = ("Select layout classes that are used to layout the graph "
                    "Can also be applied multiple times.")
     _merge_classes = True
 
