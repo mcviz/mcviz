@@ -51,7 +51,7 @@ class Painter(Tool):
     _short_opt = "p"
     _short_help = "Set the painter"
     _merge_classes = True
-    pass
+
 
 class OptionSet(Tool):
     _type = "optionset"

@@ -74,7 +74,9 @@ def real_main(argv):
     except FatalError:
         return -1
             
-def main(argv):
+def main():
+    from sys import argv
+
     if "--profile" in argv:
         try:
             from profilestats import profile
