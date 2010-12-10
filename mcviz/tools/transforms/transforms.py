@@ -4,7 +4,7 @@ from new import classobj
 
 from logging import getLogger; log = getLogger("mcviz.transforms")
 
-from mcviz.tools import Transform # , Arg
+from mcviz.tools import Transform, Arg
 from mcviz.graph import Summary
 
 
@@ -59,7 +59,7 @@ class NoKinks(Transform):
 
 @Transform.decorate("Gluballs")
 @retrying
-def gluballs(self, graph_view, Retry):
+def gluballs(graph_view, Retry):
     """
     Remove gluon self-interaction, replacing them all with one glu-vertex.
     """
@@ -83,7 +83,7 @@ def gluballs(self, graph_view, Retry):
 
 @Transform.decorate("Chainmail")
 @retrying
-def chainmail(self, graph_view, Retry):
+def chainmail(graph_view, Retry):
     """
     So named because lots of gluons all going the same way looks like chainmail.
     
@@ -101,7 +101,7 @@ def chainmail(self, graph_view, Retry):
             raise Retry
 
 @Transform.decorate("Clusters")
-def contract_clusters(self, graph_view):
+def contract_clusters(graph_view):
     """
     Summarize all particles and vertices which decend from hadronization 
     vertices and tag them.
@@ -134,7 +134,7 @@ def contract_clusters(self, graph_view):
         psummary.cluster_nparticles = len(Walk.particles)
 
 @Transform.decorate("NoLoops")
-def contract_loops(self, graph_view):
+def contract_loops(graph_view):
     """
     Drop loops from the graph
     """
@@ -142,8 +142,8 @@ def contract_loops(self, graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
-@Transform.decorate("Pluck") #, args=[Arg("vno_keep", int)])
-def pluck(self, graph_view, vno_keep=3):
+@Transform.decorate("Pluck", args=[Arg("vno_keep", int, "id of vertex to pick")])
+def pluck(graph_view, vno_keep=3):
     """
     Keep a specific vertex and particles travelling through it
     
@@ -168,7 +168,7 @@ def pluck(self, graph_view, vno_keep=3):
 
 @Transform.decorate("Unsummarize")
 @retrying
-def unsummarize(self, graph_view, Retry):
+def unsummarize(graph_view, Retry):
     """
     Undo a summarization.
     Useful when used in combination with other transforms, 
@@ -184,7 +184,7 @@ def unsummarize(self, graph_view, Retry):
         raise Retry
 
 @Transform.decorate("Shallow")
-def shallow(self, graph_view, drop_depth=10):
+def shallow(graph_view, drop_depth=10):
     """
     Take only the first `drop_depth`
     """

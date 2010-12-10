@@ -99,11 +99,16 @@ class Tool(object):
         return zip(args_names, args_list)
 
     @classmethod
-    def decorate(cls, name, title=None):
+    def decorate(cls, name, title=None, args=None):
         if title is None:
             title = name
+        if args is None:
+            args = ()
         def decorated(func):
-            return classobj(name, (cls,), dict(_name=title, __call__=func))
+            def tool_specific(self, *pargs):
+                return func(*pargs, **self.options)
+            clsd = dict(_args=args, _name=title, __call__=tool_specific)
+            return classobj(name, (cls,), clsd)
         return decorated
 
     @classmethod
