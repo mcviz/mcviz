@@ -66,6 +66,9 @@ function on_mouse_scroll(ev)
     if (ev.wheelDelta) delta = ev.wheelDelta / 120 * 3;
     if (ev.detail) delta = -ev.detail;
     update_zoom(delta, ev.clientX, ev.clientY);
+    
+    // Prevent usual window scrolling
+    ev.preventDefault();
 }
 
 function update_zoom(scroll, ex, ey) 
