@@ -55,6 +55,8 @@ class SimpleColors(Style):
             if isinstance(node.item, ViewVertex):
                 if node.item.initial:
                     node.style_args["fill"] = initial_color
+                elif "gluball" in node.item.tags:
+                    node.style_args["fill"] = "#22bb44"
             else:
                 # label in Inline; particle in Dual
                 # fill will be ignored in inline
