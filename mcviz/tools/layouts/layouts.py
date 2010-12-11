@@ -16,7 +16,8 @@ class BaseLayout(Layout):
     """
     _args = [Arg("x", int, "width"), Arg("y", int, "height"), 
              Arg("ratio", float, "aspect ratio"),
-             Arg("label_size", float, "size of labels (1.0 is normal)", 1.0)]
+             Arg("label_size", float, "size of labels (1.0 is normal)", 1.0),
+             Arg("orientation", str, "orientation of the graph", "TB", choices=["LR","RL", "TB", "BT"])]
     _base = True
 
     def __call__(self, graph):
@@ -89,6 +90,7 @@ class BaseLayout(Layout):
     def dot(self):
         out = ["digraph pythia {"]
         #out.append(self.options["extra_dot"])
+        out.append('rankdir="%s";' % self.options["orientation"])
         out.append('dpi=1;')
         if self.width and self.height:
             out.append('size="%s,%s!";' % (self.width, self.height))
