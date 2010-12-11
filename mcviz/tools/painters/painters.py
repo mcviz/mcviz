@@ -18,12 +18,12 @@ class StdPainter(Painter):
         if output_file == "-":
             print data_string
         elif hasattr(output_file, "write"):
-            output_file.write(data_string)
+            output_file.write(data_string.encode("UTF-8"))
         else:
             # Write the data to file otherwise
             log.info('writing "%s"' % output_file)
             with open(output_file, "w") as f:
-                f.write(data_string)
+                f.write(data_string.encode("UTF-8"))
 
     def recalculate_boundingbox(self):
         # if we do not know the scale; (i.e. bounding box) calculate it
@@ -55,5 +55,5 @@ class StdPainter(Painter):
 class DOTPainter(StdPainter, FundamentalTool):
     _name = "dot"
     def __call__(self, layout):
-        self.write_data(layout.dot)
+        self.write_data(layout.dot.encode("UTF-8"))
 
