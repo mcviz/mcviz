@@ -44,21 +44,5 @@ def get_option_parser():
       help="Print the DOT data passed into graphviz.")
     return p
     
-def parse_options(argv=None):
-    p = get_option_parser()
-
-    if argv is None:
-        argv = sys.argv
-
-    if "--" in argv:
-        extraopts_index = argv.index("--")
-        extra_gv_options = argv[extraopts_index+1:]
-        argv = argv[:extraopts_index]
-    else:
-        extra_gv_options = []
-
-    result = options, args = p.parse_args(argv)
-
-    options.extra_gv_options = extra_gv_options
-
-    return result
+def parse_options(argv=sys.argv):
+    return get_option_parser().parse_args(argv)

@@ -9,7 +9,7 @@ from new import classobj
 class GraphvizEngine(LayoutEngine):
     _global_args = [("extra_gv_options")]
     _args = [Arg("dump", bool, "dump raw graphviz input", default=False),
-             Arg("extra", list, "extra graphviz options", default=[])]
+             Arg("extra", str, "extra graphviz options", default="")]
     _base = True
 
     def graphviz_pass(self, engine, graphviz_options, dot_data):
@@ -39,7 +39,7 @@ class GraphvizEngine(LayoutEngine):
 
     def __call__(self, layout):
         engine = self._name
-        opts = self.options["extra"]
+        opts = self.options["extra"].split()
         if not any(opt.startswith("-T") for opt in opts):
             opts.append("-Tplain")
         plain = self.graphviz_pass(engine, opts, self.dot(layout))
