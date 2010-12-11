@@ -104,8 +104,22 @@ class FDPEngine(GraphvizEngine):
     _name = "fdp"
     
     def dot(self, layout):
-        """ tuning parameters specific to FDP: 
-          """
+        """ tuning parameters specific to FDP:
+         * K (GC, 0.3) - ideal edge length, overruled by edge len
+         * dim, dimen (G, 2) - dimensionality
+         * sep (G, +4) - minimal (additive) margin. no plus -> multiplicative
+         * esep (G, +3) - spline routing margin (as sep)
+         * len (E, 0.3) - preferred edge lenght
+         * maxiter (G, 600) - # iterations
+         * overlap (G, 9:portho) - scale, false (voronoi), scalexy, compress
+         * pack, packmode (G) - for packing disconnected graphs
+         * pin (N) - if true, fix the position of that node
+         * pos (N) - set initial position (or fixed position)
+         * start (G) - random seed for initial position placement
+         * voro_margin (G, 0.05) -  Factor to scale up drawing to allow margin
+                    for expansion in Voronoi technique. dim' = (1+2*margin)*dim
+         * weight (E, 1.0) - must be >1; 
+        """
 
         out = ["digraph pythia {"]
         #out.append(layout.options["extra_dot"])
