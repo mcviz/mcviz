@@ -21,7 +21,7 @@ class XMLNode(object):
         self.attrs.append('%s="%s"' % (attr, val))
 
     def __str__(self):
-        child_data = "".join(str(child) for child in self.children)
+        child_data = "".join(unicode(child) for child in self.children)
         open_tag = "".join(("<"," ".join([self.tag] + self.attrs),">"))
         close_tag = "".join(("</",self.tag,">"))
         return "".join((open_tag, child_data, close_tag))
@@ -31,6 +31,9 @@ class RawNode(XMLNode):
         self.data = data
 
     def __str__(self):
+        return self.data
+        
+    def __unicode__(self):
         return self.data
 
 
@@ -151,7 +154,7 @@ class SVGDocument(object):
         self.svg.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return "".join(['<?xml version="1.0" encoding="ISO-8859-1"?>', str(self.svg)])
+        return "".join(['<?xml version="1.0" encoding="UTF-8"?>', unicode(self.svg)])
 
 
 class NavigableSVGDocument(SVGDocument):
