@@ -63,7 +63,7 @@ class ToolParseError(ArgParseError):
         super(ToolParseError, self).__init__(new_msg)
 
 class Arg(object):
-    def __init__(self, name, converter, doc, default=None, choices=None, web=True):
+    def __init__(self, name, converter, doc, default=None, choices=None, web=False):
         """<converter> can be float, int, str, or even a function
         WARNING: Any function put in here will receive a user input string
         and must treat the string as TAINTED"""
