@@ -232,13 +232,15 @@ class Tool(object):
         for arg, val in setting.kwargs.iteritems():
             if not arg in my_args_dict:
                 raise ToolParseError(self, "unknown argument '%s'" % arg)
-                keyword_args[arg] = my_args_dict[arg].convert(val)
+            keyword_args[arg] = my_args_dict[arg].convert(val)
+            print arg, "=", my_args_dict[arg].convert(val)
+
 
         if len(setting.args) > len(my_args):
             raise ToolParseError(self, "too many arguments!")
 
         positional_arg_d = {}
-        for (n, arg), in_string in zip(my_args, positional_args):
+        for (n, arg), in_string in zip(my_args, setting.args):
             positional_arg_d[n] = arg.convert(in_string)
 
         for arg in keyword_args:
