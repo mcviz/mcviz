@@ -16,8 +16,7 @@ class BaseLayout(Layout):
     """
     _args = [Arg("x", int, "width"), Arg("y", int, "height"), 
              Arg("ratio", float, "aspect ratio"),
-             Arg("label_size", float, "size of labels (1.0 is normal)", 1.0),
-             Arg("orientation", str, "orientation of the graph", "TB", choices=["LR","RL", "TB", "BT"])]
+             Arg("label_size", float, "size of labels (1.0 is normal)", 1.0),]
     _base = True
 
     def __call__(self, graph):
@@ -88,17 +87,7 @@ class BaseLayout(Layout):
 
     @property
     def dot(self):
-        out = ["digraph pythia {"]
-        #out.append(self.options["extra_dot"])
-        out.append('rankdir="%s";' % self.options["orientation"])
-        out.append('dpi=1;')
-        if self.width and self.height:
-            out.append('size="%s,%s!";' % (self.width, self.height))
-        if self.ratio:
-            out.append("ratio=%s;" % self.ratio)
-
-        out.append("edge [labelangle=90]")
-
+        out = []
         for name in self.subgraph_names:
             nodelist = self.subgraphs.get(name, [])
             subgraph = self.subgraph_options.get(name, [])
@@ -111,7 +100,6 @@ class BaseLayout(Layout):
         for edge in self.edges:
             out.append(edge.dot)
 
-        out.append("}")
         return "\n".join(out)
 
     def update_from_plain(self, plain):
