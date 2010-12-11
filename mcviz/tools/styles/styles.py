@@ -9,23 +9,19 @@ from mcviz.graph import ViewParticle, ViewVertex
 from logging import getLogger; log = getLogger("mcviz.styles")
 
 
+DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "none", "stroke-width": "0.05"}
+DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black", 
+                     "stroke-width": 0.05, "scale": 1}
+
 class Default(Style):
     _name = "Default"
     def __call__(self, layout):
-        edge_args = {}
-        edge_args["energy"] = 0.2
-        edge_args["stroke"] = "black"
-        edge_args["fill"] = "black"
-        edge_args["stroke-width"] = 0.05
-        edge_args["scale"] = 0.1
-
         for edge in layout.edges:
             edge.style_line_type = "identity"
-            edge.style_args.update(edge_args)
-
-        node_args = {"stroke":"black", "fill":"none", "stroke-width" : "0.05"}
+            edge.style_args.update(DEFAULT_EDGE_ARGS)
+        
         for node in layout.nodes:
-            node.style_args.update(node_args)
+            node.style_args.update(DEFAULT_NODE_ARGS)
 
 
 def particle_color(particle):
