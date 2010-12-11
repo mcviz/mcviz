@@ -1,9 +1,9 @@
 from mcviz.tools import OptionSet 
 from mcviz.tools.tools import ToolSetting, tool_classes
 
-def setdefault(tools, tool_type, default, args=None, kwargs=None):
+def setdefault(tools, tool_type, default, *args, **kwargs):
     if len(tools[tool_type]) == 0:
-        tools[tool_type].append(ToolSetting(default, args, kwargs))
+        tools[tool_type].append(ToolSetting(default, *args, **kwargs))
 
 class CommandLineOptionSet(OptionSet):
     _name = "cl"

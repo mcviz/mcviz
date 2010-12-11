@@ -10,10 +10,10 @@ class ArgParseError(Exception):
     pass
 
 class ToolSetting(object):
-    def __init__(self, name, args=None, kwargs=None):
+    def __init__(self, name, *args, **kwargs):
         self.name = name
-        self.args = [] if args is None else args
-        self.kwargs = {} if kwargs is None else kwargs
+        self.args = args
+        self.kwargs = kwargs
 
     @classmethod
     def from_string(self, in_string):
@@ -36,7 +36,7 @@ class ToolSetting(object):
             else:
                 raise ToolParseError(self, "too many '=' in %s" % arg)
 
-        return ToolSetting(tool_name, positional_args, keyword_args)
+        return ToolSetting(tool_name, *positional_args, **keyword_args)
 
     @classmethod
     def settings_from_options(cls, options):
