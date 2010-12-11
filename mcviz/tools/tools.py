@@ -9,6 +9,52 @@ tool_classes = {}
 class ArgParseError(Exception):
     pass
 
+class ToolSetting(object):
+    def __init__(self, name, args=None, kwargs=None):
+        self.name = name
+        self.args = [] if args is None else args
+        self.kwargs = {} if kwargs is None else kwargs
+
+    @classmethod
+    def from_string(self, in_string):
+        keyword_args = {}
+        positional_args = []
+
+        ts_split = re.split(r"(?<!\\)\:", in_string)
+        tool_name, args = ts_split[0], ts_split[1:]
+
+        for arg in args:
+            # Try to find an unescaped equal sign
+            tp = re.split(r"(?<!\\)\=", arg)
+            if len(tp) == 2:
+                arg, val = tp
+                keyword_args[arg] = val
+            elif not arg.strip():
+                pass
+            elif len(tp) == 1:
+                positional_args.append(arg)
+            else:
+                raise ToolParseError(self, "too many '=' in %s" % arg)
+
+        return ToolSetting(tool_name, positional_args, keyword_args)
+
+    @classmethod
+    def settings_from_options(cls, options):
+        res = {}
+        for tool_type in sorted(tool_types.keys()):
+            tool_strings = getattr(options, tool_type.replace("-","_"))
+            res[tool_type] = map(cls.from_string, tool_strings)
+        return res
+        
+    def get_class(self, tool_type):
+        class_args = []
+        if not self.name in tool_classes[tool_type]:
+            choices = ", ".join(tool_classes[tool_type].keys())
+            raise ArgParseError("no such %s: %s\npossible choices are: %s" % 
+                (tool_type, self.name, choices))
+        return tool_classes[tool_type][self.name]
+
+
 class ToolParseError(ArgParseError):
     def __init__(self, tool, msg, exc = None):
         self.tool = tool
@@ -87,10 +133,12 @@ class Tool(object):
     _merge_classes = False
 
 
-    def __init__(self):
+    def __init__(self, settings=None):
         # Primary default for all options is None
         args = self.args()
         self.options = dict(((name, arg.default) for name, arg in args))
+        if settings:
+            self.apply_settings(settings)
 
     @classmethod
     def args(cls):
@@ -126,55 +174,20 @@ class Tool(object):
         return args
 
     @classmethod
-    def tools_from_options(cls, options):
-        res = {}
-        for tool_type in sorted(tool_types.keys()):
-            tool_strings = getattr(options, tool_type.replace("-","_"))
-            tools = cls.tools_from_strings(tool_type, tool_strings)
-            res[tool_type] = tools
-        return res
-        
-    @classmethod
-    def tools_from_dictionary(cls, options):
-        res = {}
-        for tool_type in sorted(tool_types.keys()):
-            tool_strings = options.get(tool_type, [])
-            tools = cls.tools_from_strings(tool_type, tool_strings)
-            res[tool_type] = tools
-        return res
-
-    @classmethod
-    def tools_from_strings(cls, tool_type, tool_strings):
-        tools = []
-        # Regex: Require ":" but without an (unescaped) backslash
-        ts_split = [re.split(r"(?<!\\)\:", s) for s in tool_strings]
-        class_args = []
-        for n in ts_split:
-            tool_name, args = n[0], n[1:]
-            if not tool_name in tool_classes[tool_type]:
-                choices = ", ".join(tool_classes[tool_type].keys())
-                raise ArgParseError("no such %s: %s\npossible choices are: %s" % 
-                    (tool_type, tool_name, choices))
-            class_args.append((tool_classes[tool_type][tool_name], args))
-        return class_args
-
-    @classmethod
-    def build_tools(cls, tool_type, class_args, options):
+    def build_tools(cls, tool_type, settings):
         type_cls = tool_types[tool_type]
-        classes = [c for c, a in class_args]
+        classes = [s.get_class(tool_type) for s in settings]
         if type_cls._merge_classes:
             specific_class = cls.create_specific_class(tool_type, classes)
             tool = specific_class()
-            tool.read_global_options(options)
-            for bcls, args in class_args:
-                tool.read_options(args)
+            for s in settings:
+                tool.read_settings(s)
             tools = [tool]
         else:
             tools = []
-            for tool_class, args in class_args:
-                tool = tool_class()
-                tool.read_global_options(options)
-                tool.read_options(args)
+            for setting in settings:
+                tool = setting.get_class(tool_type)()
+                tool.read_settings(setting)
                 tools.append(tool)
         return tools
 
@@ -209,38 +222,19 @@ class Tool(object):
         log.debug("Creating %s with bases %r", classname, bases)
         return classobj(classname, bases, {})
 
-    def read_global_options(self, global_args):
-
-        # Use any global args that are specified
-        for arg in self.global_args():
-            if not hasattr(global_args, arg):
-                raise ToolParseError(self, "unknown global argument '%s'" % arg)
-            self.options[arg] = getattr(global_args, arg)
-
-        log.debug("%s %s options after global args: %s" % (self._type, self._name, self.options))
-
-    def read_options(self, args):
+    def read_settings(self, setting):
         my_args = self.args()
         my_args_dict = dict(my_args)
 
         keyword_args = {}
         positional_args = []
 
-        # Now update with local options
-        for arg in args:
-            # Try to find an unescaped equal sign
-            tp = re.split(r"(?<!\\)\=", arg)
-            if len(tp) == 2:
-                arg, val = tp
-                if not arg in my_args_dict:
-                    raise ToolParseError(self, "unknown argument '%s'" % arg)
+        for arg, val in setting.kwargs.iteritems():
+            if not arg in my_args_dict:
+                raise ToolParseError(self, "unknown argument '%s'" % arg)
                 keyword_args[arg] = my_args_dict[arg].convert(val)
-            elif len(tp) == 1:
-                positional_args.append(arg)
-            else:
-                raise ToolParseError(self, "too many '=' in %s" % arg)
 
-        if len(positional_args) > len(my_args):
+        if len(setting.args) > len(my_args):
             raise ToolParseError(self, "too many arguments!")
 
         positional_arg_d = {}

@@ -8,8 +8,7 @@ from logging import getLogger; log = getLogger("mcviz.painters")
 
 class StdPainter(Painter):
 
-    #_args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
-    _global_args = ["output_file"]
+    _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
     _base = True
 
     def write_data(self, data_string):

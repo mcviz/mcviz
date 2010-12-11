@@ -1,5 +1,5 @@
 
-from tools import Tool, Arg, FundamentalTool, tool_type_options, ArgParseError
+from tools import Tool, ToolSetting, Arg, FundamentalTool, tool_type_options, ArgParseError
 from types import (Annotation, Transform, Layout, LayoutEngine, Style, Painter, 
                    OptionSet)
 

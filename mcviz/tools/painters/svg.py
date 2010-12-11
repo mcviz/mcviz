@@ -12,8 +12,7 @@ from painters import StdPainter
 
 class SVGPainter(StdPainter, FundamentalTool):
     _name = "svg"
-    _global_args = ("label_size",)
-    
+
     document_creator = SVGDocument
 
     type_map = {"identity": identity,
@@ -30,6 +29,7 @@ class SVGPainter(StdPainter, FundamentalTool):
     def __call__(self, layout):
         with timer("create the SVG document"):
             args = layout.width, layout.height, layout.scale
+            self.label_size = layout.label_size
             self.doc = self.document_creator(*args)
             for edge in layout.edges:
                 if not edge.spline:
@@ -52,7 +52,7 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.label, edge.label_center,
-                           self.options["label_size"], edge.item.subscripts)
+                           self.label_size, edge.item.subscripts)
 
 
     def paint_vertex(self, node):
@@ -63,7 +63,7 @@ class SVGPainter(StdPainter, FundamentalTool):
            
         if not node.label is None and node.center:
             self.doc.add_glyph(node.label, node.center.tuple(),
-                               self.options["label_size"],
+                               self.label_size,
                                node.item.subscripts)
 
 

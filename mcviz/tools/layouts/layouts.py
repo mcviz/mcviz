@@ -3,7 +3,7 @@ from __future__ import division
 from math import log10
 from itertools import chain
 
-from mcviz.tools import Layout
+from mcviz.tools import Layout, Arg
 from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
 from mcviz.utils.svg import TexGlyph
 from mcviz.utils.graphviz import make_node, make_edge, PlainOutput
@@ -14,14 +14,17 @@ class BaseLayout(Layout):
     """
     Class that encapsulates the layout and styling information of the graph
     """
-    _global_args = ("resolution", "ratio", "extra_dot")
+    _args = [Arg("x", int, "width"), Arg("y", int, "height"), 
+             Arg("ratio", float, "aspect ratio"),
+             Arg("label_size", float, "size of labels (1.0 is normal)", 1.0)]
     _base = True
 
     def __call__(self, graph):
 
-        self.width, self.height = self.options["resolution"]
+        self.width, self.height = self.options["x"], self.options["y"]
         self.ratio = self.options["ratio"]
         self.scale = 1.0
+        self.label_size = self.options["label_size"]
 
         self.subgraphs = {None: []}
         self.subgraph_options = {}
@@ -85,7 +88,7 @@ class BaseLayout(Layout):
     @property
     def dot(self):
         out = ["digraph pythia {"]
-        out.append(self.options["extra_dot"])
+        #out.append(self.options["extra_dot"])
         out.append('dpi=1;')
         if self.width and self.height:
             out.append('size="%s,%s!";' % (self.width, self.height))

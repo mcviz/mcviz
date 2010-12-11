@@ -2,7 +2,7 @@ from logging import getLogger
 
 from mcviz import Tool, FatalError
 from mcviz.graph import GraphView
-from mcviz.tools import ArgParseError, debug_tools
+from mcviz.tools import ToolSetting, ArgParseError, debug_tools
 from mcviz.tools.transforms.tagging import tag
 from mcviz.utils import timer
 
@@ -24,20 +24,18 @@ class GraphWorkspace(object):
         self.log.debug('Loading tools...')
         with timer('load all tools'):
             try:
-                parsed_tools = Tool.tools_from_options(options)
-                self.load_parsed_tools(parsed_tools, options)
+                settings = ToolSetting.settings_from_options(options)
+                self.tools_from_settings(settings)
             except ArgParseError, e:
                 self.log.fatal("Parse error in arguments: %s" % e.args[0])
                 raise FatalError
 
-    def load_parsed_tools(self, parsed_tools, options):
-        
-        optionsets = parsed_tools.pop("optionset")
-        for optionset in Tool.build_tools("optionset", optionsets, options):
-            optionset(parsed_tools)
-        for tool_type in parsed_tools:
-            cls_args = parsed_tools[tool_type]
-            tools = Tool.build_tools(tool_type, cls_args, options)
+    def tools_from_settings(self, settings):
+        optionsets = settings.pop("optionset")
+        for optionset in Tool.build_tools("optionset", optionsets):
+            optionset(settings)
+        for tool_type in settings:
+            tools = Tool.build_tools(tool_type, settings[tool_type])
             self.tools[tool_type] = tools
     
     def apply_tools(self, tool_type, *args):
