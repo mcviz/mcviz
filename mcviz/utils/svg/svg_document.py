@@ -165,11 +165,9 @@ class NavigableSVGDocument(SVGDocument):
                           'id="whole_document"']
         self.full_svg_document = self.svg
         self.svg = XMLNode("g", 'id="everything"')
+    
+    def inject_javascript(self, javascript_text):
         
-    def toprettyxml(self):
-        javascript_text = resource_string("mcviz.utils.svg.data", 
-                                          "navigable_svg_fragment.xml")
-                
         def match(m):
             (javascript_filename,) = m.groups()
             if not resource_exists("mcviz.utils.svg.data", javascript_filename):
@@ -180,14 +178,24 @@ class NavigableSVGDocument(SVGDocument):
             # ]]> is not allowed in CDATA and it appears in jquery!
             # Try to prevent that..
             javascript = resource_string(*args).replace("']]>'", "']' + ']>'")
+            
+            # The javascript is encoded in ISO-8859-1 :-(
+            javascript = javascript.decode("ISO-8859-1")
+            
             stag = '<script type="text/javascript"><![CDATA[\n%s\n]]></script>'
             
             return stag % javascript
         
-        javascript_text = SCRIPT_TAG.sub(match, javascript_text)
-                                          
+        return SCRIPT_TAG.sub(match, javascript_text)
+    
+    def toprettyxml(self):
+        script_fragments = resource_string("mcviz.utils.svg.data", 
+                                           "navigable_svg_fragment.xml")
+        
+        script_fragments = self.inject_javascript(script_fragments)
+                         
         self.full_svg_document.appendChild(self.svg)
-        self.full_svg_document.appendChild(RawNode(javascript_text))
+        self.full_svg_document.appendChild(RawNode(script_fragments))
         self.svg = self.full_svg_document
         result = super(NavigableSVGDocument, self).toprettyxml()
         return result
