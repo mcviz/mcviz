@@ -106,25 +106,31 @@ class FDPEngine(GraphvizEngine):
     def dot(self, layout):
         """ tuning parameters specific to FDP:
          * K (GC, 0.3) - ideal edge length, overruled by edge len
-         * dim, dimen (G, 2) - dimensionality
          * sep (G, +4) - minimal (additive) margin. no plus -> multiplicative
          * esep (G, +3) - spline routing margin (as sep)
-         * len (E, 0.3) - preferred edge lenght
+
+         * overlap (G, 9:portho) - scale, false (voronoi), scalexy, compress,
+                vpsc
          * maxiter (G, 600) - # iterations
-         * overlap (G, 9:portho) - scale, false (voronoi), scalexy, compress
          * pack, packmode (G) - for packing disconnected graphs
-         * pin (N) - if true, fix the position of that node
-         * pos (N) - set initial position (or fixed position)
-         * start (G) - random seed for initial position placement
+         * start (G) - random seed for initial position placementi (?)
          * voro_margin (G, 0.05) -  Factor to scale up drawing to allow margin
                     for expansion in Voronoi technique. dim' = (1+2*margin)*dim
+         * dim, dimen (G, 2) - dimensionality
+
          * weight (E, 1.0) - must be >1; 
+         * len (E, 0.3) - preferred edge length
+
+         * pin (N) - if true, fix the position of that node
+         * pos (N) - set initial position (or fixed position)
         """
 
         out = ["digraph pythia {"]
-        #out.append(layout.options["extra_dot"])
-        #out.append('ranksep=10;')
+        out.append('K=1.0;')
+        out.append('sep="+30";')
+        out.append('overlap="6:";') # tradeoff between speed and overlap quality
         out.append('dpi=1;')
+
         if layout.width and layout.height:
             out.append('size="%s,%s!";' % (layout.width, layout.height))
         if layout.ratio:
@@ -138,7 +144,7 @@ class FDPEngine(GraphvizEngine):
         return "\n".join(out)
 
 
-for le in ["fdp", "neato", "sfdp", "circo", "twopi"]:
+for le in ["neato", "sfdp", "circo", "twopi"]:
     # create class and apply "tool" decorator
     classobj(le, (GraphvizEngine,), {"_name" : le})
 
