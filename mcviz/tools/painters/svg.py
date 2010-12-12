@@ -3,7 +3,8 @@ from logging import getLogger; log = getLogger("mcviz.painters.svg")
 from mcviz.tools import FundamentalTool
 
 from mcviz.utils import timer
-from mcviz.utils.svg import SVGDocument, NavigableSVGDocument
+from mcviz.utils.svg.svg_document import (
+    SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
 from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
                              boson, fermion, hadron, vertex)
 
@@ -70,3 +71,8 @@ class SVGPainter(StdPainter, FundamentalTool):
 class NavigableSVGPainter(SVGPainter):
     _name = "navisvg"
     document_creator = NavigableSVGDocument
+    
+    
+class MCVizWebNavigableSVGPainter(SVGPainter):
+    _name = "webnavisvg"
+    document_creator = MCVizWebNavigableSVGDocument

@@ -158,6 +158,11 @@ class SVGDocument(object):
 
 
 class NavigableSVGDocument(SVGDocument):
+    """
+    An SVG document which has the capability to clik and scroll to navigate the
+    document, implemented in javascript.
+    """
+
     def __init__(self, *args, **kwargs):
         super(NavigableSVGDocument, self).__init__(*args, **kwargs)
         
@@ -202,3 +207,23 @@ class NavigableSVGDocument(SVGDocument):
         self.svg = self.full_svg_document
         result = super(NavigableSVGDocument, self).toprettyxml()
         return result
+        
+        
+class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
+    """
+    Overrides inject_javascript in the case that we're running within mcviz.web
+    so that the URLs are correct
+    """
+    def inject_javascript(self, javascript_text):
+        
+        def match(m):
+            (javascript_filename,) = m.groups()
+            
+            from mcviz.web import get_mcviz_data_url
+            javascript_path = get_mcviz_data_url() + javascript_filename
+            
+            stag = '<script type="text/javascript" xlink:href="%s"></script>'
+            return stag % javascript_path
+        
+        return SCRIPT_TAG.sub(match, javascript_text)
+    
