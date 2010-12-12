@@ -187,9 +187,6 @@ class NavigableSVGDocument(SVGDocument):
             # Try to prevent that..
             javascript = resource_string(*args).replace("']]>'", "']' + ']>'")
             
-            # The javascript is encoded in ISO-8859-1 :-(
-            javascript = javascript.decode("ISO-8859-1")
-            
             stag = '<script type="text/javascript"><![CDATA[\n%s\n]]></script>'
             
             return stag % javascript

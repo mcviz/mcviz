@@ -1107,7 +1107,7 @@ $.extend(SVGPath.prototype, {
 		return this;
 	},
 
-	/* Draw a cubic Bézier curve.
+	/* Draw a cubic BÃ©zier curve.
 	   @param  x1        (number) x-coordinate of beginning control point or
 	                     (number[][]) x-/y-coordinates of control and end points to draw to
 	   @param  y1        (number) y-coordinate of beginning control point (omitted if x1 is array)
@@ -1123,7 +1123,7 @@ $.extend(SVGPath.prototype, {
 		return this._coords((relative ? 'c' : 'C'), x1, y1, x2, y2, x, y);
 	},
 
-	/* Continue a cubic Bézier curve.
+	/* Continue a cubic BÃ©zier curve.
 	   Starting control point is the reflection of the previous end control point.
 	   @param  x2        (number) x-coordinate of ending control point or
 	                     (number[][]) x-/y-coordinates of control and end points to draw to
@@ -1138,7 +1138,7 @@ $.extend(SVGPath.prototype, {
 		return this._coords((relative ? 's' : 'S'), x2, y2, x, y);
 	},
 
-	/* Draw a quadratic Bézier curve.
+	/* Draw a quadratic BÃ©zier curve.
 	   @param  x1        (number) x-coordinate of control point or
 	                     (number[][]) x-/y-coordinates of control and end points to draw to
 	   @param  y1        (number) y-coordinate of control point (omitted if x1 is array)
@@ -1152,7 +1152,7 @@ $.extend(SVGPath.prototype, {
 		return this._coords((relative ? 'q' : 'Q'), x1, y1, x, y);
 	},
 
-	/* Continue a quadratic Bézier curve.
+	/* Continue a quadratic BÃ©zier curve.
 	   Control point is the reflection of the previous control point.
 	   @param  x         (number) x-coordinate of curve end or
 	                     (number[][]) x-/y-coordinates of points to draw to
