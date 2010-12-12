@@ -27,9 +27,14 @@ class ViewVertex(ViewObject):
         Hadronization is defined as a vertex which has at least one colored and
         one anti-colored object coming in, and no colored outgoing particles.
         """
+                # We must have ay least one incoming
+                # colored and anticolored particle
         return (any(p.color and not p.anticolor for p in self.incoming) and
-                 any(p.anticolor and not p.color for p in self.incoming) and
-                 all(not p.color and not p.anticolor for p in self.outgoing))
+                any(p.anticolor and not p.color for p in self.incoming) and
+                # Everything outgoing must be uncoloured
+                all(not p.color and not p.anticolor for p in self.outgoing) and
+                # No bosons
+                not any(p.boson for p in self.outgoing))
                 
     @property
     def connecting(self):
