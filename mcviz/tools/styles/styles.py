@@ -3,6 +3,7 @@ from __future__ import division
 from math import log as ln
 
 from mcviz.tools import Style, Arg
+from mcviz.tools.layouts import FeynmanLayout
 from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 
@@ -99,10 +100,14 @@ class FancyLines(Style):
 class LineWidthPt(Style):
     _name = "LineWidthPt"
     def __call__(self, layout):
-        for edge in layout.edges:
-            particle = edge.item
-
-            edge.style_args["stroke-width"] = ln(particle.pt+1)*0.1 + 0.01
+        if isinstance(layout, FeynmanLayout):
+            elements = layout.edges
+        else:
+            elements = layout.nodes
+            
+        for element in elements:
+            particle = element.item
+            element.style_args["stroke-width"] = ln(particle.pt+1)*0.1 + 0.01
             
 
 class ThickenColor(Style):
