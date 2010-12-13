@@ -21,10 +21,13 @@ class XMLNode(object):
         self.attrs.append('%s="%s"' % (attr, val))
 
     def __str__(self):
-        child_data = "".join(unicode(child) for child in self.children)
-        open_tag = "".join(("<"," ".join([self.tag] + self.attrs),">"))
-        close_tag = "".join(("</",self.tag,">"))
-        return "".join((open_tag, child_data, close_tag))
+        open_content = " ".join([self.tag] + self.attrs)
+        if not self.children:
+            return "<%s />" % open_content
+        child_data = "\n".join(unicode(child) for child in self.children)
+        open_tag = "<%s>" % open_content
+        close_tag = "</%s>" % self.tag
+        return "\n".join((open_tag, child_data, close_tag))
 
 class RawNode(XMLNode):
     def __init__(self, data):
@@ -148,7 +151,8 @@ class SVGDocument(object):
             txt.appendChild(subscript)
             self.svg.appendChild(txt)
 
-    def add_object(self, element):
+    def add_object(self, reference, element):
+        element.setAttribute("mcviz:r", reference)
         assert not element.getAttribute("transform")
         element.setAttribute("transform", "scale(%.3f)" % (self.scale))
         self.svg.appendChild(RawNode(element.toxml()))
@@ -170,6 +174,7 @@ class NavigableSVGDocument(SVGDocument):
         self.svg.attrs = ['version="1.1" '
                           'xmlns="http://www.w3.org/2000/svg" '
                           'xmlns:xlink="http://www.w3.org/1999/xlink" '
+                          'xmlns:mcviz="http://mcviz.net" '
                           'id="whole_document"']
         self.full_svg_document = self.svg
         self.svg = XMLNode("g", 'id="everything"')
@@ -224,3 +229,9 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
         
         return SCRIPT_TAG.sub(match, javascript_text)
     
+    def add_particle(self, p):
+        args = p.reference, getattr(p, "name", "-"), p.pt, p.pdgid
+        attrs = 'id="%s" name="%s" pt="%s" pdg="%s"' % args
+        self.svg.appendChild(XMLNode("mcviz:particle", attrs))
+        
+        

@@ -20,7 +20,8 @@ class BaseLayout(Layout):
     _base = True
 
     def __call__(self, graph):
-
+        self.graph = graph
+        
         self.width, self.height = self.options["x"], self.options["y"]
         self.ratio = self.options["ratio"]
         self.scale = 1.0
@@ -196,6 +197,10 @@ class LayoutNode(LayoutObject):
         self.width = self.height = None
         for key, val in args.iteritems():
             setattr(self, key, val)
+
+    @property
+    def reference(self):
+        return self.item.reference
 
     @property
     def dot(self):

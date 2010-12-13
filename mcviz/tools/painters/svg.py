@@ -40,6 +40,9 @@ class SVGPainter(StdPainter, FundamentalTool):
             for node in layout.nodes:
                 self.paint_vertex(node)
 
+            if hasattr(self, "paint_additional"):
+                self.paint_additional(layout)
+
         self.write_data(self.doc.toprettyxml())
 
     def paint_edge(self, edge):
@@ -49,7 +52,8 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.show and edge.spline:
             display_func = self.type_map.get(edge.style_line_type, hadron)
-            self.doc.add_object(display_func(spline=edge.spline, **edge.style_args))
+            display = display_func(spline=edge.spline, **edge.style_args)
+            self.doc.add_object(edge.reference, display)
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.label, edge.label_center,
@@ -60,7 +64,7 @@ class SVGPainter(StdPainter, FundamentalTool):
         if node.show and node.center:
             vx = vertex(node.center, node.width/2, node.height/2,
                         **node.style_args)
-            self.doc.add_object(vx)
+            self.doc.add_object(node.reference, vx)
            
         if not node.label is None and node.center:
             self.doc.add_glyph(node.label, node.center.tuple(),
@@ -76,3 +80,7 @@ class NavigableSVGPainter(SVGPainter):
 class MCVizWebNavigableSVGPainter(SVGPainter):
     _name = "webnavisvg"
     document_creator = MCVizWebNavigableSVGDocument
+    
+    def paint_additional(self, layout):
+        for particle in layout.graph.particles:
+            self.doc.add_particle(particle)
