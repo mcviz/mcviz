@@ -46,7 +46,7 @@ class ViewParticle(ViewObject):
     def boson(self):
         return (21 <= abs(self.pdgid) <= 25 or
                 32 <= abs(self.pdgid) <= 37 or
-                self.pdgid not in [39, 5000039])
+                self.pdgid in [39, 5000039])
 
     @property
     def quark(self):
