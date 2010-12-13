@@ -30,7 +30,6 @@ class FixedHadronsLayout(BaseLayout):
         return super(FixedHadronsLayout, self).process_node(obj)
 
 
-
 class FixedInitialLayout(BaseLayout):
     """
     Place all of the hadronization vertices on the same rank.
@@ -65,7 +64,6 @@ class FixedInitialLayout(BaseLayout):
             if obj.dot_args.get("group","") != "particlelabels":
                 obj.subgraph = "initial"
         return super(FixedInitialLayout, self).process_node(obj)
-
 
 
 class HardProcessSubgraph(BaseLayout):

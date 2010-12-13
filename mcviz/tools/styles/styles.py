@@ -3,7 +3,7 @@ from __future__ import division
 from math import log as ln
 
 from mcviz.tools import Style, Arg
-from mcviz.tools.layouts import FeynmanLayout
+from mcviz.tools.layouts import FeynmanLayout, DualLayout
 from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 
@@ -37,7 +37,6 @@ def particle_color(particle):
             return "blue"
     else:
         return "black"
-
 
 
 class SimpleColors(Style):
@@ -128,7 +127,6 @@ class StatusColor(Style):
         colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
         log.info("Colors are: %r", colors)
         
-        from mcviz.tools.layouts import FeynmanLayout, DualLayout
         if isinstance(layout, FeynmanLayout):
             for edge in layout.edges:
                 particle = edge.item
