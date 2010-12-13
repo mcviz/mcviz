@@ -59,7 +59,7 @@ class SVGDocument(object):
         self.defined_pdgids = []
         self.svg.appendChild(self.defs)
 
-    def add_glyph(self, pdgid, center, font_size, subscript = None):
+    def add_glyph(self, reference, pdgid, center, font_size, subscript = None):
 
         if not TexGlyph.exists(pdgid):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
@@ -81,6 +81,7 @@ class SVGDocument(object):
             wy *= font_size * glyph.default_scale
 
             box = XMLNode("rect")
+            box.setAttribute("mcviz:r", reference)
             box.setAttribute("x", "%.3f" % (x - wx/2))
             box.setAttribute("y", "%.3f" % (y - wy/2))
             box.setAttribute("width", "%.3f" % wx)
@@ -92,6 +93,7 @@ class SVGDocument(object):
         y -= 0.5 * (glyph.ymin + glyph.ymax) * font_size * glyph.default_scale
 
         use = XMLNode("use")
+        use.setAttribute("mcviz:r", reference)
         use.setAttribute("x", "%.3f" % (x/font_size))
         use.setAttribute("y", "%.3f" % (y/font_size))
         use.setAttribute("transform", "scale(%.3f)" % (font_size))

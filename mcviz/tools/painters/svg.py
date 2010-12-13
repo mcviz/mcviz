@@ -56,7 +56,7 @@ class SVGPainter(StdPainter, FundamentalTool):
             self.doc.add_object(edge.reference, display)
 
         if edge.label and edge.label_center:
-            self.doc.add_glyph(edge.label, edge.label_center,
+            self.doc.add_glyph(edge.reference, edge.label, edge.label_center,
                            self.label_size, edge.item.subscripts)
 
 
@@ -67,7 +67,7 @@ class SVGPainter(StdPainter, FundamentalTool):
             self.doc.add_object(node.reference, vx)
            
         if not node.label is None and node.center:
-            self.doc.add_glyph(node.label, node.center.tuple(),
+            self.doc.add_glyph(node.reference, node.label, node.center.tuple(),
                                self.label_size,
                                node.item.subscripts)
 
