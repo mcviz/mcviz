@@ -92,3 +92,13 @@ class HardProcessSubgraph(BaseLayout):
         elif 21 <= abs(obj.item.status) <= 29:
             obj.subgraph = "cluster_hardproc"
         return super(HardProcessSubgraph, self).process_node(obj)
+        
+
+class UnconstrainedPhotons(BaseLayout):
+    _name = "UnconstrainedPhotons"
+        
+    def process_edge(self, obj):
+        #if any(p.photon for p in obj.item.outgoing):
+            #obj.dot_args["constraint"] = "false"
+        return super(UnconstrainedPhotons, self).process_edge(obj)
+    
