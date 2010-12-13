@@ -87,6 +87,7 @@ class ViewParticleSingle(ViewParticle):
         self.e = self.event_particle.e
         self.m = self.event_particle.m
         self.pdgid = self.event_particle.pdgid
+        self.name = self.event_particle.name
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
         self.status = self.event_particle.status
