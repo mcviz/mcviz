@@ -164,6 +164,7 @@ class ViewParticleSummary(ViewParticle, Summary):
         self.end_vertex
 
         # Extract quantities from particles that go into the end vertex of this summary
+        self.name = ",".join(set(p.name for p in self.represented_particles))
         self.m = 0
         self.e = 0
         momentum = [0, 0, 0]
@@ -185,8 +186,7 @@ class ViewParticleSummary(ViewParticle, Summary):
         self.pdgid = min(pdgids)
         self.color, self.anticolor = max(color), max(anticolor)
         
-        particles = [graph.event.particles[p] for p in self.particle_numbers]
-        self.status = max(p.status for p in particles)
+        self.status = max(p.status for p in self.represented_particles)
         
     @property
     def start_vertex(self):
@@ -207,3 +207,7 @@ class ViewParticleSummary(ViewParticle, Summary):
     @property
     def represented_numbers(self):
         return self.particle_numbers
+    
+    @property
+    def represented_particles(self):
+        return [self.graph.event.particles[p] for p in self.particle_numbers]
