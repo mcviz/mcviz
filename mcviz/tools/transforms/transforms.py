@@ -166,22 +166,38 @@ def pluck(graph_view, vno_keep=3):
         if obj not in keep_objects:
             graph_view.drop(obj)
 
-@Transform.decorate("Unsummarize")
-@retrying
-def unsummarize(graph_view, Retry):
-    """
-    Undo a summarization.
-    Useful when used in combination with other transforms, 
-    e.g. -v{gluballs,pluck,unsummarize}
-    """
-    retry = False
-    for obj in list(graph_view.particles) + list(graph_view.vertices):
-        if isinstance(obj, Summary):
-            obj.undo_summary()
-            retry = True
+class Unsummarize(Transform):
+    _name = "Unsummarize"
+    _args = [Arg("pno", int, "id of particle to unsummarize", default=None),
+             Arg("vno", int, "id of vertex to unsummarize", default=None)]
+    def __call__(self, graph_view):
+        """
+        Undo a summarization.
+        Useful when used in combination with other transforms, 
+        e.g. -v{gluballs,pluck,unsummarize}
+        """
+        if self.options["pno"] is None and self.options["vno"] is None:
+            retry = False
+            for obj in list(graph_view.particles) + list(graph_view.vertices):
+                if isinstance(obj, Summary):
+                    obj.undo_summary()
+        else:
+            if not self.options["pno"] is None:
+                for obj in list(graph_view.particles):
+                    if isinstance(obj, Summary):
+                        if self.options["pno"] in obj.particle_numbers:
+                            vs, ve = obj.start_vertex, obj.end_vertex
+                            if isinstance(vs, Summary):
+                                vs.undo_summary()
+                            if isinstance(ve, Summary):
+                                ve.undo_summary()
+                            obj.undo_summary()
+            if not self.options["vno"] is None:
+                for obj in list(graph_view.vertices):
+                    if isinstance(obj, Summary):
+                        if self.options["vno"] in obj.vertex_number:
+                            obj.undo_summary()
     
-    if retry:
-        raise Retry
 
 @Transform.decorate("Shallow")
 def shallow(graph_view, drop_depth=10):
