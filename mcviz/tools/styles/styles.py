@@ -72,18 +72,21 @@ class SimpleColors(Style):
 
 class FancyLines(Style):
     _name = "FancyLines"
+    _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
     def __call__(self, layout):
         """ set fancy line types, curly gluons, wavy photons etc."""
         for edge in layout.edges:
             particle = edge.item
+            edge.style_args["scale"] = self.options["scale"]
             if not hasattr(particle, "gluon"):
                 return
             # colouring
             if "cluster" in particle.tags:
                 edge.style_line_type = "hadron"
-                edge.style_args["scale"] = 0.8
+                edge.style_args["scale"] = 0.8 * self.options["scale"]
                 edge.style_args["stroke-width"] = 0.4
             elif particle.gluon:
+                edge.style_args["scale"] = 0.5 * self.options["scale"]
                 edge.style_line_type = "gluon"
             elif particle.photon:
                 if particle.final_state:
