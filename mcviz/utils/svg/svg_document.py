@@ -48,6 +48,7 @@ class SVGDocument(object):
         self.svg = XMLNode("svg", 
             'version="1.1" viewBox="%s" '
             'xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:mcviz="http://mcviz.net" '
             'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
         
         # Adds a big white background rect
