@@ -1,9 +1,21 @@
+from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
 from subprocess import Popen, PIPE
+
+from mcviz import FatalError
 from mcviz.utils import Spline, SplineLine, Point2D, timer
 
+
 def run_graphviz(layout_engine, input_dot, options=[]):
-    p = Popen([layout_engine] + options, 
-              stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    args = [layout_engine] + options
+    try:
+        p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    except OSError as e:
+        if e.errno == 2:
+            log.fatal("Couldn't run graphviz, is it installed? (try 'which dot')")
+            raise FatalError
+        else:
+            raise
+    
     gv_output, gv_errors = p.communicate(input_dot)
     p.wait()
     
