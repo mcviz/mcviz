@@ -12,3 +12,4 @@ env/
 dist/
 build/
 *.egg-info/
+/mcv
