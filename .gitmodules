@@ -1,0 +1,3 @@
+[submodule "mcviz.examples"]
+	path = mcviz.examples
+	url = https://github.com/mcviz/mcviz.examples.git
