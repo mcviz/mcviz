@@ -77,16 +77,16 @@ class FancyLines(Style):
         """ set fancy line types, curly gluons, wavy photons etc."""
         for edge in layout.edges:
             particle = edge.item
-            edge.style_args["scale"] = self.options["scale"]
+            edge.style_args["scale"] = 0.2 * self.options["scale"]
             if not hasattr(particle, "gluon"):
                 return
             # colouring
             if "cluster" in particle.tags:
                 edge.style_line_type = "hadron"
-                edge.style_args["scale"] = 0.8 * self.options["scale"]
-                edge.style_args["stroke-width"] = 0.4
+                edge.style_args["scale"] = 0.2 * self.options["scale"]
+                edge.style_args["stroke-width"] = 0.2
             elif particle.gluon:
-                edge.style_args["scale"] = 0.5 * self.options["scale"]
+                edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_line_type = "gluon"
             elif particle.photon:
                 if particle.final_state:
