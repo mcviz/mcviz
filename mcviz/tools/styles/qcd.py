@@ -8,6 +8,10 @@ from mcviz.tools import Style, Arg
 
 @Style.decorate("QCDRGB")
 def qcd_rgb(layout):
+    """
+    Apply RGBCMY colours arbitrarily according to QCD color.
+    """
+    
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))
@@ -17,6 +21,10 @@ def qcd_rgb(layout):
 
 @Style.decorate("QCDRainbow")
 def qcd_rainbow(layout):
+    """
+    Colour particles according to their QCD color. Each colour+anticolour pair 
+    gets a unique hue, with anti-colours brighter than the colours.
+    """
     colors = [e.item.color for e in layout.edges]
     anticolors = [e.item.anticolor for e in layout.edges]
     unique_colors = sorted(list(set(colors + anticolors)))

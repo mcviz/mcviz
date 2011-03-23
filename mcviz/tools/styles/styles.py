@@ -15,7 +15,9 @@ DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black",
                      "stroke-width": 0.05, "scale": 1}
 
 class Default(Style):
+    "The default style. All lines are black, with no enhancements."
     _name = "Default"
+    
     def __call__(self, layout):
         for edge in layout.edges:
             edge.style_line_type = "identity"
@@ -44,7 +46,12 @@ def particle_color(particle):
 
 
 class SimpleColors(Style):
+    """
+    Gluons are drawn green, coloured particles red and anti-coloured blue.
+    Photons are orange, bosons magenta and leptons almond.
+    """
     _name = "SimpleColors"
+    
     def __call__(self, layout):
         """ just do some simple coloring of lines """
         for edge in layout.edges:
@@ -71,8 +78,12 @@ class SimpleColors(Style):
 
 
 class FancyLines(Style):
+    """
+    Draw particle lines with arrows on them, and draw gluons with curls
+    """
     _name = "FancyLines"
     _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
+    
     def __call__(self, layout):
         """ set fancy line types, curly gluons, wavy photons etc."""
         for edge in layout.edges:
@@ -104,6 +115,9 @@ class FancyLines(Style):
                 
 
 class LineWidthPt(Style):
+    """
+    Make the particle line width dependent on the transverse momentum.
+    """
     _name = "LineWidthPt"
     def __call__(self, layout):
         if isinstance(layout, FeynmanLayout):
@@ -117,8 +131,14 @@ class LineWidthPt(Style):
             
 
 class ThickenColor(Style):
+    """
+    This can be used to make a single (anti)colour line very thick, so that it 
+    can be easily seen.
+    """
+
     _name = "ThickenColor"
     _args = [Arg("color_id", int, "id of the color to thicken")]
+    
     def __call__(self, layout):
         color_id = self.options["color_id"]
         for edge in layout.edges:
@@ -128,6 +148,9 @@ class ThickenColor(Style):
 
 
 class StatusColor(Style):
+    """
+    Colour by status codes
+    """
     _name = "StatusColor"
     def __call__(self, layout):
 

@@ -171,7 +171,8 @@ class Tool(object):
         def decorated(func):
             def tool_specific(self, *pargs):
                 return func(*pargs, **self.options)
-            clsd = dict(_args=args, _name=title, __call__=tool_specific)
+            clsd = dict(_args=args, _name=title, __call__=tool_specific, 
+                        __doc__=func.__doc__)
             return classobj(name, (cls,), clsd)
         return decorated
 

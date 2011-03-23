@@ -36,13 +36,9 @@ def run(options, n_argv, args):
                   "Use --help for help.")
         raise FatalError
 
-    log.info("-------------------------------------------------------------")
     log.info("MCViz Copyright (C) 2010 Peter Waller & Johannes Ebke")
-    log.info("This program comes with ABSOLUTELY NO WARRANTY - ")
-    log.info("including no guarantee for correctness (aka. validation)")
-    log.info("This is free software, and you are welcome to redistribute it")
-    log.info("under the conditions of the GNU AGPL version 3")
-    log.info("-------------------------------------------------------------")
+    log.info("Licensed under GNU AGPL version 3. "
+             "Please see http://mcviz.net/license.txt")
     
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)

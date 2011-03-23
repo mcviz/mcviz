@@ -2,6 +2,7 @@ from __future__ import division
 
 from optparse import OptionParser, OptionGroup, SUPPRESS_HELP
 import sys
+from textwrap import dedent
 
 from mcviz import FatalError
 from mcviz.tools import tool_type_options
@@ -95,7 +96,7 @@ def print_tool_help(indent, tool, links=False):
     if tool.__doc__ and "UNDOCUMENTED" in tool.__doc__:
         return []
     text = []
-    helptext = (": " + tool.__doc__) if tool.__doc__ else ""
+    helptext = (": " + dedent(tool.__doc__.strip())) if tool.__doc__ else ""
     if links:
         helptext += "\n![example image](%s_%s.png)" % (tool._type.lower(), tool._name.lower())
     base_str = " (base)" if (hasattr(tool, "_base") and tool._base) else ""

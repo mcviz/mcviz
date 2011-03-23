@@ -28,14 +28,14 @@ def retrying(func):
     
 
 class NoKinks(Transform):
+    """
+    Remove vertices in the graph which have the same particle going in and out.
+    
+    These are, for example, recoil vertices in pythia events which are the
+    particle recoiling against the whole event.
+    """
     _name = "NoKinks"
     def __call__(self, graph_view):
-        """
-        Remove vertices in the graph which have the same particle going in and out.
-        
-        These are, for example, recoil vertices in pythia events which are the
-        particle recoiling against the whole event.
-        """
         pdgid_changes = defaultdict(int)
         for vertex in graph_view.vertices:
             if not (len(vertex.incoming) == 1 and len(vertex.outgoing) == 1):
@@ -146,9 +146,6 @@ def contract_loops(graph_view):
 def pluck(graph_view, vno_keep=3):
     """
     Keep a specific vertex and particles travelling through it
-    
-    Arguments:
-        vno_keep: This is stuff.
     """
     
     keep_objects = set()
@@ -167,15 +164,15 @@ def pluck(graph_view, vno_keep=3):
             graph_view.drop(obj)
 
 class Unsummarize(Transform):
+    """
+    Undo a summarization.
+    Useful when used in combination with other transforms, 
+    e.g. -v{gluballs,pluck,unsummarize}
+    """
     _name = "Unsummarize"
     _args = [Arg("pno", int, "id of particle to unsummarize", default=None),
              Arg("vno", int, "id of vertex to unsummarize", default=None)]
     def __call__(self, graph_view):
-        """
-        Undo a summarization.
-        Useful when used in combination with other transforms, 
-        e.g. -v{gluballs,pluck,unsummarize}
-        """
         if self.options["pno"] is None and self.options["vno"] is None:
             retry = False
             for obj in list(graph_view.particles) + list(graph_view.vertices):

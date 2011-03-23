@@ -4,6 +4,10 @@ from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
 
 class DualLayout(BaseLayout, FundamentalTool):
+    """
+    The Dual layout, so named because it is the "Dual" in the graph sense of
+    Feynman diagrams, shows particles as nodes.
+    """
     _name = "Dual"
     _global_args = ("label_size",)
     _args = [Arg("helper_vertices",Arg.bool,"add helper vertices if there are many-to-many vertices", default=True)]

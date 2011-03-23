@@ -12,6 +12,9 @@ from painters import StdPainter
 
 
 class SVGPainter(StdPainter, FundamentalTool):
+    """
+    Write out the result to plain SVG.
+    """
     _name = "svg"
 
     document_creator = SVGDocument
@@ -73,11 +76,19 @@ class SVGPainter(StdPainter, FundamentalTool):
 
 
 class NavigableSVGPainter(SVGPainter):
+    """
+    Write out additional javascript into the SVG, making it easy to navigate
+    from a recent web browser, through click-drag and scrollwheel.
+    """
     _name = "navisvg"
     document_creator = NavigableSVGDocument
     
     
 class MCVizWebNavigableSVGPainter(SVGPainter):
+    """
+    UNDOCUMENTED
+    Used for the web
+    """
     _name = "webnavisvg"
     document_creator = MCVizWebNavigableSVGDocument
     

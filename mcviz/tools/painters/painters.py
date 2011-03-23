@@ -7,7 +7,6 @@ from mcviz.tools import Painter, FundamentalTool, Arg
 from logging import getLogger; log = getLogger("mcviz.painters")
 
 class StdPainter(Painter):
-
     _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
     _base = True
 
@@ -53,6 +52,9 @@ class StdPainter(Painter):
 
 
 class DOTPainter(StdPainter, FundamentalTool):
+    """
+    Writes out the graph in dot format
+    """
     _name = "dot"
     def __call__(self, layout):
         self.write_data(layout.dot.encode("UTF-8"))

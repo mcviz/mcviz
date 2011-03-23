@@ -1,6 +1,9 @@
 from mcviz.tools import Annotation, Arg
 
 class Index(Annotation):
+    """
+    Particle index in the event record
+    """
     _name = "index"
     def __call__(self, graph):
         def label_particle_no(particle):
@@ -13,6 +16,9 @@ class Index(Annotation):
 
 
 class Color(Annotation):
+    """
+    Colour indices that the particle has
+    """
     _name = "color"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: p.color)
@@ -20,12 +26,18 @@ class Color(Annotation):
 
 
 class Status(Annotation):
+    """
+    Monte-Carlo status code for the particle
+    """
     _name = "status"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: p.status)
             
 
 class Pt(Annotation):
+    """
+    Particle transverse momentum (in Monte-Carlo units)
+    """
     _name = "pt"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: "%.2f"%p.pt)
