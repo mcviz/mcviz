@@ -35,6 +35,9 @@ class GraphvizEngine(LayoutEngine):
         if not output.strip():
             log.error("No output from %s " % engine)
             log.error("There may be too many constraints on the graph.")
+        if self.options["dump"]:
+            log.debug("Data received from %s:" % engine)
+            print output
         return output
 
     def __call__(self, layout):
