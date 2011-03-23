@@ -40,7 +40,6 @@ class BaseLayout(Layout):
         return self
 
     def fill_objects(self, graph):
-
         for vertex in graph.vertices:
             self.add_object(self.get_vertex(vertex))
 
@@ -120,6 +119,10 @@ class BaseLayout(Layout):
 
 
 class LayoutObject(object):
+    """
+    A layout object is a representation of a vertex or edge used for layout
+    purposes.
+    """
     def __init__(self, item):
         self.item = item
         self.show = True

@@ -8,6 +8,10 @@ from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
 
 class FeynmanLayout(BaseLayout, FundamentalTool):
+    """
+    Produces something analagous to the familiar Feynman diagram. Beware though,
+    event records are not really like feynman diagrams.
+    """
     _name = "Feynman"
 
     _args = [Arg("gluid", Arg.bool, "label gluons")]
@@ -85,6 +89,10 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
 
 
 class InlineLabelsLayout(FeynmanLayout):
+    """
+    Causes particle labels to "interrupt" particle edges, rather than be shown
+    by the side of them.
+    """
     _name = "InlineLabels"
     
     def get_particle(self, particle):
@@ -108,6 +116,11 @@ class InlineLabelsLayout(FeynmanLayout):
 
 
 class StringClustersLayout(FeynmanLayout):
+    """
+    Causes strings to try and arrange the edges so that gluons go into 
+    the middle, coloured particles come in on the left, and anti-colours arrive 
+    on the right.
+    """
     _name = "StringClusters"
 
     def __init__(self, *args, **kwargs):

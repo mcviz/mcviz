@@ -32,7 +32,7 @@ class FixedHadronsLayout(BaseLayout):
 
 class FixedInitialLayout(BaseLayout):
     """
-    Place all of the hadronization vertices on the same rank.
+    Place all of the initial vertices on the same rank.
     """
     _name = "FixIni"
     _args = [Arg("stretch", float, "pull initial vertices apart, 1 is max", 
@@ -93,6 +93,9 @@ class HardProcessSubgraph(BaseLayout):
         
 
 class UnconstrainedPhotons(BaseLayout):
+    """
+    UNDOCUMENTED
+    """
     _name = "UnconstrainedPhotons"
         
     def process_edge(self, obj):
