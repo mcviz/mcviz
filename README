@@ -2,7 +2,7 @@ MCViz
 =====
 ...because a graph is worth a thousand lists.
 
-Please see our [Wiki](https://github.com/mcviz/repo/wiki) for a more thorough quick start guide and screenshots.
+Please see our [Wiki](https://github.com/mcviz/repo/wiki) for a quick start guide and screenshots.
 
 ![An image of an example graph](https://github.com/mcviz/repo/wiki/ex6.png)
 
@@ -25,24 +25,4 @@ beautiful mess infront of us. `MCViz` is the result of our exploration.
 for more serious users and people who need to explore generator information
 to make sense of what is going on.
 
-Getting Started
----------------
-
-You will need:
-
-* [graphviz](http://graphviz.org). (Present on [lxplus](http://plus.web.cern.ch/plus/))
-* An SVG viewer. (We recommend [Inkscape](http://inkscape.org))
-* Life will be easier if you have a linux machine, since this is what we have 
-  developed and tested it on. ([Feedback](http://github.com/mcviz/repo/issues) 
-  is encouraged and welcome !)
-
-The easy way:
-    $ mkdir mcviz && cd mcviz
-    $ wget (http://github.com/mcviz/repo/raw/dev/mcviz_bootstrap.py)[http://github.com/mcviz/repo/raw/dev/mcviz_bootstrap.py]
-    $ ./bootstrap.py # Creates a [virtualenv](http://virtualenv.openplans.org/) 
-                     # environment the current working directory where mcviz will 
-                     # be installed.
-    $ source env/bin/activate # Activates the environment (puts mcviz in $PATH)
-    $ mcviz [path/to/input.hepmc]
-    $ inkscape mcviz.svg
-    $ mcviz --help # Explore the options!
+Now go to [Wiki](https://github.com/mcviz/repo/wiki) for a quick start!
