@@ -74,11 +74,21 @@ class Arg(object):
         self.choices = choices
         self.web = web
 
-    def convert(self, in_string):
+    def convert(self, in_string, tool):
         try:
             return self.converter(in_string)
         except Exception, x:
-            raise ToolParseError(self, "cannot convert '%s' to %s" % (in_string, self.converter) )
+            raise ToolParseError(tool, "cannot convert '%s' to %s for argument '%s'" % (in_string, self.converter, self.name) )
+
+    @classmethod
+    def bool(cls, s):
+        if s.lower() in ("true", "1", "wahr", "yes"):
+            return True
+        elif s.lower() in ("false", "0", "falsch", "no"):
+            return False
+        else:
+            raise Exception("Unknown bool value!")
+
 
 def tool_type_options():
     res = []
@@ -232,8 +242,8 @@ class Tool(object):
         for arg, val in setting.kwargs.iteritems():
             if not arg in my_args_dict:
                 raise ToolParseError(self, "unknown argument '%s'" % arg)
-            keyword_args[arg] = my_args_dict[arg].convert(val)
-            print arg, "=", my_args_dict[arg].convert(val)
+            keyword_args[arg] = my_args_dict[arg].convert(val, self)
+            print arg, "=", my_args_dict[arg].convert(val, self)
 
 
         if len(setting.args) > len(my_args):
@@ -241,7 +251,7 @@ class Tool(object):
 
         positional_arg_d = {}
         for (n, arg), in_string in zip(my_args, setting.args):
-            positional_arg_d[n] = arg.convert(in_string)
+            positional_arg_d[n] = arg.convert(in_string, self)
 
         for arg in keyword_args:
             if arg in positional_arg_d:
