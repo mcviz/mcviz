@@ -6,6 +6,7 @@ from .layouts import BaseLayout, LayoutEdge, LayoutNode
 class DualLayout(BaseLayout, FundamentalTool):
     _name = "Dual"
     _global_args = ("label_size",)
+    _args = [Arg("helper_vertices",Arg.bool,"add helper vertices if there are many-to-many vertices", default=True)]
 
     def get_subgraph(self, particle):
         if particle.initial_state:
@@ -27,17 +28,29 @@ class DualLayout(BaseLayout, FundamentalTool):
         return lo
    
     def get_vertex(self, vertex, node_style=None):
-        edges = []
-        
+        items = []
+
+        if self.options["helper_vertices"] and len(vertex.incoming) > 1 and len(vertex.outgoing) > 1:
+            helper_node = LayoutNode(vertex)
+            helper_node.width = 0.5
+            helper_node.height = 0.5
+            items.append(helper_node)
+            
+            for particle in vertex.incoming:
+                items.append(LayoutEdge(vertex, particle, vertex))
+            for particle in vertex.outgoing:
+                items.append(LayoutEdge(vertex, vertex, particle))
+            return items
+            
         for particle in vertex.outgoing:
             for mother in particle.mothers:
-                edges.append(LayoutEdge(vertex, mother, particle))
+                items.append(LayoutEdge(vertex, mother, particle))
         
-        return edges
-
+        return items
 
 class DualDecongestedHad(DualLayout):
     """
+    UNDOCUMENTED
     Takes the all-to-all connections at the hadronization step and replaces it
     with a all-to-one-to-all vertex labelled "A miracle occurs"
     """
