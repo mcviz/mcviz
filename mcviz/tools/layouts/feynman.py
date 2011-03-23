@@ -10,7 +10,7 @@ from .layouts import BaseLayout, LayoutEdge, LayoutNode
 class FeynmanLayout(BaseLayout, FundamentalTool):
     _name = "Feynman"
 
-    _args = [Arg("gluid", bool, "label gluons")]
+    _args = [Arg("gluid", Arg.bool, "label gluons")]
     
     def get_subgraph(self, vertex):
         if vertex.initial:

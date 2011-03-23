@@ -8,7 +8,7 @@ from new import classobj
 
 class GraphvizEngine(LayoutEngine):
     _global_args = [("extra_gv_options")]
-    _args = [Arg("dump", bool, "dump raw graphviz input", default=False),
+    _args = [Arg("dump", Arg.bool, "dump raw graphviz input", default=False),
              Arg("extra", str, "extra graphviz options", default="")]
     _base = True
 
