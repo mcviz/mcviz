@@ -1,4 +1,4 @@
-from mcviz.tools import OptionSet 
+from mcviz.tools import OptionSet, Arg
 from mcviz.tools.tools import ToolSetting, tool_classes, tool_types
 from logging import getLogger; log = getLogger("mcviz.optionsets")
 
@@ -24,11 +24,13 @@ class CommandLineOptionSet(OptionSet):
             
 class DemoOptionSet(CommandLineOptionSet):
     _name = "demo"
+    _args = [Arg("layout", str, "choose a layout to demo: Feynman, Dual or InlineLabels", 
+                 choices=("Feynman", "Dual", "InlineLabels"), default="Dual")]
     def __call__(self, tools):
         for tool_type in sorted(tool_types.keys()):
             tools[tool_type] = []
         setdefault(tools, "painter", "navisvg")
-        setdefault(tools, "layout", "Feynman")
+        setdefault(tools, "layout", self.options["layout"])
         setdefault(tools, "layout", "FixIni")
         tools["style"].append(ToolSetting("Default"))
         tools["style"].append(ToolSetting("SimpleColors"))
@@ -36,7 +38,7 @@ class DemoOptionSet(CommandLineOptionSet):
         tools["transform"].append(ToolSetting("NoKinks"))
         tools["transform"].append(ToolSetting("Gluballs"))
         tools["transform"].append(ToolSetting("Chainmail"))
-        log.info("--demo is equivalent to '-pnavisvg:mcviz.svg -sSimpleColors -sFancyLines -tNoKinks -tGluballs -tChainmail -lFeynman -lFixIni'")
+        log.info("--demo is equivalent to '-pnavisvg:mcviz.svg -sSimpleColors -sFancyLines -tNoKinks -tGluballs -tChainmail -l%s -lFixIni'" % self.options["layout"])
         return super(DemoOptionSet, self).__call__(tools)
 
 # If we add more optionsets, please update "OptionSets" in the wiki (grep for it!), or send an email.
