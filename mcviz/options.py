@@ -92,7 +92,7 @@ def print_type_help(cls, links=False):
     return text
 
 def print_tool_help(indent, tool, links=False):
-    if "UNDOCUMENTED" in tool.__doc__:
+    if tool.__doc__ and "UNDOCUMENTED" in tool.__doc__:
         return []
     text = []
     helptext = (": " + tool.__doc__) if tool.__doc__ else ""
