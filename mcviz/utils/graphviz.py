@@ -3,7 +3,9 @@ from subprocess import Popen, PIPE
 
 from mcviz import FatalError
 from mcviz.utils import Spline, SplineLine, Point2D, timer
+from csv import reader as csv_reader
 
+ref_prefix = "MCVIZ_REF_"
 
 def run_graphviz(layout_engine, input_dot, options=[]):
     args = [layout_engine] + options
@@ -32,6 +34,13 @@ def pretty_value(value):
     elif isinstance(value, float):
         return "%.3f" % value
     return value
+
+def splitup(somestring):
+    gen = iter(somestring.split('"'))
+    for unquoted in gen:
+        for part in unquoted.split():
+            yield part
+        yield gen.next().join('""')
 
 def make_properties_string(**properties):
     if not properties:
@@ -64,7 +73,7 @@ class PlainOutput(object):
         self.edge_label = {}
 
         for line in plain.split("\n"):
-            tokens = line.strip().split()
+            tokens = list(splitup(line.strip()))
             if not tokens:
                 continue
             command = tokens[0]
@@ -82,7 +91,7 @@ class PlainOutput(object):
         self.scale, self.width, self.height = map(float, parameters)
 
     def handle_node(self, parameters):
-        node_ref = parameters[0]
+        node_ref = parameters[0][len(ref_prefix):]
         x, y = float(parameters[1]), self.height - float(parameters[2])
         w, h = float(parameters[3]), float(parameters[4])
         self.nodes[node_ref] = Point2D(x, y), (w, h)
@@ -111,15 +120,14 @@ class PlainOutput(object):
         else:
             splineline = SplineLine(self.get_splines(control_points))
 
-        if '"' in remaining[0]:
-            left, label, right = " ".join(remaining).split('"', 2)
-            remaining = right.strip().split()
-            label_position = (float(remaining[0]), self.height - float(remaining[1]))
-            remaining = remaining[2:]
-        else:
+        if remaining[0].startswith(ref_prefix):
             label_position = None
+        else:
+            label = remaining[0].strip('"')
+            label_position = (float(remaining[1]), self.height - float(remaining[2]))
+            remaining = remaining[3:]
 
-        edge_ref = remaining[0]
+        edge_ref = remaining[0][len(ref_prefix):]
 
         self.edge_lines[edge_ref] = splineline
         self.edge_label[edge_ref] = label_position

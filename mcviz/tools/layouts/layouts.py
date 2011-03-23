@@ -6,7 +6,7 @@ from itertools import chain
 from mcviz.tools import Layout, Arg
 from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
 from mcviz.utils.svg import TexGlyph
-from mcviz.utils.graphviz import make_node, make_edge, PlainOutput
+from mcviz.utils.graphviz import make_node, make_edge, PlainOutput, ref_prefix
 
 label_scale_factor = 72.0
 
@@ -182,8 +182,8 @@ class LayoutEdge(LayoutObject):
         kwargs["label"] = self.get_label_string()
         kwargs.update(self.dot_args)
 
-        return make_edge(coming, going,
-            style=self.reference,
+        return make_edge(ref_prefix + coming, ref_prefix + going,
+            style=ref_prefix + self.reference,
             arrowhead="none",
             **kwargs
             # consider this for the future
@@ -219,4 +219,4 @@ class LayoutNode(LayoutObject):
             kwargs["label"] = self.get_label_string()
         kwargs.update(self.dot_args)
 
-        return make_node(self.item.reference, **kwargs)
+        return make_node(ref_prefix + self.item.reference, **kwargs)
