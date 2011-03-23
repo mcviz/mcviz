@@ -1,5 +1,6 @@
 from mcviz.tools import OptionSet 
 from mcviz.tools.tools import ToolSetting, tool_classes, tool_types
+from logging import getLogger; log = getLogger("mcviz.optionsets")
 
 def setdefault(tools, tool_type, default, *args, **kwargs):
     """
@@ -21,4 +22,21 @@ class CommandLineOptionSet(OptionSet):
         if not defstyle in [s.name for s in tools["style"]]:
             tools["style"].insert(0, ToolSetting(defstyle))
             
+class DemoOptionSet(CommandLineOptionSet):
+    _name = "demo"
+    def __call__(self, tools):
+        for tool_type in sorted(tool_types.keys()):
+            tools[tool_type] = []
+        setdefault(tools, "painter", "navisvg")
+        setdefault(tools, "layout", "Feynman")
+        setdefault(tools, "layout", "FixIni")
+        tools["style"].append(ToolSetting("Default"))
+        tools["style"].append(ToolSetting("SimpleColors"))
+        tools["style"].append(ToolSetting("FancyLines"))
+        tools["transform"].append(ToolSetting("NoKinks"))
+        tools["transform"].append(ToolSetting("Gluballs"))
+        tools["transform"].append(ToolSetting("Chainmail"))
+        log.info("--demo is equivalent to '-pnavisvg:mcviz.svg -sSimpleColors -sFancyLines -tNoKinks -tGluballs -tChainmail -lFeynman -lFixIni'")
+        return super(DemoOptionSet, self).__call__(tools)
+
 # If we add more optionsets, please update "OptionSets" in the wiki (grep for it!), or send an email.

@@ -24,7 +24,7 @@ def get_option_parser():
     o("-v", "--verbose", action="count", help="Be more verbose. Specify -vv for debug output")
 
     o("--demo", action="store_true", 
-      help="Create many demo svgs in the current directory (takes a while)")
+      help="Use pretty looking default (equivalent to --optionset=demo)")
 
     g = OptionGroup(p, "The MCViz Toolbox", "")
     p.add_option_group(g)
@@ -113,6 +113,9 @@ def print_tool_help(indent, tool, links=False):
 def parse_options(argv=sys.argv):
     parser = get_option_parser()
     options, args = parser.parse_args(argv)
+
+    if options.demo:
+        options.optionset = ["demo"]
 
     if options.help:
         # construct a list of tools
