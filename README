@@ -33,12 +33,12 @@ You will need:
 * [graphviz](http://graphviz.org). (Present on [lxplus](http://plus.web.cern.ch/plus/))
 * An SVG viewer. (We recommend [Inkscape](http://inkscape.org))
 * Life will be easier if you have a linux machine, since this is what we have 
-  developed and tested it on. ([Feedback](http://github.com/pwaller/mcviz/issues) 
+  developed and tested it on. ([Feedback](http://github.com/mcviz/repo/issues) 
   is encouraged and welcome !)
 
 The easy way:
     $ mkdir mcviz && cd mcviz
-    $ wget (http://github.com/pwaller/mcviz/raw/dev/mcviz_bootstrap.py)[http://github.com/pwaller/mcviz/raw/dev/mcviz_bootstrap.py]
+    $ wget (http://github.com/mcviz/repo/raw/dev/mcviz_bootstrap.py)[http://github.com/mcviz/repo/raw/dev/mcviz_bootstrap.py]
     $ ./bootstrap.py # Creates a [virtualenv](http://virtualenv.openplans.org/) 
                      # environment the current working directory where mcviz will 
                      # be installed.
