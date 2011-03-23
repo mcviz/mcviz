@@ -197,7 +197,7 @@ class NavigableSVGDocument(SVGDocument):
             
             stag = '<script type="text/javascript"><![CDATA[\n%s\n]]></script>'
             
-            return stag % javascript
+            return stag % javascript.decode("UTF-8")
         
         return SCRIPT_TAG.sub(match, javascript_text)
     
