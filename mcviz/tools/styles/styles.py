@@ -119,6 +119,7 @@ class LineWidthPt(Style):
     Make the particle line width dependent on the transverse momentum.
     """
     _name = "LineWidthPt"
+    _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
     def __call__(self, layout):
         if isinstance(layout, FeynmanLayout):
             elements = layout.edges
@@ -127,7 +128,7 @@ class LineWidthPt(Style):
             
         for element in elements:
             particle = element.item
-            element.style_args["stroke-width"] = ln(particle.pt+1)*0.1 + 0.01
+            element.style_args["stroke-width"] = self.options["scale"]*ln(particle.pt+1)*0.1 + 0.01
             
 
 class ThickenColor(Style):
