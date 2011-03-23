@@ -93,7 +93,7 @@ def print_type_help(cls, links=False):
 
 def print_tool_help(indent, tool, links=False):
     text = []
-    helptext = (": " + tool._help) if hasattr(tool, "_help") else ""
+    helptext = (": " + tool.__doc__) if tool.__doc__ else ""
     if links:
         helptext += "\n![example image](%s_%s.png)" % (tool._type.lower(), tool._name.lower())
     base_str = " (base)" if (hasattr(tool, "_base") and tool._base) else ""
