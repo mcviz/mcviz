@@ -66,7 +66,9 @@ def print_type_help(cls, links=False):
     # The following is an automatic example generator. It avoids using "None" and "" arguments if it can help it
     def nonnull(args):
         return [a for a in args if not a[1].default in [None, ""]]
-    tool = max((len(nonnull(t.args())), len(t.args()), t) for t in reversed(tool_classes[name].values()))[2]
+    documented_classes = [v for v in tool_classes[name].values() if v.__doc__ is None or not "UNDOCUMENTED" in v.__doc__]
+    sortable_classes = ((len(nonnull(t.args())), len(t.args()), t) for t in reversed(documented_classes))
+    tool = max(sortable_classes)[2]
     arglist = (nonnull(tool.args()) + tool.args())
     n_nonnull = len(nonnull(tool.args()))
     if len(arglist) == 0:
