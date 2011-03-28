@@ -4,6 +4,7 @@ from sys import stderr
 from math import sin, cos, atan2, log as ln
 
 from mcviz.utils import Point2D
+from mcviz.tools import Arg
 
 from .feynman import FeynmanLayout
 
@@ -20,6 +21,8 @@ def get_depth(particle):
 
 class PhiLayout(FeynmanLayout):
     _name = "PhiLayout"
+    _args = [Arg("scale", float, "length scale")]
+
     def process(self):
         super(PhiLayout, self).process()
         incoming_counter = 0
@@ -32,7 +35,6 @@ class PhiLayout(FeynmanLayout):
         for edge in self.edges:
             coming.setdefault(edge.coming, []).append(edge)
             going.setdefault(edge.going, []).append(edge)
-        print >> stderr, going
 
         nodes_remaining = list(self.nodes)
         item_nodes = {}
@@ -72,8 +74,7 @@ class PhiLayout(FeynmanLayout):
                         scale = 100
                     if force_scale:
                         scale = force_scale
-                    print >> stderr, scale
-
+                    scale *= self.options["scale"]
                     delta = Point2D(DR * sin(phi), DR * cos(phi)) * scale
 
                     node.center = item_nodes[edge.coming].center + delta
