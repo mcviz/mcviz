@@ -9,7 +9,7 @@ class FatalError(Exception):
     """
 
 from utils import logger
-from graph import EventGraph
+from graph import EventGraph, EventParseError
 from tools import Tool
 from workspace import GraphWorkspace
 from options import parse_options

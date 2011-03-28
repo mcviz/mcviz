@@ -20,7 +20,7 @@ from textwrap import dedent
 
 from logging import getLogger; log = getLogger("mcviz.main")
 
-from mcviz import EventGraph, GraphWorkspace, FatalError, parse_options
+from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
 from mcviz.utils import get_logger_level, log_level, timer
 
 
@@ -43,7 +43,11 @@ def run(options, n_argv, args):
     filename = args[1]
     log.verbose('trying to read the first event from "%s"' % filename)
     with timer('read one event from "%s"' % filename):
-        event_graph = EventGraph.load(filename)
+        try:
+            event_graph = EventGraph.load(filename)
+        except EventParseError, x:
+            log.fatal("No success in reading events from %s!" % filename)
+            raise FatalError
     log.info('drawing the first event from "%s"' % (filename))
 
     gw = GraphWorkspace("mcviz.graph", event_graph)
