@@ -175,3 +175,15 @@ class StatusColor(Style):
                 if hasattr(particle, "status"):
                     node.style_args["fill"] = colors[abs(particle.status) // 10]
             
+
+@Style.decorate("ColorPassing")
+def color_passing(layout):
+	for edge in layout.edges:
+		if "pass" in edge.item.tags:
+			edge.style_args["stroke"] = "#00ffff"
+			
+@Style.decorate("ColorFinal")
+def color_final(layout):
+	for edge in layout.edges:
+		if "pass" in edge.item.tags: #edge.item.final_state:
+			edge.style_args["stroke"] = "#ff0000"

@@ -74,6 +74,7 @@ def gluballs(graph_view, Retry):
             vertices.add(vertex)
                 
         graph_view.walk(vertex, vertex_action=walker)
+        
         if len(vertices) > 1:
             summary = graph_view.summarize_vertices(vertices)
             summary.tag("gluball")
@@ -242,3 +243,35 @@ def merge_vertices(graph_view):
         if len(vertices) >= 2:
             summary = graph_view.summarize_vertices(vertices)
     
+
+
+@Transform.decorate("Cut")
+def cut(graph_view):
+    """
+    So named because lots of gluons all going the same way looks like chainmail.
+    
+    This function removes sibling particles of the same type.
+    """
+    final_state = [p for p in graph_view.particles if p.final_state]
+    
+    def cut(p): return p.pt < 5
+    
+    keep = set()
+    def mark(item, depth):
+        keep.add(item)
+    
+    for particle in final_state:
+        if not cut(particle):
+            graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
+                            ascend=True)
+            
+    for p in graph_view.particles:
+       if p in keep:
+           continue
+           
+       if p.start_vertex in keep: # and not p.start_vertex.hadronization:
+          # Don't discard
+          continue
+          
+       graph_view.drop(p)
+       
