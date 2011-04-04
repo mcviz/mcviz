@@ -4,6 +4,7 @@ from mcviz.tools import FundamentalTool
 
 from mcviz.utils import timer
 from mcviz.utils.svg.svg_document import (
+    XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
 from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
                              boson, fermion, hadron, vertex)
@@ -35,6 +36,8 @@ class SVGPainter(StdPainter, FundamentalTool):
             args = layout.width, layout.height, layout.scale
             self.label_size = layout.label_size
             self.doc = self.document_creator(*args)
+            cl = XMLNode("mcviz:cmdline", children=[RawNode(workspace.cmdline)])
+            self.doc.svg.children[:0] = [cl]
             for edge in layout.edges:
                 if not edge.spline:
                     # Nothing to paint!
