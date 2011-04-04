@@ -30,7 +30,7 @@ class SVGPainter(StdPainter, FundamentalTool):
                 "vertex": vertex
                 }
 
-    def __call__(self, layout):
+    def __call__(self, workspace, layout):
         with timer("create the SVG document"):
             args = layout.width, layout.height, layout.scale
             self.label_size = layout.label_size

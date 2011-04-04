@@ -9,12 +9,15 @@ from mcviz.utils import timer
 
 class GraphWorkspace(object):
 
-    def __init__(self, name, event_graph):
-        self.name = name
+    def __init__(self, name, event_graph, cmdline=""):
+        
         self.log = getLogger(name)
         self.log.debug('Creating new graph workspace')
+        
+        self.name = name
         self.event_graph = event_graph
-        self.log.debug('Creating graph view')
+        self.cmdline = cmdline
+                
         self.graph_view = GraphView(event_graph)
         self.layout = None
         self.tools = {}
@@ -104,7 +107,7 @@ class GraphWorkspace(object):
     def paint(self):
         self.log.verbose("painting the graph")
         with timer("painted the graph"):
-            self.apply_tools("painter", self.layout)
+            self.apply_tools("painter", self, self.layout)
        
     def restyle(self):
         self.clear_tags()

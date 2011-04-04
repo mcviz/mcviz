@@ -24,7 +24,7 @@ from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse
 from mcviz.utils import get_logger_level, log_level, timer
 
 
-def run(options, n_argv, args):
+def run(options, argv, args):
 
     # Activate the python debugger if requested
     if options.debug:
@@ -50,17 +50,16 @@ def run(options, n_argv, args):
             raise FatalError
     log.info('drawing the first event from "%s"' % (filename))
 
-    gw = GraphWorkspace("mcviz.graph", event_graph)
+    gw = GraphWorkspace("mcviz.graph", event_graph, cmdline=" ".join(argv))
     gw.load_tools(options)
     gw.run()
 
 def real_main(argv):
     options, args = parse_options(argv)
-    n_argv = len(argv[1:])
     try:
         with log_level(get_logger_level(options.quiet, options.verbose)):
             with timer("complete run"):
-                run(options, n_argv, args)
+                run(options, argv, args)
         return 0
     except FatalError:
         return -1
