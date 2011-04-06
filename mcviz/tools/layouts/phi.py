@@ -1,9 +1,3 @@
-"""
-This module is defunct, due to changes in the way layout is done.
-
-It is left here for inspiration.
-"""
-
 from __future__ import division
 
 from sys import stderr
@@ -27,7 +21,7 @@ def get_depth(particle):
 
 class PhiLayout(FeynmanLayout):
     _name = "PhiLayout"
-    _args = [Arg("scale", float, "length scale")]
+    _args = [Arg("scale", float, "length scale", default=1.0)]
 
     def process(self):
         super(PhiLayout, self).process()
