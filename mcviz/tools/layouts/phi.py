@@ -1,3 +1,9 @@
+"""
+This module is defunct, due to changes in the way layout is done.
+
+It is left here for inspiration.
+"""
+
 from __future__ import division
 
 from sys import stderr
