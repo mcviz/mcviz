@@ -1,8 +1,10 @@
 from collections import namedtuple
+from itertools import izip
 import re
 
 from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
+from mcviz import FatalError
 from .. import EventParseError, Particle, Vertex
 
 
@@ -84,7 +86,7 @@ def make_record(record):
         
         return HParticle._make(first_part + [flow])
 
-def load_event(ev):
+def load_single_event(ev):
     """
     Given one event in HepMC's text format, return a list of mcviz's `Particle`s
     and `Vertex`es.
@@ -166,10 +168,21 @@ def load_event(ev):
 
     return vertices, particles
 
-def load_first_event(filename):
+def load_event(filename):
     """
     Load one event from a HepMC file
     """
+    filename, _, event_number = filename.partition(":")
+    if event_number:
+        try:
+            event_number = int(event_number)
+        except ValueError:
+            log.fatal("Failed to convert filename part to an integer. Filename "
+                      "should have the form 'string[:int(event number)]'")
+            raise FatalError()
+    else:
+        event_number = 0
+    
     with open(filename) as fd:
         match = HEPMC_TEXT.search(fd.read())
 
@@ -182,9 +195,10 @@ def load_first_event(filename):
         log.warning("Warning: Only tested with hepmc 2.06.01")
     lines = result["events"].split("\n")
     
-    for event in event_generator(lines):
+    for i, event in izip(xrange(event_number+1), event_generator(lines)):
         # Load only one event
-        return load_event(event)
+        pass
+    return load_single_event(event)
 
 if __name__ == "__main__":
     from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])

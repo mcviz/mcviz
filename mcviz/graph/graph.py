@@ -39,8 +39,8 @@ class EventGraph(object):
     
     @classmethod
     def from_hepmc(cls, filename):
-        from .loaders.hepmc import load_first_event
-        vertices, particles = load_first_event(filename)
+        from .loaders.hepmc import load_event
+        vertices, particles = load_event(filename)
         return cls(vertices, particles)
 
         

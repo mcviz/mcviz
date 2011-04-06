@@ -41,14 +41,14 @@ def run(options, argv, args):
              "Please see http://mcviz.net/license.txt")
     
     filename = args[1]
-    log.verbose('trying to read the first event from "%s"' % filename)
-    with timer('read one event from "%s"' % filename):
+    log.verbose('trying to read event from "%s"' % filename)
+    with timer('event from "%s"' % filename):
         try:
             event_graph = EventGraph.load(filename)
         except EventParseError, x:
             log.fatal("No success in reading events from %s!" % filename)
             raise FatalError
-    log.info('drawing the first event from "%s"' % (filename))
+    log.info('drawing event from "%s"' % (filename))
 
     gw = GraphWorkspace("mcviz.graph", event_graph, cmdline=" ".join(argv))
     gw.load_tools(options)
