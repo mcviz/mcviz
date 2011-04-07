@@ -11,7 +11,8 @@ from mcviz.tools.tools import tool_types, tool_classes
 help_topics = ["all", "examples"] + tool_types.keys()
 
 def get_option_parser():
-    usage = "usage: %prog [options] {hepmc_file|pythia_log}"
+    usage = "usage: %prog [options] {hepmc_file|pythia_log}[:<number of event in file, 0 is first>]\n"\
+            "       for example: %prog --demo pythia_01.log:2"
 
     p = OptionParser(usage=usage, add_help_option=False)
     o = p.add_option
