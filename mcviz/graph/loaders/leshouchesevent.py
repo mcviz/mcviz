@@ -42,19 +42,36 @@ def event_generator(lines):
       result = match.groupdict()
       yield result['event']
 
-def make_lhe_graph(lines):
+def make_lhe_graph(lines, init):
     """
     Return the particles and vertices in the event
     """
-    NUP, IDPRUP, XWGTUP, SCALUP, AQEDUP, AQCDUP = lines.pop(0).split()
-    NUP, IDPRUP = (int(i) for i in (NUP, IDPRUP) )
-    XWGTUP, SCALUP, AQEDUP, AQCDUP = (float(i) for i in (XWGTUP, SCALUP, AQEDUP, AQCDUP) )
+    # First is an event details line with the number of particle as NUP
+    LEVENT = namedtuple('LEVENT', 'NUP, IDPRUP, XWGTUP, SCALUP, AQEDUP, AQCDUP')
+    line = lines.pop(0).split()
+    line = [int(i) for i in line[:2] ] + [float(i) for i in line[2:6] ]
+    event = LEVENT._make(line)
 
+    # Now add the initial beam particles to this event
+    lines.insert(0, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP1, init.EBMUP1, init.EBMUP1) )
+    lines.insert(1, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP2, init.EBMUP2, init.EBMUP2) )
+
+    # Particles have the format:
+    LPARTICLE = namedtuple('LPARTICLE', 'IDUP, ISTUP, MOTHUP1, MOTHUP2, ICOLUP1, ICOLUP2, PUP1, PUP2, PUP3, PUP4, PUP5, VTIMUP, SPINUP')
     particles = []
-    for I, line in izip(xrange(1, NUP+1), lines):
+    for I, line in izip(xrange(1, event.NUP+3), lines):
       line = line.split()
-      line.insert(0, I)
-      particles.append(Particle.from_lhe(line) )
+      line = [int(i) for i in line[:6] ] + [float(i) for i in line[6:13] ]
+
+      # Correct indices for the initial beam particles
+      if line[2]: line[2] += 2
+      if line[3]: line[3] += 2
+      if I == 3: line[3] = 1
+      if I == 4: line[3] = 2
+
+      part = LPARTICLE._make(line)
+
+      particles.append(Particle.from_lhe(I, part) )
 
     # Convert mothers/daughters to objects
     for particle in particles:
@@ -165,6 +182,12 @@ def load_event(filename):
 
     result = match.groupdict()
     
+    # Init block has the following format:
+    LINIT = namedtuple('LINIT', 'IDBMUP1, IDBMUP2, EBMUP1, EBMUP2, PDFGUP1, PDFGUP2, PDFSUP1, PDFSUP2, IDWTUP, NPRUP')
+    init = result['init'].splitlines()[0].split()
+    init = [int(i) for i in init[:2] ] + [float(i) for i in init[2:4] ] + [int(i) for i in init[4:10] ] 
+    init = LINIT._make(init)
+    # Followed by NPRUP lines of processes
     if False:
         print("LHE init block:")
         print(result['init'])
@@ -173,7 +196,7 @@ def load_event(filename):
         # Load only one event
         pass
 
-    return make_lhe_graph(event.splitlines() )
+    return make_lhe_graph(event.splitlines(), init)
     
 if __name__ == "__main__":
     from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])
