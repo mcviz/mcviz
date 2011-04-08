@@ -1,20 +1,28 @@
 from collections import namedtuple
+from itertools import izip
 import re
 
-from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
+from logging import getLogger; log = getLogger("mcviz.loaders.lhe")
 
-from mcviz import MCVizParseError
-from ..particle import Particle
-from ..vertex import Vertex
+from mcviz import FatalError
+from .. import EventParseError, Particle, Vertex
 
 
 LHE_TEXT = re.compile("""
-<LesHouchesEvents version="(?P<version>.*?)">
+*<LesHouchesEvents version="(?P<version>.*?)">
+.*
 \s*<init>\s*
 (?P<init>.*?)
 \s*</init>\s*
 (?P<events>.*)
 </LesHouchesEvents>
+*
+""", re.M | re.DOTALL)
+
+LHE_EVENT = re.compile("""
+*\s*<event>\s*
+(?P<event>.*?)
+\s*</event>\s*
 """, re.M | re.DOTALL)
 
 # INTEGER NUP,IDPRUP,IDUP,ISTUP,MOTHUP,ICOLUP
@@ -26,29 +34,148 @@ LHE_TEXT = re.compile("""
 
 def event_generator(lines):
     """
-    Yield one event at a time from a HepMC file
+    Yield one event at a time from a LHE file
     """
-    event = []
-    for line in (l.split() for l in lines):
-        if line[0] == "E" and event:
-            yield event
-            event = []
-        event.append(line)
-    yield event
-
-LHEvent = namedtuple("LHEvent", 
-    "id interaction_count ev_scale alpha_qcd alpha_qed signal_proc_id "
-    "signal_proc_vertex_barcode num_vertices beam_p1_barcode beam_p2_barcode "
-    "random_states weights")
-LHVertex = namedtuple("LHVertex", 
-    "barcode id x y z ctau num_orphan_incoming num_outgoing weights")
-LHParticle = namedtuple("LHParticle",
-    "barcode pdgid px py pz energy mass status pol_theta pol_phi "
-    "vertex_out_barcode flow") 
+    eventiter = LHE_EVENT.finditer(lines)
     
-def load_first_event(filename):
+    for match in eventiter:
+      result = match.groupdict()
+      yield result['event']
+
+def make_lhe_graph(lines):
     """
-    Load one event from a HepMC file
+    Return the particles and vertices in the event
     """
+    NUP, IDPRUP, XWGTUP, SCALUP, AQEDUP, AQCDUP = lines.pop(0).split()
+    NUP, IDPRUP = (int(i) for i in (NUP, IDPRUP) )
+    XWGTUP, SCALUP, AQEDUP, AQCDUP = (float(i) for i in (XWGTUP, SCALUP, AQEDUP, AQCDUP) )
+
+    particles = []
+    for I, line in izip(xrange(1, NUP+1), lines):
+      line = line.split()
+      line.insert(0, I)
+      particles.append(Particle.from_lhe(line) )
+
+    # Convert mothers/daughters to objects
+    for particle in particles:
+        particle.daughters = set(particles[d-1] for d in particle.daughters if d != 0)
+        particle.mothers = set(particles[m-1] for m in particle.mothers if m != 0)
+
+    particles = [p for p in particles if p.no != 0]
+    particle_dict = dict((p.no, p) for p in particles)
+
+    # Populate mothers and daughters for particles
+    for particle in particles:
+        for mother in particle.mothers:
+            mother.daughters.add(particle)
+        for daughter in particle.daughters:
+            daughter.mothers.add(particle)
+
+    # Remove self-connections
+    for particle in particles:
+        particle.mothers.discard(particle)
+        particle.daughters.discard(particle)
+
+    # TODO: Johannes: Please explain!
+    vertex_dict = dict()
+    vno = 0
+    for particle in particles:
+        found_v = None
+        if frozenset(particle.mothers) in vertex_dict:
+            found_v = vertex_dict[frozenset(particle.mothers)]
+        else:
+            for v in vertex_dict.itervalues():
+                for m in particle.mothers:
+                    if m in v.incoming:
+                        found_v = v
+                        #print >> stderr, map(lambda x: x.no, v.incoming), map(lambda x: x.no, particle.mothers)
+                        break
+                if found_v:
+                    break
+
+        if found_v:
+            found_v.outgoing.add(particle)
+            for new_mother in found_v.incoming:
+                particle.mothers.add(new_mother)
+                new_mother.daughters.add(particle)
+        elif particle.mothers:
+            vno += 1
+            vertex_dict[frozenset(particle.mothers)] = Vertex(vno, particle.mothers, [particle])
+            if len(particle.mothers) == 0:
+                # this is the system vertex
+                log.error("particle %s has no mothers: %s", particle.no, particle)
+        else: # initial state vertex
+            vno += 1
+            vertex_dict[particle] = Vertex(vno, [], [particle])
+
+    for particle in particles:
+        if particle.final_state:
+            vno += 1
+            vertex_dict[particle] = Vertex(vno, [particle], [])
+        if particle.initial_state:
+            log.verbose("found initial particle: %s, %s", particle.no, particle.name)
+
+    # Connect particles to their vertices
+    for vertex in vertex_dict.itervalues():
+        for particle in vertex.incoming:
+            particle.vertex_out = vertex
+
+        for particle in vertex.outgoing:
+            particle.vertex_in = vertex
+
+    vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
+
+    if False:     # Some debugging printouts
+        print("\nParticles:")
+        # Particle.no .vertex_in .vertex_out
+        for p in particle_dict:
+	   part = particle_dict[p]
+           print("Particle %d mothers: %s daughters: %s" %(part.no, part.mothers, part.daughters) )
+           print("Parent vertex: %s child vertex: %s" %(part.vertex_in, part.vertex_out) )
+
+        print("\nVertices:")
+        # Vertex.vno .incoming .outgoing
+        for v in vertex_dict:
+           print(vertex_dict[v])
+        print("")
+
+    return vertex_dict, particle_dict
+    
+def load_event(filename):
+    """
+    Load one event from a LHE file
+    """
+    filename, _, event_number = filename.partition(":")
+    
+    if event_number:
+        try:
+            event_number = int(event_number)
+        except ValueError:
+            log.fatal("Failed to convert filename part to an integer. Filename "
+                      "should have the form 'string[:int(event number)]'")
+            raise FatalError()
+    else:
+        event_number = 0
+    
     with open(filename) as fd:
-        match = HEPMC_TEXT.search(fd.read())
+        match = LHE_TEXT.search(fd.read())
+    
+    if not match:
+        raise EventParseError("Failed to parse LHE data")
+
+    result = match.groupdict()
+    
+    if False:
+        print("LHE init block:")
+        print(result['init'])
+
+    for i, event in izip(xrange(event_number+1), event_generator(result['events']) ):
+        # Load only one event
+        pass
+
+    return make_lhe_graph(event.splitlines() )
+    
+if __name__ == "__main__":
+    from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])
+    from sys import argv
+    test(argv[1])

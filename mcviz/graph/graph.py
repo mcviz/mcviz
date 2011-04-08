@@ -25,7 +25,7 @@ class EventGraph(object):
         """
         Try to load a monte-carlo event using all available loaders
         """
-        loaders = [cls.from_hepmc, cls.from_pythia_log]
+        loaders = [cls.from_hepmc, cls.from_lhe, cls.from_pythia_log]
         for loader in loaders:
             try:
                 return loader(filename)
@@ -49,4 +49,10 @@ class EventGraph(object):
         from .loaders.pythialog import load_event
         vertices, particles = load_event(filename)
         return cls(vertices, particles)
+
+    @classmethod
+    def from_lhe(cls, filename):
+        from loaders.leshouchesevent import load_event
+	vertices, particles = load_event(filename)
+	return cls(vertices, particles)
 
