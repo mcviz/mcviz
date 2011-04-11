@@ -118,7 +118,6 @@ class LineWidthPt(Style):
     """
     Make the particle line width dependent on the transverse momentum.
     """
-    _name = "LineWidthPt"
     _args = [Arg("scale", float, "scale of the line effects", default=1.0),
              Arg("min", float, "minimal width of a line", default=0.1),]
     def __call__(self, layout):
