@@ -10,27 +10,22 @@ from .. import EventParseError, Particle, Vertex
 
 LHE_TEXT = re.compile("""
 *<LesHouchesEvents version="(?P<version>.*?)">
-.*
-\s*<init>\s*
+.*\s*<init>\s*
 (?P<init>.*?)
 \s*</init>\s*
 (?P<events>.*)
 </LesHouchesEvents>
-*
-""", re.M | re.DOTALL)
+*""", re.M | re.DOTALL)
 
 LHE_EVENT = re.compile("""
 *\s*<event>\s*
 (?P<event>.*?)
 \s*</event>\s*
-""", re.M | re.DOTALL)
+*""", re.M | re.DOTALL)
 
-# INTEGER NUP,IDPRUP,IDUP,ISTUP,MOTHUP,ICOLUP
-# DOUBLE PRECISION XWGTUP,SCALUP,AQEDUP,AQCDUP,PUP,VTIMUP,&SPINUP
-# COMMON/HEPEUP/NUP,IDPRUP,XWGTUP,SCALUP,AQEDUP,AQCDUP,
-# &IDUP(MAXNUP),ISTUP(MAXNUP),MOTHUP(2,MAXNUP),
-# &ICOLUP(2,MAXNUP),PUP(5,MAXNUP),VTIMUP(MAXNUP),
-# &SPINUP(MAXNUP
+# See the following for info on the LHE format:
+# http://arxiv.org/abs/hep-ph/0609017
+# http://arxiv.org/abs/hep-ph/0109068
 
 def event_generator(lines):
     """
@@ -59,15 +54,20 @@ def make_lhe_graph(lines, init):
     # Particles have the format:
     LPARTICLE = namedtuple('LPARTICLE', 'IDUP, ISTUP, MOTHUP1, MOTHUP2, ICOLUP1, ICOLUP2, PUP1, PUP2, PUP3, PUP4, PUP5, VTIMUP, SPINUP')
     particles = []
-    for I, line in izip(xrange(1, event.NUP+3), lines):
+    end = event.NUP+1
+    for I, line in izip(xrange(1, end), lines):
       line = line.split()
       line = [int(i) for i in line[:6] ] + [float(i) for i in line[6:13] ]
 
       # Correct indices for the initial beam particles
-      if line[2]: line[2] += 2
-      if line[3]: line[3] += 2
-      if I == 3: line[3] = 1
-      if I == 4: line[3] = 2
+      #if line[2]: line[2] += 2
+      #if line[3]: line[3] += 2
+      #if I == 3: line[2] = 1
+      #if I == 4: line[2] = 2
+      if False: #line[2] <= 0 and I > 2:
+        print("Skipping particle %d %s" %(I, line) )
+	continue
+      #print("Adding particle   %d %s" %(I, line) )
 
       part = LPARTICLE._make(line)
 
@@ -75,8 +75,10 @@ def make_lhe_graph(lines, init):
 
     # Convert mothers/daughters to objects
     for particle in particles:
-        particle.daughters = set(particles[d-1] for d in particle.daughters if d != 0)
-        particle.mothers = set(particles[m-1] for m in particle.mothers if m != 0)
+        particle.daughters = set(particles[d-1] for d in particle.daughters
+	    if d != 0)# and d <= len(particles) )
+        particle.mothers = set(particles[m-1] for m in particle.mothers
+	    if m != 0)# and m <= len(particles) )
 
     particles = [p for p in particles if p.no != 0]
     particle_dict = dict((p.no, p) for p in particles)
@@ -142,7 +144,7 @@ def make_lhe_graph(lines, init):
 
     vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
 
-    if False:     # Some debugging printouts
+    if True:     # Some debugging printouts
         print("\nParticles:")
         # Particle.no .vertex_in .vertex_out
         for p in particle_dict:
