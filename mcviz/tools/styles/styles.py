@@ -128,7 +128,8 @@ class LineWidthPt(Style):
             
         for element in elements:
             particle = element.item
-            element.style_args["stroke-width"] = self.options["scale"]*ln(particle.pt+1)*0.1 + 0.01
+            if hasattr(particle, "pt"):
+                element.style_args["stroke-width"] = self.options["scale"]*ln(particle.pt+1)*0.1 + 0.01
             
 
 class ThickenColor(Style):
