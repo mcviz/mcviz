@@ -71,7 +71,7 @@ class SimpleColors(Style):
             else:
                 # label in Inline; particle in Dual
                 # fill will be ignored in inline
-                node.style_args["stroke"] = node.style_args["fill"] = particle_color(node.item)
+                node.style_args["fill"] = particle_color(node.item)
                 node.style_args["fill"] = node.style_args["fill"].replace("black", "white")
                 if node.item.initial_state:
                     node.style_args["fill"] = initial_color
@@ -125,7 +125,11 @@ class LineWidthPt(Style):
             elements = layout.edges
         else:
             elements = layout.nodes
-            
+            for edge in layout.edges:
+                particle = edge.going
+                if hasattr(particle, "pt"):
+                    edge.style_args["stroke-width"] = elf.options["scale"]*ln(particle.pt+1)*0.1 + 0.01
+
         for element in elements:
             particle = element.item
             if hasattr(particle, "pt"):
