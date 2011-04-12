@@ -5,6 +5,10 @@ class Summary(object):
         self.graph.v_map.update(self.orig_v_map)
 
 class ViewObject(object):
+    """
+    Inherited by ViewParticle and ViewVertex
+    """
+    
     def __init__(self, graph):
         self.graph = graph
         self.subscripts = []
@@ -12,6 +16,11 @@ class ViewObject(object):
         self.layout_objects = []
 
     def tag(self, tag):
+        """
+        Tag a view object with some information. Can be arbitrary hashable 
+        information. Usually used to test if the object should be styled or 
+        layed out in a specific fashion.
+        """
         self.tags.add(tag)
 
     @classmethod
