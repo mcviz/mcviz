@@ -259,12 +259,31 @@ def cut(graph_view):
     keep = set()
     def mark(item, depth):
         keep.add(item)
+        item.tag("pass")
     
     for particle in final_state:
         if not cut(particle):
             graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
                             ascend=True)
-            
+    
+    def pruner(item, depth):
+        if "pass" in item.tags:
+            return ()
+    
+    for vertex in graph_view.vertices:
+        if "pass" in vertex.tags:
+            cut_daughters = [p for p in vertex.outgoing if "pass" not in p.tags]
+            #print vertex, cut_daughters
+            if len(cut_daughters) > 2:
+                print cut_daughters
+                vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
+                #vsummary.tag("cluster")
+                psummary = graph_view.summarize_particles(set(cut_daughters))
+                psummary.tag("sum")
+                vsummary.tag("sum")
+                #psummary.tag("cluster")
+                #psummary.cluster_nparticles = len(Walk.particles)
+    
     for p in graph_view.particles:
        if p in keep:
            continue
