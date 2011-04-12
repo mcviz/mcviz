@@ -1,4 +1,5 @@
 from itertools import chain
+from math import log, atan2, tan
 
 from .view_object import ViewObject, Summary
 
@@ -25,10 +26,13 @@ class ViewParticle(ViewObject):
     def pt(self):
         return (self.p[0]**2 + self.p[1]**2)**0.5
 
-    #p.eta = -log(tan(atan2(p.pt, pz)/2.))
     @property
     def phi(self):
         return atan2(self.p[0], self.p[1])
+
+    @property
+    def eta(self):
+        return -log(tan(atan2(self.pt, self.p[2])/2.))
 
     @property
     def colored(self):
