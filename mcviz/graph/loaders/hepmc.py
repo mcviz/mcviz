@@ -80,6 +80,10 @@ def make_record(record):
         return HVertex._make(first_part + [weights])
     
     elif type_ == "P":
+        if len(record) == 11:
+            # Strange dialect which misses the "mass" column? Insert 0 mass.
+            midx = HParticle._fields.index("mass")
+            record = record[:midx] + [0] + record[midx:]
         varparts_idx = HParticle._fields.index("flow")
         first_part, record = items(varparts_idx, record)
         flow = {}
