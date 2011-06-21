@@ -21,7 +21,11 @@ class ViewParticle(ViewObject):
     def final_state(self):
         "No daughters"
         return not bool(self.daughters)
-
+    
+    @property
+    def antiparticle(self):
+        return self.pdgid < 0
+    
     @property
     def pt(self):
         return (self.p[0]**2 + self.p[1]**2)**0.5
@@ -95,6 +99,10 @@ class ViewParticleSingle(ViewParticle):
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
         self.status = self.event_particle.status
+        
+        if not self.colored and self.quark:
+            self.color = not self.antiparticle
+            self.anticolor = self.antiparticle
     
     def __repr__(self):
         args = self.pdgid, self.reference
