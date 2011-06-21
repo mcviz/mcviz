@@ -42,3 +42,12 @@ class Pt(Annotation):
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: "%.2f"%p.pt)
         
+        
+class PDGID(Annotation):
+    """
+    Particle transverse momentum (in Monte-Carlo units)
+    """
+    _name = "pdg"
+    def __call__(self, graph):
+        self.annotate_particles(graph.particles, lambda p: str(p.pdgid))
+        
