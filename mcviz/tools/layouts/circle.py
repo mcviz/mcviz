@@ -1,7 +1,7 @@
 from __future__ import division
 
 from sys import stderr
-from math import sqrt, sin, cos, atan2, log as ln
+from math import sqrt, sin, cos, atan2, tan, log as ln
 
 from mcviz.utils import Point2D
 from mcviz.tools import Arg
@@ -27,8 +27,9 @@ def get_max_descendant_levels(vertex):
 class CircleLayout(FeynmanLayout):
     _name = "Circle"
     _args = [Arg("scale", float, "length scale", default=1.0),
-             Arg("view", str, "view on the event", choices=["front", "side"], default="side"),
+             Arg("view", str, "view on the event", choices=["front", "side", "eta_pt"], default="side"),
              Arg("phi", float, "rotate the view in phi [radian]", default=0.0),
+             Arg("pt", float, "minimum pT for a particle to be fixed [GeV]", default=0.0),
              ]
 
     def process(self):
@@ -48,21 +49,42 @@ class CircleLayout(FeynmanLayout):
             item_nodes[node.item] = node
 
         rotate_phi = self.options["phi"]
-        dims = (0,1) if self.options["view"] == "front" else (2,1)
+        min_fix_pt = self.options["pt"]
+        D = 100.0 * self.options["scale"]#scale*10
 
-        def pos_func(momentum):
+        def rotate_phi_proj(momentum, dims):
             p0 = cos(rotate_phi)*momentum[0] + sin(rotate_phi)*momentum[1]
             p1 = -sin(rotate_phi)*momentum[0] + cos(rotate_phi)*momentum[1]
             p = p0, p1, momentum[2]
-            x, y = p[dims[0]], p[dims[1]]
-            if x == 0 and y == 0:
-                return Point2D(0, 0)
-            return Point2D(x, y) * (1.0/sqrt(x**2+y**2))
+            return Point2D(p[dims[0]], p[dims[1]])
+
+        if self.options["view"] == "front":
+            pfunc = lambda m : rotate_phi_proj(m, (0,1))
+            mfunc = lambda m : rotate_phi_proj(m, (0,1))
+        elif self.options["view"] == "side":
+            pfunc = lambda m : rotate_phi_proj(m, (2,1))
+            mfunc = lambda m : rotate_phi_proj(m, (2,1))
+        elif self.options["view"] == "eta_pt":
+            mfunc = lambda m : rotate_phi_proj(m, (2,1))
+            def pfunc(momentum):
+                p0, p1 = rotate_phi_proj(momentum, (0, 1)).tuple()
+                pt = sqrt(p0**2 + p1**2)
+                y = pt * (1 if p0 > 0 else -1)
+                if all(momentum[i] == 0 for i in (0,1,2)):
+                    return 0, 0
+                if pt == 0:
+                    x = - momentum[2] / abs(momentum[2]) * 5
+                else:
+                    x = -ln(tan(atan2(pt, momentum[2])/2.))
+                return Point2D(x, y)
 
         for node in self.nodes:
-            if node.item.final:
+            recursive_fix = all(p.final_state and p.pt < min_fix_pt for p in node.item.outgoing)
+            nofix = node.item.final and list(node.item.incoming)[0].pt < min_fix_pt
+            if not nofix and (node.item.final or recursive_fix):
                 p = list(node.item.incoming)[0]
                 phi, pt, e = p.phi, p.pt, p.e
+
                 scale = pt
                 if scale < 1:
                     scale = 1
@@ -70,18 +92,22 @@ class CircleLayout(FeynmanLayout):
                     scale = 100
                 scale *= self.options["scale"]
 
-                momentum = pos_func(p.p) * scale
+                momentum = mfunc(p.p) * scale
 
                 sv = p.start_vertex
                 sv_p = [sum(par.p[i] for par in sv.outgoing) for i in (0,1,2)]
                 svn = item_nodes[sv]
 
-                dlvl = get_max_descendant_levels(sv) + 1
+                dlvl = get_max_descendant_levels(sv) + 1 - (1 if recursive_fix else 0)
 
                 if sv_p[0] == 0 and sv_p[1] == 0:
                     continue
 
-                pos = pos_func(sv_p) * (100.0 / sqrt(dlvl))
+
+                stretch = 1.0
+                assert 0 < stretch <= 1
+                pos = pfunc(sv_p) * (D / sqrt(dlvl))
+                pos.y = pos.y / (abs(pos.y)/D)**(stretch)
                 svn.center = pos
                 svn.dot_args["pos"] = "%s,%s!" % svn.center.tuple()
                 svn.dot_args["pin"] = "true"
@@ -95,7 +121,7 @@ class CircleLayout(FeynmanLayout):
 
             elif node.item.initial:
                 p = list(node.item.outgoing)[0]
-                node.center = pos_func(p.p) * 120
+                node.center = pfunc(p.p) * 1.2 * D
                 node.dot_args["pos"] = "%s,%s!" % node.center.tuple()
                 node.dot_args["pin"] = "true"
                 nodes_remaining.remove(node)
@@ -103,7 +129,7 @@ class CircleLayout(FeynmanLayout):
                 sv = p.end_vertex
                 sv_p = [sum(par.p[i] for par in sv.incoming) for i in (0,1,2)]
                 svn = item_nodes[sv]
-                pos = pos_func(sv_p) * (100.0)
+                pos = pfunc(sv_p) * D
                 svn.center = pos
                 svn.dot_args["pos"] = "%s,%s!" % svn.center.tuple()
                 svn.dot_args["pin"] = "true"
