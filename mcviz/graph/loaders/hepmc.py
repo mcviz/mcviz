@@ -48,6 +48,7 @@ def variable_item(record):
     """
     Parses a variable-length `record` where the first item
     """
+    if not record: return [], []
     # Ugh, some hepmc writers give us floats for this field!?
     n, record = int(float(record[0])), record[1:]
     return items(n, record)
