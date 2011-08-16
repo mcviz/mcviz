@@ -66,7 +66,7 @@ PARTICLE_MATCH = re.compile(r"".join(re_groups))
 def read_pythia_particle_db():
     particles = {}
     try:
-        xml_data = resource_string("mcviz.utils.svg", "ParticleData.xml")
+        xml_data = resource_string("mcviz.utils.svg.data", "ParticleData.xml")
     except ImportError:
         xml_data = "".join(file("ParticleData.xml").readlines())
     particle_data = minidom.parseString(xml_data)
@@ -233,10 +233,10 @@ class TexGlyph(object):
         if cls.library:
             return cls.library
         
-        if resource_exists("mcviz.utils.svg", "texglyph.cache.bz2"):
-            cls.library = loads(resource_string("mcviz.utils.svg", "texglyph.cache.bz2").decode("bz2"))
-        elif resource_exists("mcviz.utils.svg", "texglyph.cache"):
-            cls.library = loads(resource_string("mcviz.utils.svg", "texglyph.cache"))
+        if resource_exists("mcviz.utils.svg.data", "texglyph.cache.bz2"):
+            cls.library = loads(resource_string("mcviz.utils.svg.data", "texglyph.cache.bz2").decode("bz2"))
+        elif resource_exists("mcviz.utils.svg.data", "texglyph.cache"):
+            cls.library = loads(resource_string("mcviz.utils.svg.data", "texglyph.cache"))
         else:
             cls.make_library()
             with file(resource_filename("mcviz.utils.svg", "texglyph.cache"), "w") as f:
