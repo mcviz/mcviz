@@ -223,9 +223,12 @@ def merge_vertices(graph_view):
     """
     vertices_by_position = defaultdict(list)
     for vertex in graph_view.vertices:
-        vertices_by_position[vertex.event_vertex.position].append(vertex)
+        if vertex.event_vertex.position:
+            pos = tuple(float(v) for v in vertex.event_vertex.position)
+            if pos != (0,0,0,0):
+                vertices_by_position[pos].append(vertex)
 
     for pos, vertices in sorted(vertices_by_position.iteritems()):
-        if pos is not None and len(vertices) >= 2:
+        if len(vertices) >= 2:
             summary = graph_view.summarize_vertices(vertices)
     
