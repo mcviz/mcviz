@@ -14,13 +14,11 @@ class ViewParticle(ViewObject):
 
     @property
     def initial_state(self):
-        "No mothers"
-        return not bool(self.mothers)
+        return self.start_vertex.initial and len(self.start_vertex.outgoing) == 1
     
     @property
     def final_state(self):
-        "No daughters"
-        return not bool(self.daughters)
+        return self.end_vertex.final and len(self.end_vertex.incoming) == 1
     
     @property
     def antiparticle(self):
