@@ -34,7 +34,14 @@ class DualLayout(BaseLayout, FundamentalTool):
     def get_vertex(self, vertex, node_style=None):
         items = []
 
-        if self.options["helper_vertices"] and len(vertex.incoming) > 1 and len(vertex.outgoing) > 1:
+        need_help = False
+        if self.options["helper_vertices"]:
+            if len(vertex.incoming) > 1 and len(vertex.outgoing) > 1:
+                need_help = True
+            elif vertex.initial and len(vertex.outgoing) > 1:
+                need_help = True
+
+        if need_help:
             helper_node = LayoutNode(vertex)
             helper_node.width = 0.5
             helper_node.height = 0.5
