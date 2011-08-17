@@ -32,7 +32,7 @@ from xml.dom import minidom
 from shutil import rmtree
 from textwrap import dedent
 from cPickle import dumps, loads
-from pkg_resources import resource_string, resource_exists
+from pkg_resources import resource_string, resource_exists, resource_filename
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
@@ -65,7 +65,10 @@ PARTICLE_MATCH = re.compile(r"".join(re_groups))
 
 def read_pythia_particle_db():
     particles = {}
-    xml_data = resource_string("mcviz.utils.svg", "ParticleData.xml")
+    try:
+        xml_data = resource_string("mcviz.utils.svg", "ParticleData.xml")
+    except ImportError:
+        xml_data = "".join(file("ParticleData.xml").readlines())
     particle_data = minidom.parseString(xml_data)
     for particle in particle_data.getElementsByTagName("particle"):
         name = particle.getAttribute("name")
@@ -236,7 +239,7 @@ class TexGlyph(object):
             cls.library = loads(resource_string("mcviz.utils.svg", "texglyph.cache"))
         else:
             cls.make_library()
-            with file(fn, "w") as f:
+            with file(resource_filename("mcviz.utils.svg", "texglyph.cache"), "w") as f:
                 f.write(dumps(cls.library, 2))
                 
         return cls.library
@@ -269,7 +272,8 @@ class TexGlyph(object):
         log_file = os.path.join(base_dir, "eq.log")
         if use_pdf:
             texout_file = os.path.join(base_dir, "eq.pdf")
-            ps_file = texout_file
+            ps_file = os.path.join(base_dir, "eq.ps")
+            pdf_file = texout_file
         else:
             texout_file = os.path.join(base_dir, "eq.dvi")
             ps_file = os.path.join(base_dir, "eq.ps")
@@ -294,6 +298,8 @@ class TexGlyph(object):
 
         if not use_pdf:
             os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, texout_file))
+        else:
+            os.system('pdftops "%s" "%s"' % (pdf_file, ps_file))
 
         # cd to base_dir is necessary, because pstoedit writes
         # temporary files to cwd and needs write permissions
@@ -432,26 +438,44 @@ if __name__ == '__main__':
 
     if True:
         db = read_pythia_particle_db()
-        for pdgid, label, gd in sorted(db.values()):
-            if pdgid == -211:
+        scale = 0.001
+        paperw, margin = 10/scale, 100
+        lmargin = 200
+        lineskip = 200
+        curx, cury, maxy = lmargin, 200, 0
+        
+        with file("test.svg", "w") as f:
+            f.write('<?xml version="1.0" standalone="no"?>\n')
+            f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
+
+            for pdgid, label, gd in sorted(db.values()):
                 print >> sys.stderr, "Processing ", label, " (PDG ID ", pdgid , ")..."
                 glyph = TexGlyph(particle_to_latex(gd), pdgid)
-                glyph.write_tex_file('test.tex')
-                with file("test.svg", "w") as f:
-                    f.write('<?xml version="1.0" standalone="no"?>\n')
-                    f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
-                    wx, wy = glyph.dimensions
-                    from xml.dom.minidom import getDOMImplementation
-                    svgxml = getDOMImplementation().createDocument(None, "svg", None)
-                    box = svgxml.createElement("rect")
-                    box.setAttribute("x", "%.3f" % (glyph.xmin))
-                    box.setAttribute("y", "%.3f" % (glyph.ymin))
-                    box.setAttribute("width", "%.3f" % wx)
-                    box.setAttribute("height", "%.3f" % wy)
-                    box.setAttribute("fill", "red")
-                    f.write(box.toprettyxml())
-                    f.write(glyph.dom.toprettyxml())
-                    f.write('</svg>')
+                #glyph.write_tex_file('test.tex')
+                wx, wy = glyph.dimensions
+                maxy = max(wy, maxy)
+
+
+                f.write('<g transform="translate(%.3f,%.3f) scale(%.4f)">\n' % ((curx - glyph.xmin)*scale, cury*scale, scale))
+                from xml.dom.minidom import getDOMImplementation
+                svgxml = getDOMImplementation().createDocument(None, "svg", None)
+                box = svgxml.createElement("rect")
+                box.setAttribute("x", "%.3f" % (glyph.xmin))
+                box.setAttribute("y", "%.3f" % (glyph.ymin))
+                box.setAttribute("width", "%.3f" % wx)
+                box.setAttribute("height", "%.3f" % wy)
+                box.setAttribute("fill", "red")
+                f.write(box.toprettyxml())
+                f.write(glyph.dom.toprettyxml())
+                f.write("</g>\n")
+
+                curx += wx + margin
+                if curx > paperw:
+                    curx = lmargin
+                    cury += 2*maxy + lineskip
+                    maxy = 0
+
+            f.write('</svg>')
 
     else:
         for pdgid in sorted(TexGlyph.pdgids()):
