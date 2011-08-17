@@ -76,6 +76,10 @@ class ViewVertexSingle(ViewVertex):
         return self.graph.vertex_outgoing_particles(self.vertex_number)
 
     @property
+    def event_vertex(self):
+        return self.graph.event.vertices[self.vertex_number]
+        
+    @property
     def order_number(self):
         # replace - for negative vertex numbers
         return self.vertex_number

@@ -214,3 +214,18 @@ def shallow(graph_view, drop_depth=10):
     for obj in list(graph_view.particles) + list(graph_view.vertices):
         if obj not in keep_objects:
             graph_view.drop(obj)
+            
+@Transform.decorate("MergeVertices")
+def merge_vertices(graph_view):
+    """
+    Merge vertices by position. Required by some generators which don't connect 
+    particles together.
+    """
+    vertices_by_position = defaultdict(list)
+    for vertex in graph_view.vertices:
+        vertices_by_position[vertex.event_vertex.position].append(vertex)
+
+    for pos, vertices in sorted(vertices_by_position.iteritems()):
+        if pos is not None and len(vertices) >= 2:
+            summary = graph_view.summarize_vertices(vertices)
+    
