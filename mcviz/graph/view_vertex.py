@@ -11,11 +11,15 @@ class ViewVertex(ViewObject):
         
     @property
     def initial(self):
-        return not self.incoming
+        return not self.incoming and len(self.outgoing) == 1
     
     @property    
     def final(self):
-        return not self.outgoing
+        return not self.outgoing and len(self.incoming) == 1
+
+    @property    
+    def vacuum(self):
+        return (not self.incoming and not self.initial) or (not self.outgoing and not self.final)
     
     @property
     def dangling(self):

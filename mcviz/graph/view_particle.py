@@ -14,11 +14,11 @@ class ViewParticle(ViewObject):
 
     @property
     def initial_state(self):
-        return self.start_vertex.initial and len(self.start_vertex.outgoing) == 1
+        return self.start_vertex.initial
     
     @property
     def final_state(self):
-        return self.end_vertex.final and len(self.end_vertex.incoming) == 1
+        return self.end_vertex.final
     
     @property
     def antiparticle(self):

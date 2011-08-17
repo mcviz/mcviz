@@ -38,7 +38,7 @@ class DualLayout(BaseLayout, FundamentalTool):
         if self.options["helper_vertices"]:
             if len(vertex.incoming) > 1 and len(vertex.outgoing) > 1:
                 need_help = True
-            elif vertex.initial and len(vertex.outgoing) > 1:
+            elif vertex.vacuum:
                 need_help = True
 
         if need_help:
