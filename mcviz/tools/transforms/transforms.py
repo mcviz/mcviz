@@ -100,6 +100,32 @@ def chainmail(graph_view, Retry):
             summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
             raise Retry
 
+@Transform.decorate("Jets")
+@retrying
+def contract_jets(graph_view, Retry):
+    print "---", len(graph_view.vertices)
+    for i, vertex in enumerate(graph_view.vertices):
+        if not vertex.outgoing:
+            continue
+            
+        print i, len(vertex.outgoing)
+        
+        final_state = [p for p in vertex.outgoing if p.final_state]
+        if len(final_state) < 2:
+            continue
+                    
+        cluster_ends = set(p.end_vertex for p in final_state)
+        vsummary = graph_view.summarize_vertices(cluster_ends)
+        vsummary.tag("cluster")
+        vsummary.cluster_nvertices = len(cluster_ends)
+        psummary = graph_view.summarize_particles(final_state)
+        psummary.tag("cluster")
+        psummary.cluster_nparticles = len(final_state)
+        
+        print "  Summarizing", len(cluster_ends), len(final_state)
+        raise Retry
+        
+
 @Transform.decorate("Clusters")
 def contract_clusters(graph_view):
     """
