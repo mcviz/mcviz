@@ -48,8 +48,8 @@ def make_lhe_graph(lines, init):
     event = LEVENT._make(line)
 
     # Now add the initial beam particles to this event
-    lines.insert(0, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP1, init.EBMUP1, init.EBMUP1) )
-    lines.insert(1, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP2, init.EBMUP2, init.EBMUP2) )
+#lines.insert(0, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP1, init.EBMUP1, init.EBMUP1) )
+#lines.insert(1, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP2, init.EBMUP2, init.EBMUP2) )
 
     # Particles have the format:
     LPARTICLE = namedtuple('LPARTICLE', 'IDUP, ISTUP, MOTHUP1, MOTHUP2, ICOLUP1, ICOLUP2, PUP1, PUP2, PUP3, PUP4, PUP5, VTIMUP, SPINUP')
@@ -114,6 +114,7 @@ def make_lhe_graph(lines, init):
 
         if found_v:
             found_v.outgoing.add(particle)
+
             for new_mother in found_v.incoming:
                 particle.mothers.add(new_mother)
                 new_mother.daughters.add(particle)
@@ -144,19 +145,27 @@ def make_lhe_graph(lines, init):
 
     vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
 
+    for particle in particles:
+        if particle.final_state and particle.initial_state: #len(particle.mothers) == 0:
+            if particle.vertex_in: del vertex_dict[particle.vertex_in.vno]
+	    del vertex_dict[particle.vertex_out.vno]
+	    del particle_dict[particle.no]
+#particles.remove(particle)
+            continue
+
     if True:     # Some debugging printouts
-        print("\nParticles:")
+        log.debug("\nParticles:")
         # Particle.no .vertex_in .vertex_out
         for p in particle_dict:
 	   part = particle_dict[p]
-           print("Particle %d mothers: %s daughters: %s" %(part.no, part.mothers, part.daughters) )
-           print("Parent vertex: %s child vertex: %s" %(part.vertex_in, part.vertex_out) )
+           log.debug("Particle %d (%d) mothers: %s daughters: %s" %(part.no, part.pdgid, part.mothers, part.daughters) )
+           log.debug("Parent vertex: %s child vertex: %s" %(part.vertex_in, part.vertex_out) )
 
-        print("\nVertices:")
-        # Vertex.vno .incoming .outgoing
+        log.debug("\nVertices:")
+        # Vertex: .vno .incoming .outgoing
         for v in vertex_dict:
-           print(vertex_dict[v])
-        print("")
+           log.debug(vertex_dict[v])
+        log.debug("")
 
     return vertex_dict, particle_dict
     
