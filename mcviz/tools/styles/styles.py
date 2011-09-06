@@ -71,7 +71,7 @@ class SimpleColors(Style):
             else:
                 # label in Inline; particle in Dual
                 # fill will be ignored in inline
-                node.style_args["stroke"] = node.style_args["fill"] = particle_color(node.item)
+                node.style_args["fill"] = particle_color(node.item)
                 node.style_args["fill"] = node.style_args["fill"].replace("black", "white")
                 if node.item.initial_state:
                     node.style_args["fill"] = initial_color
@@ -119,16 +119,22 @@ class LineWidthPt(Style):
     Make the particle line width dependent on the transverse momentum.
     """
     _name = "LineWidthPt"
-    _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
+    _args = [Arg("scale", float, "scale of the line effects", default=1.0),
+             Arg("min", float, "minimal width of a line", default=0.1),]
     def __call__(self, layout):
         if isinstance(layout, FeynmanLayout):
             elements = layout.edges
         else:
             elements = layout.nodes
-            
+            for edge in layout.edges:
+                particle = edge.going
+                if hasattr(particle, "pt"):
+                    edge.style_args["stroke-width"] = self.options["min"] + self.options["scale"]*ln(particle.pt+1)*0.1
+
         for element in elements:
             particle = element.item
-            element.style_args["stroke-width"] = self.options["scale"]*ln(particle.pt+1)*0.1 + 0.01
+            if hasattr(particle, "pt"):
+                element.style_args["stroke-width"] = self.options["min"] + +self.options["scale"]*ln(particle.pt+1)*0.1
             
 
 class ThickenColor(Style):

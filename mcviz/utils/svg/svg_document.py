@@ -135,7 +135,12 @@ class SVGDocument(object):
         self.add_subscripts(subscript, (x, y), (width_est/2, font_size/3), font_size)
 
     def add_subscripts(self, subscripts, center, dimensions, font_size):
+        subscripts_by_pos = {}
         for subscript, pos in subscripts:
+            subscripts_by_pos.setdefault(pos, []).append(subscript)
+    
+        for pos, subscripts in sorted(subscripts_by_pos.iteritems()):
+            subscript = ", ".join(map(str, subscripts))
             x, y  = center
             xw, yw = dimensions
             if pos == "sub":

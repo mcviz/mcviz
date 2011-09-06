@@ -11,11 +11,15 @@ class ViewVertex(ViewObject):
         
     @property
     def initial(self):
-        return not self.incoming
+        return not self.incoming and len(self.outgoing) == 1
     
     @property    
     def final(self):
-        return not self.outgoing
+        return not self.outgoing and len(self.incoming) == 1
+
+    @property    
+    def vacuum(self):
+        return (not self.incoming and not self.initial) or (not self.outgoing and not self.final)
     
     @property
     def dangling(self):
@@ -75,6 +79,10 @@ class ViewVertexSingle(ViewVertex):
     def outgoing(self):
         return self.graph.vertex_outgoing_particles(self.vertex_number)
 
+    @property
+    def event_vertex(self):
+        return self.graph.event.vertices[self.vertex_number]
+        
     @property
     def order_number(self):
         # replace - for negative vertex numbers

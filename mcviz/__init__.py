@@ -8,6 +8,11 @@ class FatalError(Exception):
     Must be accompanied by a FATAL log message.
     """
 
+import sys
+
+if not sys.version_info >= (2, 6):
+    raise ImportError("mcviz is only compatible with python >= 2.6")
+
 from utils import logger
 from graph import EventGraph, EventParseError
 from tools import Tool

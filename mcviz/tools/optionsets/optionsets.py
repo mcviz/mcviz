@@ -15,7 +15,7 @@ class CommandLineOptionSet(OptionSet):
     def __call__(self, tools):
         for tool_type in sorted(tool_types.keys()):
             tools.setdefault(tool_type, [])
-        setdefault(tools, "painter", "svg")
+        setdefault(tools, "painter", "navisvg")
         setdefault(tools, "layout-engine", "dot")
         setdefault(tools, "layout", "Feynman")
         defstyle = "Default"

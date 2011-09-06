@@ -1,4 +1,5 @@
 from itertools import chain
+from math import log, atan2, tan
 
 from .view_object import ViewObject, Summary
 
@@ -13,22 +14,27 @@ class ViewParticle(ViewObject):
 
     @property
     def initial_state(self):
-        "No mothers"
-        return not bool(self.mothers)
+        return self.start_vertex.initial
     
     @property
     def final_state(self):
-        "No daughters"
-        return not bool(self.daughters)
-
+        return self.end_vertex.final
+    
+    @property
+    def antiparticle(self):
+        return self.pdgid < 0
+    
     @property
     def pt(self):
         return (self.p[0]**2 + self.p[1]**2)**0.5
 
-    #p.eta = -log(tan(atan2(p.pt, pz)/2.))
     @property
     def phi(self):
         return atan2(self.p[0], self.p[1])
+
+    @property
+    def eta(self):
+        return -log(tan(atan2(self.pt, self.p[2])/2.))
 
     @property
     def colored(self):
@@ -91,6 +97,10 @@ class ViewParticleSingle(ViewParticle):
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
         self.status = self.event_particle.status
+        
+        if not self.colored and self.quark:
+            self.color = not self.antiparticle
+            self.anticolor = self.antiparticle
     
     def __repr__(self):
         args = self.pdgid, self.reference

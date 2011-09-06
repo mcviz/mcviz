@@ -8,11 +8,11 @@ from mcviz import FatalError
 from .. import EventParseError, Particle, Vertex
 
 
-HEPMC_TEXT = re.compile("""
-HepMC::Version (?P<version>.*?)
-HepMC::IO_GenEvent-START_EVENT_LISTING
+HEPMC_TEXT = re.compile("""(?:
+HepMC::Version (?P<version>.*?))?\s*
+HepMC::IO_(?:GenEvent|Ascii)-START_EVENT_LISTING
 (?P<events>.*)
-HepMC::IO_GenEvent-END_EVENT_LISTING
+HepMC::IO_(?:GenEvent|Ascii)-END_EVENT_LISTING
 """, re.M | re.DOTALL)
 
 def event_generator(lines):
@@ -48,7 +48,9 @@ def variable_item(record):
     """
     Parses a variable-length `record` where the first item
     """
-    n, record = int(record[0]), record[1:] 
+    if not record: return [], []
+    # Ugh, some hepmc writers give us floats for this field!?
+    n, record = int(float(record[0])), record[1:]
     return items(n, record)
 
 def make_record(record):
@@ -62,7 +64,10 @@ def make_record(record):
         varparts_idx = HEvent._fields.index("random_states")
         first_part,    record = items(varparts_idx, record)
         random_states, record = variable_item(record)
-        weights,       record = variable_item(record)        
+        if record:
+            weights,   record = variable_item(record)
+        else:
+            weights = None
         assert not record, "Unexpected additional data on event"
         
         return HEvent._make(first_part + [random_states, weights])
@@ -76,12 +81,19 @@ def make_record(record):
         return HVertex._make(first_part + [weights])
     
     elif type_ == "P":
+        if len(record) == 11:
+            # Strange dialect which misses the "mass" column? Insert 0 mass.
+            midx = HParticle._fields.index("mass")
+            record = record[:midx] + [0] + record[midx:]
         varparts_idx = HParticle._fields.index("flow")
         first_part, record = items(varparts_idx, record)
-        (n_flow,), record = items(1, record)
-        flow,      record = items(int(n_flow)*2, record)
-        flow = map(int, flow)
-        flow = dict(zip(flow[::2], flow[1::2]))
+        flow = {}
+        if record:
+            # try parsing flow information
+            (n_flow,), record = items(1, record)
+            flow,      record = items(int(n_flow)*2, record)
+            flow = map(int, flow)
+            flow = dict(zip(flow[::2], flow[1::2]))
         assert not record, "Unexpected additional data on vertex"
         
         return HParticle._make(first_part + [flow])
@@ -190,9 +202,9 @@ def load_event(filename):
         raise EventParseError("Not obviously hepmc data.")
         
     result = match.groupdict()
-    version = tuple(map(int, result["version"].split(".")))
-    if version != (2, 06, 01):
-        log.warning("Warning: Only tested with hepmc 2.06.01")
+    #version = tuple(map(int, result.get("version", "0").split(".")))
+    #if version != (2, 06, 01):
+        #log.warning("Warning: Only tested with hepmc 2.06.01")
     lines = result["events"].split("\n")
     
     for i, event in izip(xrange(event_number+1), event_generator(lines)):

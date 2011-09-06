@@ -20,7 +20,7 @@ def get_depth(particle):
         return -1 + max(get_depth(daughter) for daughter in particle.daughters)
 
 class PhiLayout(FeynmanLayout):
-    _name = "PhiLayout"
+    _name = "Phi"
     _args = [Arg("scale", float, "length scale", default=1.0)]
 
     def process(self):
@@ -60,14 +60,19 @@ class PhiLayout(FeynmanLayout):
                     else:
                         edge = pinned[0]
                         force_scale = 0.1
-                    #phi = edge.item.phi
-                    phi = 0
-                    #theta = atan2(edge.item.p[2], sin(phi)*edge.item.p[0] + cos(phi)*edge.item.p[1])
-                    signum = 1 if sin(phi)*edge.item.p[0] + cos(phi)*edge.item.p[1] > 0 else -1
-                    theta = atan2(edge.item.p[2], edge.item.pt * signum)
-                    phi = theta
+
+                    phi = edge.item.phi
+                    px, py, pz = edge.item.p
+                    pt = edge.item.pt
+                    e = edge.item.e
+                    signum = 1 if sin(phi)*px + cos(phi)*py > 0 else -1
+                    theta = atan2(pz, pt * signum)
+
+                    #phi = 0
+                    #phi = theta
+
                     #scale = ln(edge.item.e)
-                    scale = edge.item.e / 1000.0 + edge.item.pt * 10
+                    scale = e / 1000.0 + pt * 10
                     if scale < 0.1: 
                         scale = 0.1
                     elif scale > 100:

@@ -1,6 +1,6 @@
 from logging import getLogger; log = getLogger("mcviz.painters.svg")
 
-from mcviz.tools import FundamentalTool
+from mcviz.tools import FundamentalTool, Arg
 
 from mcviz.utils import timer
 from mcviz.utils.svg.svg_document import (
@@ -17,6 +17,9 @@ class SVGPainter(StdPainter, FundamentalTool):
     Write out the result to plain SVG.
     """
     _name = "svg"
+    _args = [
+            Arg("debug", Arg.bool, "add debug information into the SVG", default=False),
+            ]
 
     document_creator = SVGDocument
 
@@ -48,6 +51,24 @@ class SVGPainter(StdPainter, FundamentalTool):
 
             if hasattr(self, "paint_additional"):
                 self.paint_additional(layout)
+
+            if self.options["debug"]:
+                w, h = layout.width*layout.scale, layout.height*layout.scale
+                def line(x1, y1, x2, y2, w):
+                    n = RawNode('<line x1="%.4f" y1="%.4f" x2="%.4f" y2="%.4f" style="stroke:rgb(255,0,0);stroke-width:%.4f"/>' % (x1, y1, x2, y2, w))
+                    self.doc.svg.children[:0] = [n]
+                def text(x, y, size, txt):
+                    n = RawNode('<text x="%.4f" y="%.4f" font-size="%.4f">%s</text>' % (x, y, size, txt))
+                    self.doc.svg.children[:0] = [n]
+                sz = (w+h)/100.0
+                line(0, 0, w, 0, sz)
+                line(w, 0, w, h, sz)
+                line(w, h, 0, h, sz)
+                line(0, h, 0, 0, sz)
+                text(2*sz, -3*sz , 0.8*sz, "Scale : %.4f" % layout.scale)
+                text(2*sz, -2*sz, 0.8*sz,  "Width : %.4f" % w)
+                text(2*sz, -1*sz, 0.8*sz,  "Height: %.4f" % h)
+
 
         self.write_data(self.doc.toprettyxml())
 

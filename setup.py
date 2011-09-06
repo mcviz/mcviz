@@ -22,5 +22,9 @@ setup(name='mcviz',
       url='http://mcviz.net',
       license='Affero GPLv3',
       packages=find_packages(),
-      entry_points={"console_scripts" : ["mcviz = mcviz:main"]}
+      entry_points={"console_scripts" : ["mcviz = mcviz:main"]},
+      package_data={
+        "mcviz.utils.svg" : ["ParticleData.xml", "texglyph.cache"],
+        "mcviz.utils.svg.data" : ["*.js", "*.xml"],
+      },
       )

@@ -56,6 +56,6 @@ class DOTPainter(StdPainter, FundamentalTool):
     Writes out the graph in dot format
     """
     _name = "dot"
-    def __call__(self, layout):
-        self.write_data(layout.dot.encode("UTF-8"))
+    def __call__(self, workspace, layout):
+        self.write_data("graph {\n%s\n}" % layout.dot.encode("UTF-8"))
 
