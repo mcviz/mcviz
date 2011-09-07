@@ -81,7 +81,7 @@ def make_record(record):
         return HVertex._make(first_part + [weights])
     
     elif type_ == "P":
-        if len(record) == 11:
+        if len(record) in [11,13,15]:
             # Strange dialect which misses the "mass" column? Insert 0 mass.
             midx = HParticle._fields.index("mass")
             record = record[:midx] + [0] + record[midx:]
