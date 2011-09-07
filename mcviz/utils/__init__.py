@@ -13,6 +13,7 @@ from .logger import get_logger_level, log_level
 from .timer import timer
 from .colors import rainbow_color
 from .spline import Spline, SplineLine, Line
+from .units import pick_mag, energy_mag
 
 def fixup_unicodedata_name(x):
     "Oh dear. unicodedata misspelt lambda."
