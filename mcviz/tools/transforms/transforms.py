@@ -142,21 +142,31 @@ def contract_loops(graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
-@Transform.decorate("Pluck", args=[Arg("vno_keep", int, "id of vertex to pick")])
-def pluck(graph_view, vno_keep=3):
+@Transform.decorate("Pluck", args=[Arg("vno_keep", int, "id of vertex to pick", default=3),
+                                   Arg("keep_down", int, "max depth to descend from vertex", default=8),
+                                   Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
+def pluck(graph_view, vno_keep, keep_down, keep_up):
     """
     Keep a specific vertex and particles travelling through it
     """
     
     keep_objects = set()
-    keep_vertex = graph_view.v_map[vno_keep]
-            
+    # Some generators don't have VN3; give nice message if we can't find vno_keep
+    try:
+        keep_vertex = graph_view.v_map[vno_keep]
+    except KeyError:
+        log.error("vertex %d not found in input graph" %vno_keep)
+        return
+
+    max_depth = keep_down
     def walker(vertex, depth):
         keep_objects.add(vertex)
-        if depth > 3:
+        log.debug("vertex depth = %d" %depth)
+        if depth > max_depth:
             return ()
         
-    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker)    
+    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker)
+    max_depth = keep_up
     graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker, ascend=True)
     
     for obj in list(graph_view.particles) + list(graph_view.vertices):
