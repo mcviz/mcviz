@@ -1,6 +1,6 @@
 from mcviz.tools import Annotation, Arg
 
-from mcviz.utils import energy_mag
+from mcviz.utils import energy_mag, pick_mag
 
 class Index(Annotation):
     """
@@ -36,13 +36,22 @@ class Status(Annotation):
         self.annotate_particles(graph.particles, lambda p: p.status)
             
 
+class E(Annotation):
+    """
+    Particle energy (in Monte-Carlo units)
+    """
+    _name = "e"
+    def __call__(self, graph):
+        self.annotate_particles(graph.particles, lambda p: "%.4g%seV"%energy_mag(p.e))
+
+
 class Pt(Annotation):
     """
     Particle transverse momentum (in Monte-Carlo units)
     """
     _name = "pt"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles, lambda p: "%.4g%seV"%energy_mag(p.pt))
+        self.annotate_particles(graph.particles, lambda p: "%.4g%seV"%pick_mag(p.pt))
         
         
 class PDGID(Annotation):

@@ -2,7 +2,7 @@ from mcviz.tools import FundamentalTool, Arg
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
-from mcviz.utils import energy_mag
+from mcviz.utils import pick_mag
 
 class DualLayout(BaseLayout, FundamentalTool):
     """
@@ -28,7 +28,7 @@ class DualLayout(BaseLayout, FundamentalTool):
             # Big red initial vertices
             lo.width = lo.height = 1.0
         elif "cluster" in particle.tags:
-            lo.label = "cluster (%.4g %seV)" %energy_mag(particle.pt)
+            lo.label = "cluster (%.4g %seV)" %pick_mag(particle.pt)
         
         return lo
    

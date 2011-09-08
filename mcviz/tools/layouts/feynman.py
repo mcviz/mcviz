@@ -3,7 +3,7 @@ from __future__ import division
 from math import log10
 
 from mcviz.tools import FundamentalTool, Arg
-from mcviz.utils import energy_mag
+from mcviz.utils import pick_mag
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
@@ -78,7 +78,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
         lo.label_size = self.options["label_size"]
 
         if "cluster" in particle.tags:
-            lo.label = "cluster (%.4g %seV)" %energy_mag(particle.pt)
+            lo.label = "cluster (%.4g %seV)" %pick_mag(particle.pt)
         elif (particle.gluon or particle.photon) and not self.options["gluid"]:
             lo.label = None
         else:
