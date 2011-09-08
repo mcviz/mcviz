@@ -6,6 +6,7 @@ from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
 from mcviz import FatalError
 from .. import EventParseError, Particle, Vertex
+from mcviz.utils import units
 
 
 HEPMC_TEXT = re.compile("""(?:
@@ -97,6 +98,15 @@ def make_record(record):
         assert not record, "Unexpected additional data on vertex"
         
         return HParticle._make(first_part + [flow])
+
+    elif type_ == "U":
+        log.info("event reports units are %s and %s" %tuple(record[:2]))
+	# I'm sure these should be the other way around, looks like the HepMC input is to blame
+	if record[0] == "GEV":
+	    units.CURRENT_ENERGY_MAG = 0.001
+        elif record[0] == "MEV":
+	    units.CURRENT_ENERGY_MAG = 1
+
 
 def load_single_event(ev):
     """
