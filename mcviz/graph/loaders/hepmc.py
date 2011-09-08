@@ -95,8 +95,10 @@ def make_record(record):
             flow = map(int, flow)
             flow = dict(zip(flow[::2], flow[1::2]))
         assert not record, "Unexpected additional data on vertex"
+
+        if not first_part[1] == '0':
+            return HParticle._make(first_part + [flow])
         
-        return HParticle._make(first_part + [flow])
 
 def load_single_event(ev):
     """
@@ -177,6 +179,10 @@ def load_single_event(ev):
         for p_out in vertex.outgoing:
             p_out.vertex_in = vertex
             p_out.mothers = vertex.incoming
+
+    # Probably not the greatest way to do this, but oh well...
+    vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
+                                  if vertex.outgoing or vertex.incoming)
 
     return vertices, particles
 
