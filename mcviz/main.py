@@ -24,14 +24,14 @@ from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse
 from mcviz.utils import get_logger_level, log_level, timer
 
 
-def run(options, argv, args):
+def run(args, argv):
 
     # Activate the python debugger if requested
-    if options.debug:
+    if args.debug:
         from IPython.Shell import IPShellEmbed
         ip = IPShellEmbed(["-pdb"], rc_override=dict(quiet=True))
 
-    if len(args) <= 1:
+    if not args.filename:
         log.fatal("Please specify an HepMC file or Pythia log file to run on. "
                   "Use --help for help.")
         raise FatalError
@@ -40,7 +40,7 @@ def run(options, argv, args):
     log.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
     
-    filename = args[1]
+    filename = args.filename
     log.verbose('trying to read event from "%s"' % filename)
     with timer('event from "%s"' % filename):
         try:
@@ -51,15 +51,15 @@ def run(options, argv, args):
     log.info('drawing event from "%s"' % (filename))
 
     gw = GraphWorkspace("mcviz.graph", event_graph, cmdline=" ".join(argv))
-    gw.load_tools(options)
+    gw.load_tools(args)
     gw.run()
 
 def real_main(argv):
-    options, args = parse_options(argv)
+    args = parse_options()
     try:
-        with log_level(get_logger_level(options.quiet, options.verbose)):
+        with log_level(get_logger_level(args.quiet, args.verbose)):
             with timer("complete run"):
-                run(options, argv, args)
+                run(args, argv)
         return 0
     except FatalError:
         return -1
