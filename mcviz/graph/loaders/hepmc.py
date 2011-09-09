@@ -100,12 +100,10 @@ def make_record(record):
         return HParticle._make(first_part + [flow])
 
     elif type_ == "U":
-        log.info("event reports units are %s and %s" %tuple(record[:2]))
+        log.verbose("event reports units are %s and %s" %tuple(record[:2]))
 	# I'm sure these should be the other way around, looks like the HepMC input is to blame
-	if record[0] == "GEV":
-	    units.CURRENT_ENERGY_MAG = 0.001
-        elif record[0] == "MEV":
-	    units.CURRENT_ENERGY_MAG = 1
+	units.set_energy(record[0])
+	units.set_length(record[1])
 
 
 def load_single_event(ev):

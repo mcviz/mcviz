@@ -1,6 +1,6 @@
 from mcviz.tools import Annotation, Arg
 
-from mcviz.utils import energy_mag, pick_mag
+from mcviz.utils import pick_energy_mag, pick_mag
 
 class Index(Annotation):
     """
@@ -42,7 +42,7 @@ class E(Annotation):
     """
     _name = "e"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles, lambda p: "%.4g%seV"%energy_mag(p.e))
+        self.annotate_particles(graph.particles, lambda p: "%.4g%seV"%pick_energy_mag(p.e))
 
 
 class Pt(Annotation):

@@ -27,7 +27,7 @@ class ViewParticle(ViewObject):
     
     @property
     def pt(self):
-        return (self.p[0]**2 + self.p[1]**2)**0.5 * units.CURRENT_ENERGY_MAG
+        return (self.p[0]**2 + self.p[1]**2)**0.5 * units.energy_mag
 
     @property
     def phi(self):
