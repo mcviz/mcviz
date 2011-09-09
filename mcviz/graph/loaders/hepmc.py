@@ -100,8 +100,7 @@ def make_record(record):
         return HParticle._make(first_part + [flow])
 
     elif type_ == "U":
-        log.verbose("event reports units are %s and %s" %tuple(record[:2]))
-	# I'm sure these should be the other way around, looks like the HepMC input is to blame
+        log.verbose("event reports units are {0} and {1}".format(*record[:2]))
 	units.set_energy(record[0])
 	units.set_length(record[1])
 
@@ -128,6 +127,7 @@ def load_single_event(ev):
         if isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
+            log.debug("Event record: {0} ".format(event))
         
         elif event is None:
             raise RuntimeError("Event record should come first. Corrupted "
@@ -174,6 +174,8 @@ def load_single_event(ev):
     
     # Construct "initial" vertices
     for initial_particle in initial_particles:
+        if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
+            log.info("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
     

@@ -32,10 +32,10 @@ def set_energy(string):
         if string.lower() == "gev": energy_mag = 1
         elif string.lower() == "mev": energy_mag = 0.001
         elif string.lower() == "kev": energy_mag = 0.000001
-        else: log.error("unit %s not recognised" %string)
-        log.info("setting energy unit to %s factor %f" %(string, energy_mag))
+        else: log.error("unit {0} not recognised".format(string))
+        log.info("setting energy unit to {0} factor {1:g}".format(string, energy_mag))
     else:
-        log.info("unit is already %s, not overriding with %s" %(energy_mag_string, string))
+        log.info("unit is already {0:s}, not overriding with {1:s}".format(energy_mag_string, string))
 
 def set_length(string):
     """
@@ -44,12 +44,12 @@ def set_length(string):
     global length_mag
     global length_mag_string
     if not length_mag_string:
-        log.info("setting length unit to %s" %string)
+        log.info("setting length unit to {0:s}".format(string))
         length_mag_string = string
         if string.lower() == "mm": length_mag = 1
         elif string.lower() == "cm": length_mag = 10
     else:
-        log.info("unit is already %s, not overriding with %s" %(length_mag_string, string))
+        log.info("unit is already {0:s}, not overriding with {0:s}".format(length_mag_string, string))
 
 def pick_mag(value):
     """
@@ -72,10 +72,8 @@ def pick_energy_mag(value):
     return pick_mag(value * energy_mag)
 
 if __name__ == '__main__':
-    CURRENT_ENERGY_MAG = 1
     def trial(value):
-        print("%f GeV is represented:" %value)
-        print("    %.4g %seV" %energy_mag(value))
+        print("{0:f} GeV is represented: {1:g}{2:s}eV".format(value, *pick_energy_mag(value)))
     trial(1234567890.123456789)
     trial(34567890.123456789)
     trial(547890.123456789)
