@@ -142,6 +142,23 @@ def contract_loops(graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
+@Transform.decorate("PluckPDGID", args=[Arg("keep_pdgid_start", int, "id of particles to pick", default=6),
+                                   Arg("keep_pdgid_end", int, "last particle id for range", default=0),
+                                   Arg("keep_down", int, "max depth to descend from vertex", default=8),
+                                   Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
+def pluckpdgid(graph_view, keep_pdgid_start, keep_pdgid_end, keep_down, keep_up):
+    """
+    Keep a particles with given pdgid
+    """
+    
+    if keep_pdgid_end:
+        keep_pdgid = range(keep_pdgid_start, keep_pdgid_end)
+    else:
+        keep_pdgid = [keep_pdgid_start]
+    keep_particles = [particle for particle in graph_view.particles if abs(particle.pdgid) in keep_pdgid]
+    log.info("keeping particles: {0:s}".format(str(keep_particles)))
+    log.info("keeping pdgids: {0:s}".format(str(keep_pdgid)))
+
 @Transform.decorate("Pluck", args=[Arg("vno_keep", int, "id of vertex to pick", default=3),
                                    Arg("keep_down", int, "max depth to descend from vertex", default=8),
                                    Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
