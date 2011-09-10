@@ -5,8 +5,8 @@ import re
 from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
 from mcviz import FatalError
+from mcviz.utils import Units
 from .. import EventParseError, Particle, Vertex
-from mcviz.utils import units
 
 
 HEPMC_TEXT = re.compile("""(?:
@@ -100,11 +100,12 @@ def make_record(record):
         if not first_part[1] == '0':
             return HParticle._make(first_part + [flow])
         
-
     elif type_ == "U":
         log.verbose("event reports units are {0} and {1}".format(*record[:2]))
-	units.set_energy(record[0])
-	units.set_length(record[1])
+        u = Units()
+        u.set_energy(record[0])
+        u.set_length(record[1])
+        return u
 
 
 def load_single_event(ev):
@@ -119,6 +120,8 @@ def load_single_event(ev):
     vertex_incoming = {} # { vertex_barcode : set(particles) }
     
     initial_particles = []
+
+    units = None
     
     orphans = 0
     
@@ -126,7 +129,10 @@ def load_single_event(ev):
     # Read a vertex, then read N particles. When we get to the next vertex, 
     # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
-        if isinstance(record, HEvent):
+        if isinstance(record, Units):
+            assert units is None, "Duplicate unit record in event"
+            units = record
+        elif isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
             log.debug("Event record: {0} ".format(event))
@@ -194,7 +200,11 @@ def load_single_event(ev):
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
                                   if vertex.outgoing or vertex.incoming)
 
-    return vertices, particles
+    # Use default units if they are not specified
+    if units is None:
+        units = Units()
+
+    return vertices, particles, units
 
 def load_event(filename):
     """

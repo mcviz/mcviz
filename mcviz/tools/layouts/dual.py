@@ -2,8 +2,6 @@ from mcviz.tools import FundamentalTool, Arg
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
-from mcviz.utils import pick_mag
-
 class DualLayout(BaseLayout, FundamentalTool):
     """
     The Dual layout, so named because it is the "Dual" in the graph sense of
@@ -28,7 +26,7 @@ class DualLayout(BaseLayout, FundamentalTool):
             # Big red initial vertices
             lo.width = lo.height = 1.0
         elif "cluster" in particle.tags:
-            lo.label = "cluster (%.4g %seV)" %pick_mag(particle.pt)
+            lo.label = "cluster (%.4g %seV)" % self.graph.units.pick_mag(particle.pt)
         
         return lo
    

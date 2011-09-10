@@ -1,7 +1,5 @@
 from mcviz.tools import Annotation, Arg
 
-from mcviz.utils import pick_energy_mag, pick_mag
-
 class Index(Annotation):
     """
     Particle index in the event record
@@ -43,7 +41,7 @@ class E(Annotation):
     _name = "e"
     def __call__(self, graph):
         self.annotate_particles(graph.particles,
-	    lambda p: "{0:.4g}{1:s}eV".format(*pick_energy_mag(p.e)))
+	    lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_energy_mag(p.e)))
 
 
 class Pt(Annotation):
@@ -53,7 +51,7 @@ class Pt(Annotation):
     _name = "pt"
     def __call__(self, graph):
         self.annotate_particles(graph.particles,
-	    lambda p: "{0:.4g}{1:s}eV".format(*pick_mag(p.pt)))
+	    lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.pt)))
         
         
 class PDGID(Annotation):

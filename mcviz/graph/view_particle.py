@@ -2,7 +2,6 @@ from itertools import chain
 from math import log, atan2, tan
 
 from .view_object import ViewObject, Summary
-from mcviz.utils import units
 
 class ViewParticle(ViewObject):
     @property
@@ -27,7 +26,7 @@ class ViewParticle(ViewObject):
     
     @property
     def pt(self):
-        return (self.p[0]**2 + self.p[1]**2)**0.5 * units.energy_mag
+        return (self.p[0]**2 + self.p[1]**2)**0.5 * self.graph.units.energy_mag
 
     @property
     def phi(self):

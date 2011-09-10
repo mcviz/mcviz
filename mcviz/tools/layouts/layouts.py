@@ -26,6 +26,7 @@ class BaseLayout(Layout):
         self.ratio = self.options["ratio"]
         self.scale = 1.0
         self.label_size = self.options["label_size"]
+        self.units = graph.units
 
         self.subgraphs = {None: []}
         self.subgraph_options = {}
