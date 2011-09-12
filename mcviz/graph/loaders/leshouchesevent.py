@@ -48,22 +48,24 @@ def make_lhe_graph(lines, init):
     event = LEVENT._make(line)
 
     # Now add the initial beam particles to this event
-#lines.insert(0, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP1, init.EBMUP1, init.EBMUP1) )
-#lines.insert(1, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP2, init.EBMUP2, init.EBMUP2) )
+    lines.insert(0, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP1, init.EBMUP1, init.EBMUP1) )
+    lines.insert(1, "%s -1 0 0 0 0 0 0 %s %s 0 0 9" %(init.IDBMUP2, init.EBMUP2, init.EBMUP2) )
 
     # Particles have the format:
     LPARTICLE = namedtuple('LPARTICLE', 'IDUP, ISTUP, MOTHUP1, MOTHUP2, ICOLUP1, ICOLUP2, PUP1, PUP2, PUP3, PUP4, PUP5, VTIMUP, SPINUP')
     particles = []
-    end = event.NUP+1
-    for I, line in izip(xrange(1, end), lines):
+    for I, line in izip(range(1, event.NUP+3), lines):
       line = line.split()
-      line = [int(i) for i in line[:6] ] + [float(i) for i in line[6:13] ]
+      if len(line[3]) > 1 and line[3][0] == '0':
+          line = [int(i) for i in line[:3] ] + [0] + [line[3][1:] ] +[int(i) for i in line[4:5] ] + [float(i) for i in line[5:12] ]
+      else:
+          line = [int(i) for i in line[:6] ] + [float(i) for i in line[6:13] ]
 
       # Correct indices for the initial beam particles
-      #if line[2]: line[2] += 2
-      #if line[3]: line[3] += 2
-      #if I == 3: line[2] = 1
-      #if I == 4: line[2] = 2
+      if line[2]: line[2] += 2
+      if line[3]: line[3] += 2
+      if I == 3: line[2] = 1
+      if I == 4: line[2] = 2
       if False: #line[2] <= 0 and I > 2:
         print("Skipping particle %d %s" %(I, line) )
 	continue
@@ -76,9 +78,9 @@ def make_lhe_graph(lines, init):
     # Convert mothers/daughters to objects
     for particle in particles:
         particle.daughters = set(particles[d-1] for d in particle.daughters
-	    if d != 0)# and d <= len(particles) )
+	    if d != 0 and d <= len(particles) )
         particle.mothers = set(particles[m-1] for m in particle.mothers
-	    if m != 0)# and m <= len(particles) )
+	    if m != 0 and m <= len(particles) )
 
     particles = [p for p in particles if p.no != 0]
     particle_dict = dict((p.no, p) for p in particles)
@@ -199,9 +201,10 @@ def load_event(filename):
     init = [int(i) for i in init[:2] ] + [float(i) for i in init[2:4] ] + [int(i) for i in init[4:10] ] 
     init = LINIT._make(init)
     # Followed by NPRUP lines of processes
-    if False:
-        print("LHE init block:")
-        print(result['init'])
+    if True:
+        log.verbose("LHE init block:")
+        for line in result['init'].splitlines():
+	    log.verbose(line.strip())
 
     for i, event in izip(xrange(event_number+1), event_generator(result['events']) ):
         # Load only one event
