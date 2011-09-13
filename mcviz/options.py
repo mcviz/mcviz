@@ -65,7 +65,7 @@ def print_type_help(cls, links=False):
     if cls._merge_classes:
         helptext2 = "All tools of the type '{0:s}' are merged into one class. "\
                 "There are 'base' classes (one of which must be included) and supplementary classes."\
-		.format(name)
+                .format(name)
     else:
         helptext2 = "Tools of type '{0}' are simple tools, and can be applied several times (if sensible)".format(name)
     text.append(str(helptext2))
@@ -83,7 +83,7 @@ def print_type_help(cls, links=False):
     elif n_nonnull == 1 or (n_nonnull == 0 and len(arglist) == 1):
         argname, argcls = arglist[0]
         example = "--{0} {1}:{2} or --{3} {4}:{5}={6}"\
-	    .format(cls._type, tool._name, argcls.default, cls._type, tool._name, argname, argcls.default)
+            .format(cls._type, tool._name, argcls.default, cls._type, tool._name, argname, argcls.default)
         text.append("This is a list of all {0}s with their arguments. Arguments are separated by colons ':'.".format(name))
         text.append("Arguments can be positional or specified by name.")
         text.append("")
@@ -115,13 +115,16 @@ def print_tool_help(indent, tool, links=False):
 
     if tool.global_args():
          text.append("{0}This {1} uses the options {2}"\
-	     .format(indent, tool._type, ", ".join(tool.global_args())))
+             .format(indent, tool._type, ", ".join(tool.global_args())))
     if tool.args():
          for arg in tool.args():
              arg_name, arg_obj = arg
              # default doc choices
-             choices = "(choices: {0})".format(", ".join("'{0}'".format(c) for c in arg_obj.choices) if arg_obj.choices else "")
-             text.append("{0} * {1}='{2}': {3} {4}".format(indent, arg_name, arg_obj.default, arg_obj.doc, choices))
+             if arg_obj.choices is None:
+                 choices = ""
+             else:
+                 choices = " (choices: {0})".format(", ".join("'{0}'".format(c) for c in arg_obj.choices))
+             text.append("{0} * {1}='{2}': {3}{4}".format(indent, arg_name, arg_obj.default, arg_obj.doc, choices))
     return text
     
 def parse_options(argv=sys.argv):
