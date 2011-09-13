@@ -21,7 +21,7 @@ from textwrap import dedent
 from logging import getLogger; log = getLogger("mcviz.main")
 
 from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
-from mcviz.utils import get_logger_level, log_level, timer
+from mcviz.utils import get_logger_level, log_level, timer, Units
 
 
 def run(args, argv):
@@ -40,11 +40,16 @@ def run(args, argv):
     log.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
     
+    #if args.units:
+    #    units = Units(args.units)
+    #else:
+    #    units = Units()
+
     filename = args.filename
     log.verbose('trying to read event from "%s"' % filename)
     with timer('event from "%s"' % filename):
         try:
-            event_graph = EventGraph.load(filename)
+            event_graph = EventGraph.load(filename, args)
         except EventParseError, x:
             log.fatal("No success in reading events from %s!" % filename)
             raise FatalError

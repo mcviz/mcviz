@@ -102,13 +102,11 @@ def make_record(record):
         
     elif type_ == "U":
         log.verbose("event reports units are {0} and {1}".format(*record[:2]))
-        u = Units()
-        u.set_energy(record[0])
-        u.set_length(record[1])
+        u = Units(record[0] + " " + record[1])
         return u
 
 
-def load_single_event(ev):
+def load_single_event(ev, args):
     """
     Given one event in HepMC's text format, return a list of mcviz's `Particle`s
     and `Vertex`es.
@@ -121,7 +119,10 @@ def load_single_event(ev):
     
     initial_particles = []
 
-    units = None
+    if args.units:
+        units = Units(args.units)
+    else:
+        units = None
     
     orphans = 0
     
@@ -130,8 +131,10 @@ def load_single_event(ev):
     # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
         if isinstance(record, Units):
-            assert units is None, "Duplicate unit record in event"
-            units = record
+	    if units is None:
+                units = record
+	    else:
+	        log.verbose("previous units declaration overriding input's unit record")
         elif isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
@@ -183,7 +186,17 @@ def load_single_event(ev):
     # Construct "initial" vertices
     for initial_particle in initial_particles:
         if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
-            log.info("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
+            e = units.energy_mag * initial_particle.e
+            warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
+                       ", consider setting --units={new:s}eV if this is incorrect"
+            if e > 100000:
+	        new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
+                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
+            elif e < 100:
+	        new = units.pick_energy_mag(initial_particle.e*100)[1]
+                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
+            else:
+                log.verbose("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
     
@@ -206,7 +219,7 @@ def load_single_event(ev):
 
     return vertices, particles, units
 
-def load_event(filename):
+def load_event(filename, args):
     """
     Load one event from a HepMC file
     """
@@ -236,7 +249,7 @@ def load_event(filename):
     for i, event in izip(xrange(event_number+1), event_generator(lines)):
         # Load only one event
         pass
-    return load_single_event(event)
+    return load_single_event(event, args)
 
 if __name__ == "__main__":
     from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])

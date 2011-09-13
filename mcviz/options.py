@@ -7,7 +7,6 @@ from textwrap import dedent
 from mcviz import FatalError
 from mcviz.tools import tool_type_options
 from mcviz.tools.tools import tool_types, tool_classes
-from mcviz.utils import units
 
 help_topics = ["all", "examples"] + tool_types.keys()
 
@@ -128,9 +127,6 @@ def print_tool_help(indent, tool, links=False):
 def parse_options(argv=sys.argv):
     parser = get_option_parser()
     args = parser.parse_args()
-
-    if args.units:
-        units.set_energy(args.units)
 
     if args.demo:
         args.optionset = ["demo"]
