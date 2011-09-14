@@ -106,7 +106,7 @@ def make_pythia_graph(records):
     
     return vertex_dict, particle_dict, Units() #TODO: find out proper units for pythia 
         
-def load_event(filename):
+def load_event(filename, args):
     """
     Parse a pythia event record from a log file.
     Numbers are converted to floats where possible.

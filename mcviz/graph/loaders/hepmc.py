@@ -131,10 +131,10 @@ def load_single_event(ev, args):
     # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
         if isinstance(record, Units):
-	    if units is None:
+            if units is None:
                 units = record
-	    else:
-	        log.verbose("previous units declaration overriding input's unit record")
+            else:
+                log.verbose("previous units declaration overriding input's unit record")
         elif isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
