@@ -178,8 +178,8 @@ def process_path_data(d, tf_x, tf_y):
             x_positions.append(x)
             y_positions.append(y)
             new_points.append("%.2f,%.2f" % (x, y))
-        return " ".join(new_points), min(x_positions), max(x_positions), \
-                                     min(y_positions), max(y_positions)
+        return (" ".join(new_points), min(x_positions), max(x_positions), 
+                                      min(y_positions), max(y_positions))
 
     # split and preprocess command strings
     cmds = []
@@ -232,8 +232,8 @@ class TexGlyph(object):
         for pdgid, label, gd in sorted(db.values()):
             print >> sys.stderr, "Processing %s (PDG ID %i)" % (label, pdgid)
             glyph = TexGlyph(particle_to_latex(gd), pdgid)
-            print >> sys.stderr, " box: X %.1f to %.1f / Y %.1f to %.1f" % \
-                    (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax)
+            print >> sys.stderr, (" box: X %.1f to %.1f / Y %.1f to %.1f" % 
+                                  (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax))
             cls.library[pdgid] = glyph
         avg_height = cls.get_average_dimensions()[1]
         for glyph in cls.library.values():
@@ -298,7 +298,7 @@ class TexGlyph(object):
             rmtree(base_dir)
 
         self.write_tex_file(latex_file)
-        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
+        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"'
                   % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
                   
         try:
@@ -319,7 +319,7 @@ class TexGlyph(object):
         separator = ';'
         if os.name == 'nt':
             separator = '&&'
-        os.system('cd "%s" %s pstoedit -f plot-svg -dt -ssp "%s" "%s" > "%s" 2> "%s"' \
+        os.system('cd "%s" %s pstoedit -f plot-svg -dt -ssp "%s" "%s" > "%s" 2> "%s"'
                   % (base_dir, separator, ps_file, svg_file, out_file, err_file))
 
         # forward errors to stderr but skip pstoedit header
