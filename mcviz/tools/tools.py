@@ -1,7 +1,10 @@
 from .. import log; log = log.getChild(__name__)
 
 import re
+
 from new import classobj
+from os import isatty
+from sys import stdin
 
 
 tool_types = {}
@@ -50,7 +53,16 @@ class ToolSetting(object):
     def get_class(self, tool_type):
         class_args = []
         if not self.name in tool_classes[tool_type]:
-            choices = ", ".join(tool_classes[tool_type].keys())
+            possible = tool_classes[tool_type].keys()
+            from ..help import did_you_mean
+            meant = did_you_mean(self.name, possible)
+            if meant and isatty(stdin.fileno()):
+                log.error("No such tool {0} - did you mean {1}"
+                          .format(self.name, meant))
+                          
+                raw_input()
+                
+            choices = ", ".join(possible)
             raise ArgParseError("no such %s: %s\npossible choices are: %s" % 
                 (tool_type, self.name, choices))
         return tool_classes[tool_type][self.name]
@@ -173,7 +185,7 @@ class Tool(object):
             def tool_specific(self, *pargs):
                 return func(*pargs, **self.options)
             clsd = dict(_args=args, _name=title, __call__=tool_specific, 
-                        __doc__=func.__doc__)
+                        __doc__=func.__doc__, __module__=func.__module__)
             return classobj(name, (cls,), clsd)
         return decorated
 

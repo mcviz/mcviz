@@ -1,5 +1,7 @@
+from os.path import dirname
 from textwrap import dedent
 
+import mcviz
 from .tools.tools import tool_types, tool_classes
 
 help_topics = ["all", "examples"] + tool_types.keys()
@@ -49,9 +51,9 @@ def print_type_help(cls, links=False):
     text.append("")
 
     # Print the help for all the subtools
-    for tool in tool_classes[name].values():
-        text.extend(print_tool_help(" "*6, tool, links))
-        
+    for toolname, tool in sorted(tool_classes[name].iteritems()):
+        text.extend(print_tool_help(" "*6, tool, links) + [""])
+    
     return text
 
 def print_tool_help(indent, tool, links=False):
@@ -59,14 +61,22 @@ def print_tool_help(indent, tool, links=False):
         return []
         
     text = []
-    helptext = (": " + dedent(tool.__doc__.strip())) if tool.__doc__ else ""
+
+    helptext = dedent(tool.__doc__).strip() if tool.__doc__ else ""
+    helptext = "\n    ".join(helptext.split("\n"))
     
     if links:
         helptext += "\n![example image]({0}_{1}.png)".format(tool._type.lower(), tool._name.lower())
-        
+    
+    from inspect import getfile
+    
+    definition = getfile(tool)[len(dirname(getfile(mcviz))):].rstrip("co")
+    #definition = repr(tool)
+    
     base_str = " (base)" if (hasattr(tool, "_base") and tool._base) else ""
-    text.append("  * {0}{1}{2}".format(tool._name, base_str, helptext))
-
+    text.append(("  * {0}{1}:\n"
+                 "    [{2}]\n"
+                 "    {3}").format(tool._name, base_str, definition, helptext))
 
     if tool.global_args():
          text.append("{0}This {1} uses the options {2}"
@@ -84,13 +94,29 @@ def print_tool_help(indent, tool, links=False):
              
     return text
     
+def did_you_mean(topic, available):
+    from difflib import get_close_matches
+    close = get_close_matches(topic, available)
+    
+    if close:
+        bits = ", ".join(sorted(close))
+        left, lastcomma, right = bits.rpartition(", ")
+        if lastcomma:
+            bits = "{0} or {1}".format(left, right)
+        log.error("  Did you mean {0}?".format(bits))
+        
+        if len(close) == 1:
+            return close[0]
+    
 def run_help(parser, args):
 
     # construct a list of tools
     tool_list = reduce(list.__add__, (tc.values() for tc in tool_classes.values()))
-    tool_map = dict((t._name.lower(), t) for t in tool_list)
     tool_types_lower = dict((tn.lower(), ty) for tn, ty in tool_types.iteritems())
-
+    
+    tool_map = {}
+    for t in tool_list:
+        tool_map.setdefault(t._name.lower(), []).append(t)
 
     if not args.filename:
         parser.print_help()
@@ -100,6 +126,11 @@ def run_help(parser, args):
         return -1
     
     topic = args.filename.lower()
+    
+    if topic.rstrip("s") in tool_types_lower:
+        # If the non-plural version exists, lookup that
+        topic = topic.rstrip("s")
+    
     if topic == "examples":
         text = ["Sorry, Peter is still working on them!"]
         
@@ -113,10 +144,16 @@ def run_help(parser, args):
         text = print_type_help(tool_types_lower[topic], args.links)
         
     elif topic in tool_map:
-        text = print_tool_help(" "*4, tool_map[topic], args.links)
+        tools = tool_map[topic]
+        text = []
+        for tool in tools:
+            text.append("--{type} / -{shortopt}:"
+                        .format(type=tool._type, shortopt=tool._short_opt))
+            text.extend(print_tool_help(" "*4, tool, args.links) + [""])
         
     else:
         print "Unknown help topic '{0}'. Known topics: {1} (and all tool names)".format(topic, help_topics)
+        did_you_mean(topic, help_topics + sorted(tool_map))
         return -1
         
     print("\n".join(text))
