@@ -2,6 +2,7 @@ from os.path import dirname
 from textwrap import dedent
 
 import mcviz
+from . import log; log = log.getChild("help")
 from .tools.tools import tool_types, tool_classes
 
 help_topics = ["all", "examples"] + tool_types.keys()
@@ -103,7 +104,7 @@ def did_you_mean(topic, available):
         left, lastcomma, right = bits.rpartition(", ")
         if lastcomma:
             bits = "{0} or {1}".format(left, right)
-        log.error("  Did you mean {0}?".format(bits))
+        log.error("Did you mean {0}?".format(bits))
         
         if len(close) == 1:
             return close[0]
