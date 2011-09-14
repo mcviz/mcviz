@@ -22,6 +22,9 @@ BOLD_SEQ = "\033[1m"
 def insert_seqs(message):
     return message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
 
+def remove_seqs(message):
+    return message.replace("$RESET", "").replace("$BOLD", "")
+
 COLORS = {
     'DEBUG'   : BLUE,
     'VERBOSE' : WHITE,
@@ -32,18 +35,26 @@ COLORS = {
 }
 
 
-class ColoredFormatter(logging.Formatter):
+class MCVizFormatter(logging.Formatter):
+
+    def mcviz_strip(self, record):
+        if record.name.startswith("mcviz."):
+            # If we're running as mcviz, omit the "mcviz" name, which doesn't
+            # introduce any additional information
+            record.name = record.name[len("mcviz."):]
+
+    def format(self, record):
+        self.mcviz_strip(record)
+        return logging.Formatter.format(self, record)
+        
+class ColoredFormatter(MCVizFormatter):
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg)
         self.use_color = use_color
 
     def format(self, record):
         levelname = record.levelname
-        
-        if record.name.startswith("mcviz."):
-            # If we're running as mcviz, omit the "mcviz" name, which doesn't
-            # introduce any additional information
-            record.name = record.name[len("mcviz."):]
+        self.mcviz_strip(record)
             
         if self.use_color and levelname in COLORS:
             color_seq = COLOR_SEQ % (30 + COLORS[levelname])
@@ -110,9 +121,11 @@ def get_log_handler(singleton={}):
         return singleton["value"]
         
     handler = logging.StreamHandler()
+    FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s"
     if os.isatty(handler.stream.fileno()):
-        FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s"
         handler.setFormatter(ColoredFormatter(insert_seqs(FORMAT)))
+    else:
+        handler.setFormatter(MCVizFormatter(remove_seqs(FORMAT)))
     
     # Make the top level logger and make it as verbose as possible.
     # The log messages which make it to the screen are controlled by the handler
