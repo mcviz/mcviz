@@ -1,4 +1,4 @@
-from logging import getLogger; log = getLogger("mcviz.utils.units")
+from .. import log; log = log.getChild(__name__)
 
 """
 Module to look after units.

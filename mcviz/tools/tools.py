@@ -1,7 +1,8 @@
+from .. import log; log = log.getChild(__name__)
+
 import re
 from new import classobj
 
-from logging import getLogger; log = getLogger("mcviz.main")
 
 tool_types = {}
 tool_classes = {}

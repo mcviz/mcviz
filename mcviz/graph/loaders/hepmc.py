@@ -1,8 +1,8 @@
+from ... import log; log = log.getChild(__name__)
+
 from collections import namedtuple
 from itertools import izip
 import re
-
-from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
 from mcviz import FatalError
 from mcviz.utils import Units

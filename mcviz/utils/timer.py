@@ -1,7 +1,8 @@
+from .. import log; log = log.getChild(__name__)
+
 from contextlib import contextmanager
 from time import time
 
-from logging import getLogger; log = getLogger("mcviz.utils")
 
 timer_depth = 0
 

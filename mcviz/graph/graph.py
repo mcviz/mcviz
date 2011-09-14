@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from logging import getLogger; log = getLogger("mcviz.event_graph")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
 from . import EventParseError

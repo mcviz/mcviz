@@ -1,3 +1,4 @@
+from ... import log; log = log.getChild(__name__)
 from mcviz.tools import Annotation, Arg
 
 class Index(Annotation):

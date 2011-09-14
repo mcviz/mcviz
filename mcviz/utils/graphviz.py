@@ -1,4 +1,5 @@
-from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
+from .. import log; log = log.getChild(__name__)
+
 from subprocess import Popen, PIPE
 
 from mcviz import FatalError

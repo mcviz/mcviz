@@ -39,6 +39,12 @@ class ColoredFormatter(logging.Formatter):
 
     def format(self, record):
         levelname = record.levelname
+        
+        if record.name.startswith("mcviz."):
+            # If we're running as mcviz, omit the "mcviz" name, which doesn't
+            # introduce any additional information
+            record.name = record.name[len("mcviz."):]
+            
         if self.use_color and levelname in COLORS:
             color_seq = COLOR_SEQ % (30 + COLORS[levelname])
             record.levelname = color_seq + levelname + RESET_SEQ
@@ -53,15 +59,24 @@ class ExtendedLogger(LoggerClass):
 
     def getChild(self, suffix):
         """
-        Taken from CPython 2.7, modified to remove duplicate prefix
+        Taken from CPython 2.7, modified to remove duplicate prefix and suffixes
         """
         if self.root is not self:
             if suffix.startswith(self.name + "."):
                 # Remove duplicate prefix
                 suffix = suffix[len(self.name + "."):]
+                
+                suf_parts = suffix.split(".")
+                if len(suf_parts) > 1 and suf_parts[-1] == suf_parts[-2]:
+                    # If we have a submodule's name equal to the parent's name,
+                    # omit it.
+                    suffix = ".".join(suf_parts[:-1])
+                    
             suffix = '.'.join((self.name, suffix))
             
         return self.manager.getLogger(suffix)
+
+    VERBOSE = VERBOSE_LEVEL
 
     def verbose(self, *args):
         self.log(VERBOSE_LEVEL, *args)

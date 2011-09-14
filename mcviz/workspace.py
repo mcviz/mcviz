@@ -1,4 +1,4 @@
-from logging import getLogger
+from . import log; log = log.getChild(__name__)
 
 from mcviz import Tool, FatalError
 from mcviz.graph import GraphView
@@ -11,8 +11,8 @@ class GraphWorkspace(object):
 
     def __init__(self, name, event_graph, cmdline=""):
         
-        self.log = getLogger(name)
-        self.log.debug('Creating new graph workspace')
+        self.log = log.getChild(name)
+        self.log.debug('Creating new graph workspace {0}'.format(name))
         
         self.name = name
         self.event_graph = event_graph

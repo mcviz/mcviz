@@ -1,8 +1,8 @@
+from .. import log; log = log.getChild(__name__)
+
 from functools import wraps
 from collections import defaultdict
 from new import classobj
-
-from logging import getLogger; log = getLogger("mcviz.transforms")
 
 from mcviz.tools import Transform, Arg
 from mcviz.graph import Summary

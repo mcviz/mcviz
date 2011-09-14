@@ -1,4 +1,4 @@
-from logging import getLogger; log = getLogger("mcviz.painters.svg")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz.tools import FundamentalTool, Arg
 

@@ -2,7 +2,7 @@
 This whole module is begging for a refactor, but by some miracle it works.
 """
 
-from logging import getLogger; log = getLogger("mcviz.loaders.pythialog")
+from ... import log; log = log.getChild(__name__)
 
 from mcviz.utils import Units
 from .. import EventParseError, Particle, Vertex

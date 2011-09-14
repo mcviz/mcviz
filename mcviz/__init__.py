@@ -13,7 +13,8 @@ import sys
 if not sys.version_info >= (2, 6):
     raise ImportError("mcviz is only compatible with python >= 2.6")
 
-from utils import logger
+from .logger import log
+
 from graph import EventGraph, EventParseError
 from tools import Tool
 from workspace import GraphWorkspace

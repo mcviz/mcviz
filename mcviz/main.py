@@ -18,10 +18,12 @@
 
 from textwrap import dedent
 
-from logging import getLogger; log = getLogger("mcviz.main")
+from . import log; log = log.getChild(__name__)
 
 from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
-from mcviz.utils import get_logger_level, log_level, timer, Units
+
+from .utils import timer, Units
+from .logger import get_logger_level, log_level
 
 
 def run(args, argv):
@@ -55,7 +57,7 @@ def run(args, argv):
             raise FatalError
     log.info('drawing event from "%s"' % (filename))
 
-    gw = GraphWorkspace("mcviz.graph", event_graph, cmdline=" ".join(argv))
+    gw = GraphWorkspace("local", event_graph, cmdline=" ".join(argv))
     gw.load_tools(args)
     gw.run()
 

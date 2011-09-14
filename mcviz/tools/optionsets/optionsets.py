@@ -1,6 +1,7 @@
+from .. import log; log = log.getChild(__name__)
+
 from mcviz.tools import OptionSet, Arg
 from mcviz.tools.tools import ToolSetting, tool_classes, tool_types
-from logging import getLogger; log = getLogger("mcviz.optionsets")
 
 def setdefault(tools, tool_type, default, *args, **kwargs):
     """
