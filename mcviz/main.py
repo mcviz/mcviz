@@ -25,7 +25,7 @@ from . import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_opt
 from .logger import get_logger_level, log_level
 from .utils import Units
 from .utils.timer import Timer; timer = Timer(log, log.VERBOSE)
-
+from .help import run_help
 
 def run(args, argv):
 
@@ -63,7 +63,11 @@ def run(args, argv):
     gw.run()
 
 def real_main(argv):
-    args = parse_options()
+    parser, args = parse_options()
+    if args.help:
+        run_help(parser, args)
+        return 0
+        
     try:
         with log_level(get_logger_level(args.quiet, args.verbose)):
             with timer("complete run"):
