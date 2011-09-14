@@ -66,7 +66,6 @@ LoggerClass = logging.getLoggerClass()
 class ExtendedLogger(LoggerClass):
     def __init__(self, name):
         LoggerClass.__init__(self, name)
-        self.__dict__.update(logging._levelNames)
 
     def getChild(self, suffix):
         """
@@ -87,8 +86,6 @@ class ExtendedLogger(LoggerClass):
             
         return self.manager.getLogger(suffix)
 
-    VERBOSE = VERBOSE_LEVEL
-
     def verbose(self, *args):
         self.log(VERBOSE_LEVEL, *args)
 
@@ -97,6 +94,8 @@ class ExtendedLogger(LoggerClass):
         
     def __repr__(self):
         return "<MCViz logger {0}>".format(self.name)
+
+ExtendedLogger.__dict__.update(logging._levelNames)
 
 class MCVizLogManager(logging.Manager):
     """

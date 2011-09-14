@@ -65,7 +65,8 @@ def run(args, argv):
 def real_main(argv):
     parser, args = parse_options()
     if args.help:
-        return run_help(parser, args)
+        with log_level(log.ERROR):
+            return run_help(parser, args)
         
     try:
         with log_level(get_logger_level(args.quiet, args.verbose)):
