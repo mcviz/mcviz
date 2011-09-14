@@ -1,5 +1,7 @@
+
 import os
 import logging
+
 from contextlib import contextmanager
 
 
@@ -44,18 +46,46 @@ class ColoredFormatter(logging.Formatter):
 
 
 LoggerClass = logging.getLoggerClass()
-@logging.setLoggerClass
 class ExtendedLogger(LoggerClass):
     def __init__(self, name):
         LoggerClass.__init__(self, name)
         self.__dict__.update(logging._levelNames)
+
+    def getChild(self, suffix):
+        """
+        Taken from CPython 2.7, modified to remove duplicate prefix
+        """
+        if self.root is not self:
+            if suffix.startswith(self.name + "."):
+                # Remove duplicate prefix
+                suffix = suffix[len(self.name + "."):]
+            suffix = '.'.join((self.name, suffix))
+            
+        return self.manager.getLogger(suffix)
 
     def verbose(self, *args):
         self.log(VERBOSE_LEVEL, *args)
 
     def fatal(self, *args):
         self.critical(*args)
+        
+    def __repr__(self):
+        return "<MCViz logger {0}>".format(self.name)
 
+class MCVizLogManager(logging.Manager):
+    """
+    Workaround for CPython 2.6
+    """
+    def getLogger(self, name):
+        logger = logging.Manager.getLogger(self, name)
+        logger.__class__ = ExtendedLogger
+        return logger
+
+# Reference: 
+# http://hg.python.org/cpython/file/5395f96588d4/Lib/logging/__init__.py#l979
+
+log_manager = MCVizLogManager(logging.getLogger())
+log = log_manager.getLogger("mcviz")
 
 def get_log_handler(singleton={}):
     """
@@ -71,7 +101,6 @@ def get_log_handler(singleton={}):
     
     # Make the top level logger and make it as verbose as possible.
     # The log messages which make it to the screen are controlled by the handler
-    log = logging.getLogger("mcviz")
     log.addHandler(handler)
     log.setLevel(logging.DEBUG)
 
