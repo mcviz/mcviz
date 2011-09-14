@@ -50,7 +50,7 @@ def run(args, argv):
 
     filename = args.filename
     log.verbose('trying to read event from "%s"' % filename)
-    with timer('event from "%s"' % filename):
+    with timer('read event from "%s"' % filename):
         try:
             event_graph = EventGraph.load(filename, args)
         except EventParseError, x:

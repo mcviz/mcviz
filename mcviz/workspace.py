@@ -1,10 +1,10 @@
 from . import log; log = log.getChild(__name__)
 
-from mcviz import Tool, FatalError
-from mcviz.graph import GraphView
-from mcviz.tools import ToolSetting, ArgParseError, debug_tools
-from mcviz.tools.transforms.tagging import tag
-from mcviz.utils import timer, Timer
+from . import Tool, FatalError
+from .graph import GraphView
+from .tools import ToolSetting, ArgParseError, debug_tools
+from .tools.transforms.tagging import tag
+from .utils.timer import timer, Timer
 
 
 class GraphWorkspace(object):

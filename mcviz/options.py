@@ -4,11 +4,12 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter, SUPPRESS
 import sys
 from textwrap import dedent
 
-from mcviz import FatalError
-from mcviz.tools import tool_type_options
-from mcviz.tools.tools import tool_types, tool_classes
+from . import FatalError
+from .tools import tool_type_options
+from .tools.tools import tool_types, tool_classes
 
 help_topics = ["all", "examples"] + tool_types.keys()
+
 
 def get_option_parser():
     usage = "usage: %(prog)s [options] {hepmc_file|pythia_log}[:<number of event in file, 0 is first>]\n"\
