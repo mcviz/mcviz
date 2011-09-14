@@ -95,13 +95,22 @@ def test_particle_data():
                 s.append("%20s | %s" % (label, gd[key]))
     return "\n".join(s)
 
-def particle_to_latex(gd):
+def particle_to_latex(gd, bastardize=False):
+    """
+    Generate latex from particle
+    
+    `bastardize`: Generate ROOT latex from particle
+    """
     rep = []
-    rep.append(r"$\mathbf{")
+    if not bastardize:
+        rep.append(r"$\mathbf{")
     if gd["mass"]:
         rep.append(r"\underset{\mbox{\tiny (%s)}}{" % gd["mass"])
     if gd["bar"]:
-        rep.append(r"\overline{")
+        if bastardize:
+            rep.append(r"#bar{")
+        else:
+            rep.append(r"\overline{")
     if gd["susy"]:
         rep.append(r"\tilde{")
     rep.append(gd["name"])
@@ -137,10 +146,14 @@ def particle_to_latex(gd):
 
     if gd["mass"]:
         rep.append(r"}")
-
-    rep.append(r"}$")
+    
+    if not bastardize:
+        rep.append(r"}$")
+        
+    greek_prefix = "#" if bastardize else "\\"
+        
     name = "".join(rep)
-    name = GREEK_FINDER.sub(lambda g: "\\" + g.group(0) + " ", name)
+    name = GREEK_FINDER.sub(lambda g: greek_prefix + g.group(0), name)
     return name
 
 def test_particle_display():
