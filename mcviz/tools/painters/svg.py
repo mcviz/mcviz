@@ -2,7 +2,7 @@ from .. import log; log = log.getChild(__name__)
 
 from mcviz.tools import FundamentalTool, Arg
 
-from mcviz.utils import timer
+from mcviz.utils.timer import Timer; timer = Timer(log)
 from mcviz.utils.svg.svg_document import (
     XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)

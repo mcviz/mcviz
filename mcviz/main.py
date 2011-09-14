@@ -20,10 +20,11 @@ from textwrap import dedent
 
 from . import log; log = log.getChild(__name__)
 
-from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
+from . import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
 
-from .utils import timer, Units
 from .logger import get_logger_level, log_level
+from .utils import Units
+from .utils.timer import Timer; timer = Timer(log, log.VERBOSE)
 
 
 def run(args, argv):
