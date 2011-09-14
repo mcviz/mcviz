@@ -32,8 +32,8 @@ class EventGraph(object):
                 return loader(filename, args)
             except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
-            except IOError:
-                log.fatal('loading file "%s" failed!' % filename)
+            except IOError as e:
+                log.exception('loading file "{0}" failed!'.format(filename))
                 raise FatalError
                 
         raise EventParseError("No loaders succeeded on %s" % filename)

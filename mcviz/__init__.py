@@ -1,5 +1,3 @@
-
-
 class FatalError(Exception):
     """
     Raised when a subsystem of MCViz has encountered an error
