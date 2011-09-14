@@ -4,7 +4,7 @@ from . import Tool, FatalError
 from .graph import GraphView
 from .tools import ToolSetting, ArgParseError, debug_tools
 from .tools.transforms.tagging import tag
-from .utils.timer import timer, Timer
+from .utils.timer import Timer
 
 
 class GraphWorkspace(object):

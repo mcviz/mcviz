@@ -10,7 +10,6 @@ from contextlib import contextmanager
 
 from .orderedset import OrderedSet
 from .point import Point2D
-from .timer import timer
 from .colors import rainbow_color
 from .spline import Spline, SplineLine, Line
 from .units import Units

@@ -8,19 +8,6 @@ from time import time
 
 timer_depth = 0
 
-@contextmanager
-def timer(what, level=None):
-    global timer_depth
-    timer_depth += 1
-    start = time()
-    try: yield
-    finally:
-        timer_depth -= 1
-        depth = "-" * timer_depth
-        elapsed = time() - start
-        msg = "%sit took %.3f seconds to %s" % (depth, elapsed, what)
-        log.debug(msg) if level is None else log.log(level, msg)
-
 class Timer(object):
     def __init__(self, logger, level=logging.DEBUG, child=True):
         """
