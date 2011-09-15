@@ -1,0 +1,34 @@
+-----------------
+New in 2011.09.15
+-----------------
+
+Johannes Ebke:
+    Code improvements / Consistency tweaks
+    Added OnlyHard transform that selects the hard process
+    Re-added circle and phi layout, reminder: use -e neato for this
+    Made LineWidthPt work for the Dual
+    Added helper vertices for vacuum pairs of particles in dual layout
+    view_particles are now only initial_state if they have no siblings
+    Added ViewVertex.vacuum property, and do not classify such vertices as initial or final state
+    Updated texglyph.py to use additional pdftops step, fixed regeneration, and work standalone
+    Updated texglyph cache
+    
+Peter Waller:
+    Add <mcviz:cmdline> tag to all svg output showing what was used to generate it
+    Add event picking to hepmc input
+    Make navisvg the default output type
+    First attempt at making hepmc parser able to read ATLAS files
+    Add Particle.antiparticle and add a heuristic in ViewParticleSingle to make quarks colored (color = True or False)
+    Add pdg annotation to show pdgid next to particle
+    New Transform: MergeVertices which treats vertices with the same 4-position as the same vertex
+    Code Improvements, consistency tweaks: better logging, better help, better timing
+    Autosuggest when there is one close match to a tool name
+
+Tim Brooks:
+    Fixes to HepMC loader
+    Added some features to Pluck
+    Added --units and units detection
+    Bug fixes / Code improvements / Improvements to help
+    Tidied units implementation, added --units switch
+    Switched to argparse
+    Updated ParticleData
