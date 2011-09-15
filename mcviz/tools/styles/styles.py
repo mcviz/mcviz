@@ -77,6 +77,40 @@ class SimpleColors(Style):
                     node.style_args["fill"] = initial_color
 
 
+class Highlight(Style):
+    """
+    Colour particles matching some criteria.
+    e.g. -sHighlight:6:color=blue highlights top quarks in blue,
+         -sHighlight:param=eta:0:2.5 highlights central particles,
+         -sHighlight:1000000:2000015 highlights susy particles
+    """
+    _name = "Highlight"
+    _args = [Arg("start", float, "start pdgid to highlight", default=6),
+             Arg("end", float, "end pdgid", default=0),
+             Arg("color", str, "highlight color", default="red"),
+             Arg("param", str, "parameter", default="pdgid"),]
+
+    def __call__(self, layout):
+        """ highlight all particles in rage of interest """
+        start = self.options["start"]
+        if self.options["end"] == 0: end = start
+        else: end = self.options["end"]
+        color = self.options["color"]
+        param = self.options["param"]
+        for edge in layout.edges:
+            if hasattr(edge.item, param):
+                if start <= abs(getattr(edge.item, param)) <= end:
+                  edge.style_args["stroke"] = edge.style_args["fill"] = color
+            #if isinstance(edge.item, ViewParticle) and start <= abs(edge.item.pdgid) <= end:
+            #    edge.style_args["stroke"] = edge.style_args["fill"] = color
+
+        for node in layout.nodes:
+            if hasattr(node.item, param):
+                # label in Inline; particle in Dual
+                if start <= abs(getattr(node.item, param)) <= end:
+                    node.style_args["fill"] = color
+
+
 class FancyLines(Style):
     """
     Draw particle lines with arrows on them, and draw gluons with curls
