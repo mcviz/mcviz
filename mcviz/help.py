@@ -7,6 +7,9 @@ from .tools.tools import tool_types, tool_classes
 
 help_topics = ["all", "examples"] + tool_types.keys()
 
+GIT_URL = "https://github.com/mcviz/repo/tree/master/mcviz"
+
+
 def print_type_help(cls, links=False):
     name = cls._type
     text = []
@@ -75,9 +78,10 @@ def print_tool_help(indent, tool, links=False):
     #definition = repr(tool)
     
     base_str = " (base)" if (hasattr(tool, "_base") and tool._base) else ""
-    text.append(("  * {0}{1}:\n"
-                 "    [{2}]\n"
-                 "    {3}").format(tool._name, base_str, definition, helptext))
+    text.append(("  * **{0}**{1}:\n"
+                 "    [{2}]({GIT_URL}{2})\n"
+                 "    {3}").format(tool._name, base_str, definition, helptext, 
+                                   GIT_URL=GIT_URL))
 
     if tool.global_args():
          text.append("{0}This {1} uses the options {2}"
