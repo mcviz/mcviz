@@ -190,7 +190,7 @@ def load_single_event(ev, args):
             warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
                        ", consider setting --units={new:s}eV if this is incorrect"
             if e > 100000:
-                new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
+                new = units.pick_energy_mag(initial_particle.e*0.0000001)[1]
                 log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
             elif e < 100:
                 new = units.pick_energy_mag(initial_particle.e*100)[1]
