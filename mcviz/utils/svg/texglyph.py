@@ -6,7 +6,7 @@ This extension need, to work properly:
     - pstoedit software: <http://www.pstoedit.net/pstoedit>
 
 Parts of this file Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
-Copyright (C) 2010 Johannes Ebke <ebke@cern.ch>; Peter Waller
+Copyright (C) 2011 Johannes Ebke <ebke@cern.ch>; Peter Waller
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

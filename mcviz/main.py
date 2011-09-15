@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.6
 
 # MCViz - Visualize Monte Carlo Events
-# Copyright (C) 2010  Peter Waller & Johannes Ebke
+# Copyright (C) 2011 : See http://mcviz.net/AUTHORS
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -39,7 +39,7 @@ def run(args, argv):
                   "Use --help for help.")
         raise FatalError
 
-    log.info("MCViz Copyright (C) 2010 Peter Waller & Johannes Ebke")
+    log.info("MCViz Copyright (C) 2011 : See http://mcviz.net/AUTHORS")
     log.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
     
