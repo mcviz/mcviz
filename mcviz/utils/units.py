@@ -27,11 +27,11 @@ class Units(object):
         self.length_mag = 1
 
         units = string.replace(',',' ').split(' ')
-	for unit in units:
-	    if unit.lower() in energy_units:
-	        self.set_energy(unit)
+        for unit in units:
+            if unit.lower() in energy_units:
+                self.set_energy(unit)
             elif unit.lower() in length_units:
-	        self.set_length(unit)
+                self.set_length(unit)
             else: raise RuntimeError("unit {0} not recognised".format(unit))
         return
 
@@ -58,7 +58,7 @@ class Units(object):
             self.length_mag_string = string
             if string.lower() == "mm": self.length_mag = 1
             elif string.lower() == "cm": self.length_mag = 10
-	    else: raise RuntimeError("unit {0} not recognised".format(string))
+            else: raise RuntimeError("unit {0} not recognised".format(string))
             log.debug("setting length unit to {0:s}".format(string))
         else:
             log.error("unit is already {0:s}, not overriding with {0:s}".format(self.length_mag_string, string))

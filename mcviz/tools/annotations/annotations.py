@@ -42,7 +42,7 @@ class E(Annotation):
     _name = "e"
     def __call__(self, graph):
         self.annotate_particles(graph.particles,
-	    lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_energy_mag(p.e)))
+            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_energy_mag(p.e)))
 
 
 class Pt(Annotation):
@@ -52,7 +52,7 @@ class Pt(Annotation):
     _name = "pt"
     def __call__(self, graph):
         self.annotate_particles(graph.particles,
-	    lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.pt)))
+            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.pt)))
         
         
 class PDGID(Annotation):
