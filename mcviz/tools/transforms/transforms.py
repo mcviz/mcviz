@@ -159,7 +159,9 @@ def pluckpdgid(graph_view, keep_pdgid_start, keep_pdgid_end, keep_down, keep_up)
     log.info("keeping particles: {0:s}".format(str(keep_particles)))
     log.info("keeping pdgids: {0:s}".format(str(keep_pdgid)))
 
-@Transform.decorate("Pluck", args=[Arg("vno_keep", int, "id of vertex to pick", default=3),
+@Transform.decorate("Pluck", args=[Arg("start", float, "start of range to keep", default=6),
+                                   Arg("end", float, "end of range", default=0),
+                                   Arg("param", str, "parameter of interest", default="pdgid"),
                                    Arg("keep_down", int, "max depth to descend from vertex", default=8),
                                    Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
 def pluck(graph_view, vno_keep, keep_down, keep_up):
@@ -169,6 +171,8 @@ def pluck(graph_view, vno_keep, keep_down, keep_up):
     
     keep_objects = set()
     # Some generators don't have VN3; give nice message if we can't find vno_keep
+    for particle in graph_view.particles:
+      if abs(particle.pdgid) == 6: log.info("particle {0} has pdgid = {1}".format(particle.particle_number, particle.pdgid))
     try:
         keep_vertex = graph_view.v_map[vno_keep]
     except KeyError:
