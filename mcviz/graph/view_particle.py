@@ -34,7 +34,10 @@ class ViewParticle(ViewObject):
 
     @property
     def eta(self):
-        return -log(tan(atan2(self.pt, self.p[2])/2.))
+        try:
+            return -log(tan(atan2(self.pt, self.p[2])/2.))
+        except ValueError:       # catch pt == 0
+            return float("inf")
 
     @property
     def colored(self):
