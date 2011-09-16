@@ -93,22 +93,27 @@ class Highlight(Style):
     def __call__(self, layout):
         """ highlight all particles in rage of interest """
         start = self.options["start"]
-        if self.options["end"] == 0: end = start
-        else: end = self.options["end"]
+        if self.options["end"] == 0:
+            end = start
+        else:
+            end = self.options["end"]
         color = self.options["color"]
         param = self.options["param"]
+
         for edge in layout.edges:
-            if hasattr(edge.item, param):
+            try:
                 if start <= abs(getattr(edge.item, param)) <= end:
                   edge.style_args["stroke"] = edge.style_args["fill"] = color
-            #if isinstance(edge.item, ViewParticle) and start <= abs(edge.item.pdgid) <= end:
-            #    edge.style_args["stroke"] = edge.style_args["fill"] = color
+            except AttributeError: # looks like the item doesn't have that param
+                pass
 
         for node in layout.nodes:
-            if hasattr(node.item, param):
+            try:
                 # label in Inline; particle in Dual
                 if start <= abs(getattr(node.item, param)) <= end:
                     node.style_args["fill"] = color
+            except AttributeError: # looks like the item doesn't have that param
+                pass
 
 
 class FancyLines(Style):
