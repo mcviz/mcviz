@@ -25,10 +25,13 @@ class Units(object):
         self.energy_mag = 1
         self.length_mag_string = ""
         self.length_mag = 1
+        self.auto = False
 
         units = string.replace(',',' ').split(' ')
         for unit in units:
-            if unit.lower() in energy_units:
+            if unit.lower() == "auto":
+                self.auto = True
+            elif unit.lower() in energy_units:
                 self.set_energy(unit)
             elif unit.lower() in length_units:
                 self.set_length(unit)
@@ -82,6 +85,34 @@ class Units(object):
         Take an energy in the input units, return it in an appropriate display unit
         """
         return self.pick_mag(value * self.energy_mag)
+
+    def initial_check(self, initial_particle):
+        """
+        Check an incoming particle has a resonable energy.
+        If units are automatic, the best units will be picked, else a warning is issued.
+        """
+        e = self.energy_mag * initial_particle.e
+        log.verbose("initial particle of energy {0:.4g}{1:s}eV"
+            .format(*self.pick_energy_mag(initial_particle.e)))
+        if e > 100000:
+            new = self.pick_energy_mag(initial_particle.e*0.0000001)
+        elif e < 100:
+            new = self.pick_energy_mag(initial_particle.e*100)
+        else:
+            log.verbose("initial particle of energy {0:.4g}{1:s}eV"
+                .format(*self.pick_energy_mag(initial_particle.e)))
+            return
+
+        if self.auto:
+            self.set_energy(new[1]+"eV")
+            info = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
+                       ", units have been changed to {new:s}eV"
+            log.info(info.format(*self.pick_energy_mag(initial_particle.e), new=new[1]))
+        else:
+            warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
+                       ", consider setting --units={new:s}eV or auto if this is incorrect"
+            log.warn(warning.format(*self.pick_energy_mag(initial_particle.e), new=new[1]))
+        return
 
 if __name__ == '__main__':
     u = Units()

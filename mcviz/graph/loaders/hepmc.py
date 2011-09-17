@@ -186,17 +186,8 @@ def load_single_event(ev, args):
     # Construct "initial" vertices
     for initial_particle in initial_particles:
         if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
-            e = units.energy_mag * initial_particle.e
-            warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
-                       ", consider setting --units={new:s}eV if this is incorrect"
-            if e > 100000:
-                new = units.pick_energy_mag(initial_particle.e*0.0000001)[1]
-                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
-            elif e < 100:
-                new = units.pick_energy_mag(initial_particle.e*100)[1]
-                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
-            else:
-                log.verbose("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
+          pass
+        units.initial_check(initial_particle)
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
     
