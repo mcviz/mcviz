@@ -242,66 +242,74 @@ def merge_vertices(graph_view):
     for pos, vertices in sorted(vertices_by_position.iteritems()):
         if len(vertices) >= 2:
             summary = graph_view.summarize_vertices(vertices)
-    
 
 
 class Cut(Transform):
     """
-    Cut away particles from the 'outside' of the graph
+    Removes particles in the specified range of param
     """
     _name = "Cut"
-    _args = [Arg("pt", int, "minimum transverse momentum", default=5.0),
-             Arg("eta", int, "maximum absolute eta", default=None)]
+    _args = [Arg("cut", float, "cut value", default=5),
+             Arg("param", str, "parameter to cut on", default="pt"),
+             Arg("abs", Arg.bool, "take abs value of param", default=True),
+             Arg("less_than", Arg.bool, "remove particles less cut", default=True),]
 
-    def __call__(graph_view):
-        """
-        So named because lots of gluons all going the same way looks like chainmail.
-        
-        This function removes sibling particles of the same type.
-        """
+    def __call__(self, graph_view):
+        cut = self.options["cut"]
+        param = self.options["param"]
+        take_abs = self.options["abs"]
+        less_than = self.options["less_than"]
         final_state = [p for p in graph_view.particles if p.final_state]
-        pt_cut = self.options["pt"]
-        eta_cut = self.options["eta"]
-        passed_tag = "passed_cut"
+        print(less_than)
 
-        if eta_cut is None:
-            cut = lambda p : p.pt < pt_cut
-        else:
-            cut = lambda p : p.pt < pt_cut or abs(p.eta) > eta_cut
-        
+        def cutter(p):
+            if hasattr(p, param):
+                value = getattr(p, param)
+                if take_abs: value = abs(value)
+                if less_than:
+                    return value <= cut
+                else:
+                    print('there')
+                    return cut <= value
+            else: return True
+
         keep = set()
         def mark(item, depth):
             keep.add(item)
-            item.tag(passed_tag)
-        
+            item.tag("pass")
+
         for particle in final_state:
-            if not cut(particle):
-                graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
+            if not cutter(particle):
+                graph_view.walk(particle, vertex_action=mark, particle_action=mark,
                                 ascend=True)
-        
+
         def pruner(item, depth):
-            if passed_tag in item.tags:
+            if "pass" in item.tags:
                 return ()
-        
+
         for vertex in graph_view.vertices:
-            if passed_tag in vertex.tags:
-                cut_daughters = [p for p in vertex.outgoing if passed_tag not in p.tags]
+            if "pass" in vertex.tags:
+                cut_daughters = [p for p in vertex.outgoing if "pass" not in p.tags]
                 #print vertex, cut_daughters
                 if len(cut_daughters) > 2:
-                    print cut_daughters
                     vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
-                    vsummary.tag("cut_summary")
+                    #vsummary.tag("cluster")
                     psummary = graph_view.summarize_particles(set(cut_daughters))
-                    psummary.tag("cut_summary")
-                    psummary.cut_nparticles = len(Walk.particles)
-        
+                    psummary.tag("sum")
+                    vsummary.tag("sum")
+                    #psummary.tag("cluster")
+                    #psummary.cluster_nparticles = len(Walk.particles)
+
         for p in graph_view.particles:
            if p in keep:
                continue
-               
+
            if p.start_vertex in keep: # and not p.start_vertex.hadronization:
               # Don't discard
               continue
-              
+
            graph_view.drop(p)
-           
+
+        for vertex in graph_view.vertices:
+            if not vertex.incoming and not vertex.outgoing:
+                graph_view.drop(vertex)
