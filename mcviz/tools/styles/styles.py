@@ -1,13 +1,13 @@
 from __future__ import division
 
+from .. import log; log = log.getChild(__name__)
+
 from math import log as ln
 
 from mcviz.tools import Style, Arg
 from mcviz.tools.layouts import FeynmanLayout, DualLayout
 from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
-
-from logging import getLogger; log = getLogger("mcviz.styles")
 
 
 DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "none", "stroke-width": "0.05"}

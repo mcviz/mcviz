@@ -1,15 +1,15 @@
-from logging import getLogger; log = getLogger("mcviz.painters.svg")
+from .. import log; log = log.getChild(__name__)
 
-from mcviz.tools import FundamentalTool, Arg
+from ..tools import FundamentalTool, Arg
 
-from mcviz.utils import timer
+from mcviz.utils.timer import Timer; timer = Timer(log)
 from mcviz.utils.svg.svg_document import (
     XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
 from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
                              boson, fermion, hadron, vertex)
 
-from painters import StdPainter
+from .painters import StdPainter
 
 
 class SVGPainter(StdPainter, FundamentalTool):

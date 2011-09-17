@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from logging import getLogger; log = getLogger("mcviz.event_graph")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
 from . import EventParseError
@@ -22,32 +22,32 @@ class EventGraph(object):
         return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename, args):
         """
         Try to load a monte-carlo event using all available loaders
         """
         loaders = [cls.from_hepmc, cls.from_pythia_log]
         for loader in loaders:
             try:
-                return loader(filename)
+                return loader(filename, args)
             except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
-            except IOError:
-                log.fatal('loading file "%s" failed!' % filename)
+            except IOError as e:
+                log.exception('loading file "{0}" failed!'.format(filename))
                 raise FatalError
                 
         raise EventParseError("No loaders succeeded on %s" % filename)
     
     @classmethod
-    def from_hepmc(cls, filename):
+    def from_hepmc(cls, filename, args):
         from .loaders.hepmc import load_event
-        vertices, particles, units = load_event(filename)
+        vertices, particles, units = load_event(filename, args)
         return cls(vertices, particles, units)
 
         
     @classmethod
-    def from_pythia_log(cls, filename):
+    def from_pythia_log(cls, filename, args):
         from .loaders.pythialog import load_event
-        vertices, particles, units = load_event(filename)
+        vertices, particles, units = load_event(filename, args)
         return cls(vertices, particles, units)
 

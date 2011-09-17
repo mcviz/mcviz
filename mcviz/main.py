@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.6
 
 # MCViz - Visualize Monte Carlo Events
-# Copyright (C) 2010  Peter Waller & Johannes Ebke
+# Copyright (C) 2011 : See http://mcviz.net/AUTHORS
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -18,11 +18,14 @@
 
 from textwrap import dedent
 
-from logging import getLogger; log = getLogger("mcviz.main")
+from . import log; log = log.getChild(__name__)
 
-from mcviz import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
-from mcviz.utils import get_logger_level, log_level, timer
+from . import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
 
+from .logger import get_logger_level, log_level
+from .utils import Units
+from .utils.timer import Timer; timer = Timer(log, log.VERBOSE)
+from .help import run_help
 
 def run(args, argv):
 
@@ -36,26 +39,35 @@ def run(args, argv):
                   "Use --help for help.")
         raise FatalError
 
-    log.info("MCViz Copyright (C) 2010 Peter Waller & Johannes Ebke")
+    log.info("MCViz Copyright (C) 2011 : See http://mcviz.net/AUTHORS")
     log.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
     
+    #if args.units:
+    #    units = Units(args.units)
+    #else:
+    #    units = Units()
+
     filename = args.filename
     log.verbose('trying to read event from "%s"' % filename)
-    with timer('event from "%s"' % filename):
+    with timer('read event from "%s"' % filename):
         try:
-            event_graph = EventGraph.load(filename)
+            event_graph = EventGraph.load(filename, args)
         except EventParseError, x:
             log.fatal("No success in reading events from %s!" % filename)
             raise FatalError
     log.info('drawing event from "%s"' % (filename))
 
-    gw = GraphWorkspace("mcviz.graph", event_graph, cmdline=" ".join(argv))
+    gw = GraphWorkspace("local", event_graph, cmdline=" ".join(argv))
     gw.load_tools(args)
     gw.run()
 
 def real_main(argv):
-    args = parse_options()
+    parser, args = parse_options()
+    if args.help:
+        with log_level(log.ERROR):
+            return run_help(parser, args)
+        
     try:
         with log_level(get_logger_level(args.quiet, args.verbose)):
             with timer("complete run"):

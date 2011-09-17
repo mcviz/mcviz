@@ -1,7 +1,11 @@
-import re
-from new import classobj
+from .. import log; log = log.getChild(__name__)
 
-from logging import getLogger; log = getLogger("mcviz.main")
+import re
+
+from new import classobj
+from os import isatty
+from sys import stdin
+
 
 tool_types = {}
 tool_classes = {}
@@ -49,9 +53,26 @@ class ToolSetting(object):
     def get_class(self, tool_type):
         class_args = []
         if not self.name in tool_classes[tool_type]:
-            choices = ", ".join(tool_classes[tool_type].keys())
-            raise ArgParseError("no such %s: %s\npossible choices are: %s" % 
-                (tool_type, self.name, choices))
+            possible = tool_classes[tool_type].keys()
+            log.error("No such {0} tool {1}".format(tool_type, self.name))
+            
+            found = False
+            from ..help import did_you_mean
+            meant = did_you_mean(self.name, possible)
+            if meant and isatty(stdin.fileno()):
+                try:
+                    yes = raw_input("[Y/n] ").lower() in ("y", "")
+                    if yes:
+                        log.debug("Rewriting tool '{0}' to '{1}'".format(self.name, meant))
+                        self.name, found = meant, True
+                except (IOError, EOFError):
+                    pass
+            
+            if not found:
+                choices = ", ".join(possible)
+                raise ArgParseError(
+                    "no such {0}: {1}\npossible choices are: {2}"
+                    .format(tool_type, self.name, choices))
         return tool_classes[tool_type][self.name]
 
 
@@ -172,7 +193,7 @@ class Tool(object):
             def tool_specific(self, *pargs):
                 return func(*pargs, **self.options)
             clsd = dict(_args=args, _name=title, __call__=tool_specific, 
-                        __doc__=func.__doc__)
+                        __doc__=func.__doc__, __module__=func.__module__)
             return classobj(name, (cls,), clsd)
         return decorated
 
