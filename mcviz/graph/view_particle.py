@@ -26,7 +26,7 @@ class ViewParticle(ViewObject):
     
     @property
     def pt(self):
-        return (self.p[0]**2 + self.p[1]**2)**0.5
+        return (self.p[0]**2 + self.p[1]**2)**0.5 * self.graph.units.energy_mag
 
     @property
     def phi(self):
@@ -77,9 +77,9 @@ class ViewParticle(ViewObject):
 
     @property
     def reference(self):
-        #ref = "P" + "_".join("%i" % no for no in self.particle_numbers)
+        #ref = "P" + "_".join("{0}".format(no) for no in self.particle_numbers)
         #return ref.replace("-","N") # replace for negative particle nr
-        return "P%i" % self.order_number
+        return "P{0}".format(self.order_number)
 
 class ViewParticleSingle(ViewParticle):
     """
@@ -103,8 +103,8 @@ class ViewParticleSingle(ViewParticle):
             self.anticolor = self.antiparticle
     
     def __repr__(self):
-        args = self.pdgid, self.reference
-        return "<ViewParticleSingle pdgid=%s ref='%s'>" % args
+        return "<ViewParticleSingle pdgid={0} ref='{1}'>"\
+            .format(self.pdgid, self.reference)
     
     @property
     def start_vertex(self):

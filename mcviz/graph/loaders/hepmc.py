@@ -1,10 +1,11 @@
+from ... import log; log = log.getChild(__name__)
+
 from collections import namedtuple
 from itertools import izip
 import re
 
-from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
-
 from mcviz import FatalError
+from mcviz.utils import Units
 from .. import EventParseError, Particle, Vertex
 
 
@@ -81,7 +82,7 @@ def make_record(record):
         return HVertex._make(first_part + [weights])
     
     elif type_ == "P":
-        if len(record) == 11:
+        if len(record) in [11,13,15]:
             # Strange dialect which misses the "mass" column? Insert 0 mass.
             midx = HParticle._fields.index("mass")
             record = record[:midx] + [0] + record[midx:]
@@ -95,10 +96,17 @@ def make_record(record):
             flow = map(int, flow)
             flow = dict(zip(flow[::2], flow[1::2]))
         assert not record, "Unexpected additional data on vertex"
-        
-        return HParticle._make(first_part + [flow])
 
-def load_single_event(ev):
+        if not first_part[1] == '0':
+            return HParticle._make(first_part + [flow])
+        
+    elif type_ == "U":
+        log.verbose("event reports units are {0} and {1}".format(*record[:2]))
+        u = Units(record[0] + " " + record[1])
+        return u
+
+
+def load_single_event(ev, args):
     """
     Given one event in HepMC's text format, return a list of mcviz's `Particle`s
     and `Vertex`es.
@@ -110,6 +118,11 @@ def load_single_event(ev):
     vertex_incoming = {} # { vertex_barcode : set(particles) }
     
     initial_particles = []
+
+    if args.units:
+        units = Units(args.units)
+    else:
+        units = None
     
     orphans = 0
     
@@ -117,9 +130,15 @@ def load_single_event(ev):
     # Read a vertex, then read N particles. When we get to the next vertex, 
     # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
-        if isinstance(record, HEvent):
+        if isinstance(record, Units):
+            if units is None:
+                units = record
+            else:
+                log.verbose("previous units declaration overriding input's unit record")
+        elif isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
+            log.debug("Event record: {0} ".format(event))
         
         elif event is None:
             raise RuntimeError("Event record should come first. Corrupted "
@@ -166,6 +185,18 @@ def load_single_event(ev):
     
     # Construct "initial" vertices
     for initial_particle in initial_particles:
+        if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
+            e = units.energy_mag * initial_particle.e
+            warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
+                       ", consider setting --units={new:s}eV if this is incorrect"
+            if e > 100000:
+                new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
+                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
+            elif e < 100:
+                new = units.pick_energy_mag(initial_particle.e*100)[1]
+                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
+            else:
+                log.verbose("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
     
@@ -178,9 +209,17 @@ def load_single_event(ev):
             p_out.vertex_in = vertex
             p_out.mothers = vertex.incoming
 
-    return vertices, particles
+    # Probably not the greatest way to do this, but oh well...
+    vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
+                                  if vertex.outgoing or vertex.incoming)
 
-def load_event(filename):
+    # Use default units if they are not specified
+    if units is None:
+        units = Units()
+
+    return vertices, particles, units
+
+def load_event(filename, args):
     """
     Load one event from a HepMC file
     """
@@ -210,7 +249,7 @@ def load_event(filename):
     for i, event in izip(xrange(event_number+1), event_generator(lines)):
         # Load only one event
         pass
-    return load_single_event(event)
+    return load_single_event(event, args)
 
 if __name__ == "__main__":
     from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])

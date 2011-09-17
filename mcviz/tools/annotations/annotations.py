@@ -1,3 +1,4 @@
+from ... import log; log = log.getChild(__name__)
 from mcviz.tools import Annotation, Arg
 
 class Index(Annotation):
@@ -34,13 +35,24 @@ class Status(Annotation):
         self.annotate_particles(graph.particles, lambda p: p.status)
             
 
+class E(Annotation):
+    """
+    Particle energy (in Monte-Carlo units)
+    """
+    _name = "e"
+    def __call__(self, graph):
+        self.annotate_particles(graph.particles,
+            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_energy_mag(p.e)))
+
+
 class Pt(Annotation):
     """
     Particle transverse momentum (in Monte-Carlo units)
     """
     _name = "pt"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles, lambda p: "%.2f"%p.pt)
+        self.annotate_particles(graph.particles,
+            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.pt)))
         
         
 class PDGID(Annotation):

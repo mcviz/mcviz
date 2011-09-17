@@ -27,4 +27,7 @@ setup(name='mcviz',
         "mcviz.utils.svg" : ["ParticleData.xml", "texglyph.cache"],
         "mcviz.utils.svg.data" : ["*.js", "*.xml"],
       },
+      install_requires=[
+        'argparse',
+      ],
       )

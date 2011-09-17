@@ -1,10 +1,10 @@
 from __future__ import division
 
+from .. import log; log = log.getChild(__name__)
+
 from os.path import basename
 
 from mcviz.tools import Painter, FundamentalTool, Arg
-
-from logging import getLogger; log = getLogger("mcviz.painters")
 
 class StdPainter(Painter):
     _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)

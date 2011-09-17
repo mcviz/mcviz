@@ -6,7 +6,7 @@ This extension need, to work properly:
     - pstoedit software: <http://www.pstoedit.net/pstoedit>
 
 Parts of this file Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
-Copyright (C) 2010 Johannes Ebke <ebke@cern.ch>; Peter Waller
+Copyright (C) 2011 Johannes Ebke <ebke@cern.ch>; Peter Waller
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -95,13 +95,22 @@ def test_particle_data():
                 s.append("%20s | %s" % (label, gd[key]))
     return "\n".join(s)
 
-def particle_to_latex(gd):
+def particle_to_latex(gd, bastardize=False):
+    """
+    Generate latex from particle
+    
+    `bastardize`: Generate ROOT latex from particle
+    """
     rep = []
-    rep.append(r"$\mathbf{")
+    if not bastardize:
+        rep.append(r"$\mathbf{")
     if gd["mass"]:
         rep.append(r"\underset{\mbox{\tiny (%s)}}{" % gd["mass"])
     if gd["bar"]:
-        rep.append(r"\overline{")
+        if bastardize:
+            rep.append(r"#bar{")
+        else:
+            rep.append(r"\overline{")
     if gd["susy"]:
         rep.append(r"\tilde{")
     rep.append(gd["name"])
@@ -137,10 +146,14 @@ def particle_to_latex(gd):
 
     if gd["mass"]:
         rep.append(r"}")
-
-    rep.append(r"}$")
+    
+    if not bastardize:
+        rep.append(r"}$")
+        
+    greek_prefix = "#" if bastardize else "\\"
+        
     name = "".join(rep)
-    name = GREEK_FINDER.sub(lambda g: "\\" + g.group(0) + " ", name)
+    name = GREEK_FINDER.sub(lambda g: greek_prefix + g.group(0), name)
     return name
 
 def test_particle_display():
@@ -165,8 +178,8 @@ def process_path_data(d, tf_x, tf_y):
             x_positions.append(x)
             y_positions.append(y)
             new_points.append("%.2f,%.2f" % (x, y))
-        return " ".join(new_points), min(x_positions), max(x_positions), \
-                                     min(y_positions), max(y_positions)
+        return (" ".join(new_points), min(x_positions), max(x_positions), 
+                                      min(y_positions), max(y_positions))
 
     # split and preprocess command strings
     cmds = []
@@ -219,8 +232,8 @@ class TexGlyph(object):
         for pdgid, label, gd in sorted(db.values()):
             print >> sys.stderr, "Processing %s (PDG ID %i)" % (label, pdgid)
             glyph = TexGlyph(particle_to_latex(gd), pdgid)
-            print >> sys.stderr, " box: X %.1f to %.1f / Y %.1f to %.1f" % \
-                    (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax)
+            print >> sys.stderr, (" box: X %.1f to %.1f / Y %.1f to %.1f" % 
+                                  (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax))
             cls.library[pdgid] = glyph
         avg_height = cls.get_average_dimensions()[1]
         for glyph in cls.library.values():
@@ -285,7 +298,7 @@ class TexGlyph(object):
             rmtree(base_dir)
 
         self.write_tex_file(latex_file)
-        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"' \
+        os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"'
                   % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
                   
         try:
@@ -306,7 +319,7 @@ class TexGlyph(object):
         separator = ';'
         if os.name == 'nt':
             separator = '&&'
-        os.system('cd "%s" %s pstoedit -f plot-svg -dt -ssp "%s" "%s" > "%s" 2> "%s"' \
+        os.system('cd "%s" %s pstoedit -f plot-svg -dt -ssp "%s" "%s" > "%s" 2> "%s"'
                   % (base_dir, separator, ps_file, svg_file, out_file, err_file))
 
         # forward errors to stderr but skip pstoedit header

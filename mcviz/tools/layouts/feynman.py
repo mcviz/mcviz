@@ -77,7 +77,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
         lo.label_size = self.options["label_size"]
 
         if "cluster" in particle.tags:
-            lo.label = "cluster (%.1f GeV)" % particle.pt
+            lo.label = "cluster (%.4g %seV)" % self.graph.units.pick_mag(particle.pt)
         elif (particle.gluon or particle.photon) and not self.options["gluid"]:
             lo.label = None
         else:

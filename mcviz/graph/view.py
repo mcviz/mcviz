@@ -8,6 +8,7 @@ from .walk import walk
 class GraphView(object):
     def __init__(self, event_graph):
         self.event = event_graph
+        self.units = event_graph.units
 
         # create central maps (define structure)
         self.v_map, self.p_map = {}, {}

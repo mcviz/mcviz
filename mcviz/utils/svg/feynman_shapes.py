@@ -5,6 +5,7 @@ svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
 from ..spline import Spline, SplineLine, Point2D
 
+
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
     N = n_waves * 2
     wavelength = length / N

@@ -1,7 +1,7 @@
+from .. import log; log = log.getChild(__name__)
+
 from os.path import basename, exists
 from sys import argv
-
-from logging import getLogger; log = getLogger("mcviz.demo")
 
 from mcviz import main
 from logger import log_level
