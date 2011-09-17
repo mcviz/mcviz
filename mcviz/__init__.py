@@ -11,11 +11,14 @@ import sys
 if not sys.version_info >= (2, 6):
     raise ImportError("mcviz is only compatible with python >= 2.6")
 
-from .logger import log
+# Note: "from .module import" syntax is not used below 
+# so that python<2.6 doesn't crash.
 
-from graph import EventGraph, EventParseError
-from tools import Tool
-from workspace import GraphWorkspace
-from options import parse_options
-from main import main
+from mcviz.logger import log
+
+from mcviz.graph import EventGraph, EventParseError
+from mcviz.tools import Tool
+from mcviz.workspace import GraphWorkspace
+from mcviz.options import parse_options
+from mcviz.main import main
 
