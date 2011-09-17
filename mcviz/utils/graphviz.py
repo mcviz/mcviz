@@ -1,9 +1,11 @@
-from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
+from .. import log; log = log.getChild(__name__)
+
+from csv import reader as csv_reader
 from subprocess import Popen, PIPE
 
-from mcviz import FatalError
-from mcviz.utils import Spline, SplineLine, Point2D, timer
-from csv import reader as csv_reader
+from .. import FatalError
+from . import Spline, SplineLine, Point2D
+
 
 ref_prefix = "MCVIZ_REF_"
 

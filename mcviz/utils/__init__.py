@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from .. import log; log = log.getChild(__name__)
 
 import re
 import unicodedata as UD
@@ -9,8 +10,6 @@ from contextlib import contextmanager
 
 from .orderedset import OrderedSet
 from .point import Point2D
-from .logger import get_logger_level, log_level
-from .timer import timer
 from .colors import rainbow_color
 from .spline import Spline, SplineLine, Line
 from .units import Units

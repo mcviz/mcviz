@@ -1,4 +1,4 @@
-from logging import getLogger; log = getLogger("mcviz.transforms")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz.tools import Transform, Arg
 from mcviz.graph import Summary

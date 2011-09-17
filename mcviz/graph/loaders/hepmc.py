@@ -1,8 +1,8 @@
+from ... import log; log = log.getChild(__name__)
+
 from collections import namedtuple
 from itertools import izip
 import re
-
-from logging import getLogger; log = getLogger("mcviz.loaders.hepmc")
 
 from mcviz import FatalError
 from mcviz.utils import Units
@@ -131,10 +131,10 @@ def load_single_event(ev, args):
     # associate the N particles with the previous vertexEventParseError
     for record in map(make_record, ev):
         if isinstance(record, Units):
-	    if units is None:
+            if units is None:
                 units = record
-	    else:
-	        log.verbose("previous units declaration overriding input's unit record")
+            else:
+                log.verbose("previous units declaration overriding input's unit record")
         elif isinstance(record, HEvent):
             assert event is None, "Duplicate event records in event"
             event = record
@@ -190,10 +190,10 @@ def load_single_event(ev, args):
             warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
                        ", consider setting --units={new:s}eV if this is incorrect"
             if e > 100000:
-	        new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
+                new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
                 log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
             elif e < 100:
-	        new = units.pick_energy_mag(initial_particle.e*100)[1]
+                new = units.pick_energy_mag(initial_particle.e*100)[1]
                 log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
             else:
                 log.verbose("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))

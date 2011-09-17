@@ -1,5 +1,5 @@
 
-from logging import getLogger; log = getLogger("mcviz.layouts.extra")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz.graph import ViewVertex, ViewParticleSummary
 from mcviz.tools import Arg

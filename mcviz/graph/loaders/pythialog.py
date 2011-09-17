@@ -2,7 +2,7 @@
 This whole module is begging for a refactor, but by some miracle it works.
 """
 
-from logging import getLogger; log = getLogger("mcviz.loaders.pythialog")
+from ... import log; log = log.getChild(__name__)
 
 from mcviz.utils import Units
 from .. import EventParseError, Particle, Vertex
@@ -106,7 +106,7 @@ def make_pythia_graph(records):
     
     return vertex_dict, particle_dict, Units() #TODO: find out proper units for pythia 
         
-def load_event(filename):
+def load_event(filename, args):
     """
     Parse a pythia event record from a log file.
     Numbers are converted to floats where possible.

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from logging import getLogger; log = getLogger("mcviz.event_graph")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
 from . import EventParseError
@@ -32,8 +32,8 @@ class EventGraph(object):
                 return loader(filename, args)
             except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
-            except IOError:
-                log.fatal('loading file "%s" failed!' % filename)
+            except IOError as e:
+                log.exception('loading file "{0}" failed!'.format(filename))
                 raise FatalError
                 
         raise EventParseError("No loaders succeeded on %s" % filename)

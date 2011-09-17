@@ -1,8 +1,8 @@
-from logging import getLogger; log = getLogger("mcviz.utils.graphviz")
+from .. import log; log = log.getChild(__name__)
 
 from mcviz.tools import LayoutEngine, Arg
 from mcviz.utils.graphviz import run_graphviz
-from mcviz.utils import timer
+from mcviz.utils.timer import Timer; timer = Timer(log, log.VERBOSE)
 
 from new import classobj
 

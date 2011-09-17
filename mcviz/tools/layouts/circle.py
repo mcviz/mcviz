@@ -50,7 +50,7 @@ class CircleLayout(FeynmanLayout):
 
         rotate_phi = self.options["phi"]
         min_fix_pt = self.options["pt"]
-        D = 100.0 * self.options["scale"]#scale*10
+        D = self.options["scale"]
 
         def rotate_phi_proj(momentum, dims):
             p0 = cos(rotate_phi)*momentum[0] + sin(rotate_phi)*momentum[1]
@@ -103,11 +103,10 @@ class CircleLayout(FeynmanLayout):
                 if sv_p[0] == 0 and sv_p[1] == 0:
                     continue
 
-
                 stretch = 1.0
                 assert 0 < stretch <= 1
                 pos = pfunc(sv_p) * (D / sqrt(dlvl))
-                pos.y = pos.y / (abs(pos.y)/D)**(stretch)
+                pos.y = pos.y / (abs(pos.y)/D)**(stretch) * 10 # signum modified by stretch
                 svn.center = pos
                 svn.dot_args["pos"] = "%s,%s!" % svn.center.tuple()
                 svn.dot_args["pin"] = "true"
