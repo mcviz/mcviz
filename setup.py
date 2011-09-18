@@ -1,3 +1,8 @@
+import sys
+
+if not sys.version_info >= (2, 6):
+    raise RuntimeError("mcviz is only compatible with python >= 2.6")
+
 from setuptools import setup, find_packages
 from textwrap import dedent
 
