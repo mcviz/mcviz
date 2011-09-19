@@ -6,7 +6,15 @@ if not sys.version_info >= (2, 6):
 from setuptools import setup, find_packages
 from textwrap import dedent
 
-version = "0.1"
+from os.path import dirname, exists, join as pjoin
+from inspect import getfile
+setup_location = dirname(getfile(sys.modules[__name__]))
+version_file = pjoin(setup_location, "mcviz", "VERSION")
+if not exists(version_file):
+    raise RuntimeError("mcviz/VERSION doesn't exist!")
+
+with open(version_file) as fd:
+    version = fd.read().strip()
 
 setup(name='mcviz',
       version=version,
@@ -22,13 +30,14 @@ setup(name='mcviz',
         'GNU Affero General Public License v3',
       ],
       keywords='mcviz hep montecarlo hepmc graphviz svg visualization',
-      author='Johannes Ebke and Peter Waller',
+      author='Johannes Ebke, Peter Waller and Tim Brooks (see AUTHORS)',
       author_email='dev@mcviz.net',
       url='http://mcviz.net',
       license='Affero GPLv3',
       packages=find_packages(),
       entry_points={"console_scripts" : ["mcviz = mcviz:main"]},
       package_data={
+        "mcviz" : ["VERSION"],
         "mcviz.utils.svg" : ["ParticleData.xml", "texglyph.cache"],
         "mcviz.utils.svg.data" : ["*.js", "*.xml"],
       },
