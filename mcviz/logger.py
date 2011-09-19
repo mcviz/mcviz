@@ -64,6 +64,11 @@ class ColoredFormatter(MCVizFormatter):
 
 LoggerClass = logging.getLoggerClass()
 class ExtendedLogger(LoggerClass):
+    """
+    The ExtendedLogger only gets used by loggers created as children of the 
+    mcviz logger, `log`, at module level in logger.py.
+    """
+    
     def __init__(self, name):
         LoggerClass.__init__(self, name)
 
@@ -95,13 +100,19 @@ class ExtendedLogger(LoggerClass):
     def __repr__(self):
         return "<MCViz logger {0}>".format(self.name)
 
-ExtendedLogger.__dict__.update(logging._levelNames)
+# Give the ExtendedLogger class the log level constants
+for key, value in logging._levelNames.iteritems():
+    if not isinstance(key, basestring): continue
+    setattr(ExtendedLogger, key, value)
 
 class MCVizLogManager(logging.Manager):
     """
     Workaround for CPython 2.6
     """
     def getLogger(self, name):
+        """
+        Fetch an ordinary logger and switch out its class
+        """
         logger = logging.Manager.getLogger(self, name)
         logger.__class__ = ExtendedLogger
         return logger
