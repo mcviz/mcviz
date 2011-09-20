@@ -2,7 +2,7 @@ from collections import namedtuple
 from itertools import izip
 import re
 
-from logging import getLogger; log = getLogger("mcviz.loaders.lhe")
+from ... import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
 from .. import EventParseError, Particle, Vertex
@@ -64,23 +64,19 @@ def make_lhe_graph(lines, init):
       # Correct indices for the initial beam particles
       if line[2]: line[2] += 2
       if line[3]: line[3] += 2
+      # Connect the first daughters to the inital particles
       if I == 3: line[2] = 1
-      if I == 4: line[2] = 2
-      if False: #line[2] <= 0 and I > 2:
-        print("Skipping particle %d %s" %(I, line) )
-	continue
-      #print("Adding particle   %d %s" %(I, line) )
+      elif I == 4: line[2] = 2
 
       part = LPARTICLE._make(line)
-
       particles.append(Particle.from_lhe(I, part) )
 
     # Convert mothers/daughters to objects
     for particle in particles:
         particle.daughters = set(particles[d-1] for d in particle.daughters
-	    if d != 0 and d <= len(particles) )
+            if d != 0 and d <= len(particles) )
         particle.mothers = set(particles[m-1] for m in particle.mothers
-	    if m != 0 and m <= len(particles) )
+            if m != 0 and m <= len(particles) )
 
     particles = [p for p in particles if p.no != 0]
     particle_dict = dict((p.no, p) for p in particles)
@@ -150,8 +146,8 @@ def make_lhe_graph(lines, init):
     for particle in particles:
         if particle.final_state and particle.initial_state: #len(particle.mothers) == 0:
             if particle.vertex_in: del vertex_dict[particle.vertex_in.vno]
-	    del vertex_dict[particle.vertex_out.vno]
-	    del particle_dict[particle.no]
+            del vertex_dict[particle.vertex_out.vno]
+            del particle_dict[particle.no]
 #particles.remove(particle)
             continue
 
@@ -159,7 +155,7 @@ def make_lhe_graph(lines, init):
         log.debug("\nParticles:")
         # Particle.no .vertex_in .vertex_out
         for p in particle_dict:
-	   part = particle_dict[p]
+           part = particle_dict[p]
            log.debug("Particle %d (%d) mothers: %s daughters: %s" %(part.no, part.pdgid, part.mothers, part.daughters) )
            log.debug("Parent vertex: %s child vertex: %s" %(part.vertex_in, part.vertex_out) )
 
@@ -201,10 +197,9 @@ def load_event(filename):
     init = [int(i) for i in init[:2] ] + [float(i) for i in init[2:4] ] + [int(i) for i in init[4:10] ] 
     init = LINIT._make(init)
     # Followed by NPRUP lines of processes
-    if True:
-        log.verbose("LHE init block:")
-        for line in result['init'].splitlines():
-	    log.verbose(line.strip())
+    log.verbose("LHE init block:")
+    for line in result['init'].splitlines():
+        log.verbose(line.strip())
 
     for i, event in izip(xrange(event_number+1), event_generator(result['events']) ):
         # Load only one event

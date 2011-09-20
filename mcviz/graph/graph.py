@@ -52,7 +52,7 @@ class EventGraph(object):
         return cls(vertices, particles, units)
 
     @classmethod
-    def from_lhe(cls, filename):
+    def from_lhe(cls, filename, args):
         from loaders.leshouchesevent import load_event
 	vertices, particles = load_event(filename)
 	return cls(vertices, particles)
