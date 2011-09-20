@@ -157,9 +157,6 @@ def load_single_event(ev, args):
         elif isinstance(record, HParticle):
             particle = Particle.from_hepmc(record)
             particles[particle.no] = particle
-
-            if particle.final_state and not particle.outgoing:
-                print(particle.color)
             
             if not orphans:
                 outgoing_particles.append(particle)
@@ -209,6 +206,15 @@ def load_single_event(ev, args):
         for p_out in vertex.outgoing:
             p_out.vertex_in = vertex
             p_out.mothers = vertex.incoming
+            
+    for i in particles:
+        particle = particles[i]
+        if particle.final_state and not particle.daughters:
+            if particle.color or particle.anticolor:
+                log.warning("found coloured final state particle"\
+                    ", this may indicate an incomplete input file")
+                log.debug("final state particle: {0:s} color: {1:d} anticolor {2:d}"\
+                    .format(repr(particle), particle.color, particle.anticolor))
 
     # Probably not the greatest way to do this, but oh well...
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
