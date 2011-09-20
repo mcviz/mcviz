@@ -34,6 +34,24 @@ class Particle(object):
         return p
         
     @classmethod
+    def from_lhe(cls, no, part):
+        #IDUP(I), ISTUP(I), MOTHUP(1,I), MOTHUP(2,I), ICOLUP(1,I), ICOLUP(2,I), PUP(1,I), PUP(2,I), PUP(3,I), PUP(4,I), PUP(5,I), VTIMUP(I), SPINUP(I)
+        # p, e & m values are in GeV
+        # lifetime is invarient lifetime in mm
+        # spin=9 particles are unpolarized or unknown
+          
+        p = cls(part.PUP1, part.PUP2, part.PUP3, part.PUP4, part.PUP5)
+        p.no = no
+        p.pdgid = part.IDUP
+        p.name = ""
+        p.status = part.ISTUP
+        p.mothers = [m for m in (part.MOTHUP1, part.MOTHUP2) if m != 0]
+        p.daughters = []
+        p.color, p.anticolor = part.ICOLUP1, part.ICOLUP2
+        
+        return p
+        
+    @classmethod
     def from_hepmc(cls, hparticle):
         hp = hparticle
         p = cls(*map(float, (hp.px, hp.py, hp.pz, hp.energy, hp.mass)))
