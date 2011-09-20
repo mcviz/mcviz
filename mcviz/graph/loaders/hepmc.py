@@ -157,6 +157,9 @@ def load_single_event(ev, args):
         elif isinstance(record, HParticle):
             particle = Particle.from_hepmc(record)
             particles[particle.no] = particle
+
+            if particle.final_state and not particle.outgoing:
+                print(particle.color)
             
             if not orphans:
                 outgoing_particles.append(particle)
@@ -182,7 +185,14 @@ def load_single_event(ev, args):
         else:
             v = vertices[vertex_barcode]
             v.incoming = incoming_particles
-    
+
+    # Check theres only 2 incoming vertices
+    if len(initial_particles) != 2:
+        log.warning("found {0:d} incoming particles, this may indicate an incomplete input file"\
+            .format(len(initial_particles)))
+        log.debug("initial particles:")
+        for p in initial_particles: log.debug(repr(p))
+
     # Construct "initial" vertices
     for initial_particle in initial_particles:
         if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
@@ -219,11 +229,11 @@ def load_single_event(ev, args):
 
     return vertices, particles, units
 
-def load_event(filename, args):
+def load_event(args):
     """
     Load one event from a HepMC file
     """
-    filename, _, event_number = filename.partition(":")
+    filename, _, event_number = args.filename.partition(":")
     if event_number:
         try:
             event_number = int(event_number)

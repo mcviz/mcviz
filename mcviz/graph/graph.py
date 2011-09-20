@@ -22,14 +22,14 @@ class EventGraph(object):
         return sorted(p for p in self.particles.values() if p.initial_state)
     
     @classmethod
-    def load(cls, filename, args):
+    def load(cls, args):
         """
         Try to load a monte-carlo event using all available loaders
         """
         loaders = [cls.from_hepmc, cls.from_lhe, cls.from_pythia_log]
         for loader in loaders:
             try:
-                return loader(filename, args)
+                return loader(args)
             except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
             except IOError as e:
@@ -39,21 +39,21 @@ class EventGraph(object):
         raise EventParseError("No loaders succeeded on %s" % filename)
     
     @classmethod
-    def from_hepmc(cls, filename, args):
+    def from_hepmc(cls, args):
         from .loaders.hepmc import load_event
-        vertices, particles, units = load_event(filename, args)
+        vertices, particles, units = load_event(args)
         return cls(vertices, particles, units)
 
         
     @classmethod
-    def from_pythia_log(cls, filename, args):
+    def from_pythia_log(cls, args):
         from .loaders.pythialog import load_event
-        vertices, particles, units = load_event(filename, args)
+        vertices, particles, units = load_event(args)
         return cls(vertices, particles, units)
 
     @classmethod
-    def from_lhe(cls, filename, args):
+    def from_lhe(cls, args):
         from loaders.leshouchesevent import load_event
-	vertices, particles = load_event(filename)
-	return cls(vertices, particles)
+	vertices, particles, units = load_event(args)
+	return cls(vertices, particles, units)
 

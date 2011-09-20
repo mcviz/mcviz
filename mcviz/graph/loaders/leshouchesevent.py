@@ -37,7 +37,7 @@ def event_generator(lines):
       result = match.groupdict()
       yield result['event']
 
-def make_lhe_graph(lines, init):
+def make_lhe_graph(lines, init, args):
     """
     Return the particles and vertices in the event
     """
@@ -126,12 +126,23 @@ def make_lhe_graph(lines, init):
             vno += 1
             vertex_dict[particle] = Vertex(vno, [], [particle])
 
+    initial_particles = []
     for particle in particles:
         if particle.final_state:
             vno += 1
             vertex_dict[particle] = Vertex(vno, [particle], [])
+            if particle.color or particle.anticolor:
+                log.warning("found coloured final state particle"\
+                    ", this may indicate an incomplete input file")
+                log.debug("final state particle: {0:s} color: {1:d} anticolor {2:d}"\
+                    .format(repr(particle), particle.color, particle.anticolor))
         if particle.initial_state:
-            log.verbose("found initial particle: %s, %s", particle.no, particle.name)
+            initial_particles.append(particle)
+    if len(initial_particles) != 2:
+        log.warning("found {0:d} incoming particles, this may indicate an incomplete input file"\
+            .format(len(initial_particles)))
+        log.debug("initial particles:")
+        for p in initial_particles: log.debug(repr(p))
 
     # Connect particles to their vertices
     for vertex in vertex_dict.itervalues():
@@ -151,27 +162,13 @@ def make_lhe_graph(lines, init):
 #particles.remove(particle)
             continue
 
-    if True:     # Some debugging printouts
-        log.debug("\nParticles:")
-        # Particle.no .vertex_in .vertex_out
-        for p in particle_dict:
-           part = particle_dict[p]
-           log.debug("Particle %d (%d) mothers: %s daughters: %s" %(part.no, part.pdgid, part.mothers, part.daughters) )
-           log.debug("Parent vertex: %s child vertex: %s" %(part.vertex_in, part.vertex_out) )
-
-        log.debug("\nVertices:")
-        # Vertex: .vno .incoming .outgoing
-        for v in vertex_dict:
-           log.debug(vertex_dict[v])
-        log.debug("")
-
-    return vertex_dict, particle_dict
+    return vertex_dict, particle_dict, args.units
     
-def load_event(filename):
+def load_event(args):
     """
     Load one event from a LHE file
     """
-    filename, _, event_number = filename.partition(":")
+    filename, _, event_number = args.filename.partition(":")
     
     if event_number:
         try:
@@ -205,7 +202,7 @@ def load_event(filename):
         # Load only one event
         pass
 
-    return make_lhe_graph(event.splitlines(), init)
+    return make_lhe_graph(event.splitlines(), init, args)
     
 if __name__ == "__main__":
     from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])
