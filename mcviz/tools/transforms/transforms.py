@@ -246,7 +246,7 @@ def merge_vertices(graph_view):
 
 class Cut(Transform):
     """
-    Removes particles in the specified range of param
+    Cut away particles from the 'outside' of the graph
     """
     _name = "Cut"
     _args = [Arg("cut", float, "cut value", default=5),
@@ -260,8 +260,8 @@ class Cut(Transform):
         take_abs = self.options["abs"]
         less_than = self.options["less_than"]
         final_state = [p for p in graph_view.particles if p.final_state]
-        print(less_than)
 
+        passed_tag = "passed_cut"
         def cutter(p):
             if hasattr(p, param):
                 value = getattr(p, param)
@@ -269,36 +269,32 @@ class Cut(Transform):
                 if less_than:
                     return value <= cut
                 else:
-                    print('there')
                     return cut <= value
             else: return True
 
         keep = set()
         def mark(item, depth):
             keep.add(item)
-            item.tag("pass")
-
+            item.tag(passed_tag)
+        
         for particle in final_state:
             if not cutter(particle):
                 graph_view.walk(particle, vertex_action=mark, particle_action=mark,
                                 ascend=True)
 
         def pruner(item, depth):
-            if "pass" in item.tags:
+            if passed_tag in item.tags:
                 return ()
 
         for vertex in graph_view.vertices:
-            if "pass" in vertex.tags:
-                cut_daughters = [p for p in vertex.outgoing if "pass" not in p.tags]
+            if passed_tag in vertex.tags:
+                cut_daughters = [p for p in vertex.outgoing if passed_tag not in p.tags]
                 #print vertex, cut_daughters
                 if len(cut_daughters) > 2:
                     vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
-                    #vsummary.tag("cluster")
+                    vsummary.tag("cut_summary")
                     psummary = graph_view.summarize_particles(set(cut_daughters))
-                    psummary.tag("sum")
-                    vsummary.tag("sum")
-                    #psummary.tag("cluster")
-                    #psummary.cluster_nparticles = len(Walk.particles)
+                    psummary.tag("cut_summary")
 
         for p in graph_view.particles:
            if p in keep:
@@ -310,6 +306,7 @@ class Cut(Transform):
 
            graph_view.drop(p)
 
+        #Clean out 'dangling' vertices
         for vertex in graph_view.vertices:
             if not vertex.incoming and not vertex.outgoing:
                 graph_view.drop(vertex)
