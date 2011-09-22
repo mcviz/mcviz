@@ -49,6 +49,7 @@ GREEK_FINDER = re.compile(GREEK_ALTERNATES)
 
 grp_susy = r"(?P<susy>\~)?"
 grp_name = r"(?P<name>[A-Za-z8/]+?)"
+grp_hv = r"(?P<hv>(E|MU|TAU)?(?<!fla)[v](Up|Dn|Diag)?)?"
 grp_star = r"(?P<star>\*)?"
 grp_prime = r"(?P<prime>'+)?"
 grp_sub = r"(?P<sub>(_([A-Za-z]+?)|_([0-9]+?(s|c|b)?))*?)"
@@ -60,7 +61,7 @@ grp_2s = r"(\((?P<state>2S)\))?"
 grp_extra = r"(\[(?P<extra>.*?)\])?"
 grp_alt = r"(\((?P<alt>.*?)\))?"
 grp_end = r"$"
-re_groups = [grp_susy, grp_name, grp_star, grp_prime, grp_sub, grp_mass, grp_bar, grp_charge, grp_techni, grp_2s, grp_extra, grp_alt, grp_end]
+re_groups = [grp_susy, grp_name, grp_hv, grp_star, grp_prime, grp_sub, grp_mass, grp_bar, grp_charge, grp_techni, grp_2s, grp_extra, grp_alt, grp_end]
 PARTICLE_MATCH = re.compile(r"".join(re_groups))
 
 def read_pythia_particle_db():
@@ -84,7 +85,7 @@ def read_pythia_particle_db():
 
 def test_particle_data():
     db = read_pythia_particle_db()
-    keys = ['star', 'extra', 'sub', 'techni', 'susy', 'alt', 'prime', 'bar', 'name', 'state', 'charge', 'mass']
+    keys = ['star', 'extra', 'sub', 'techni', 'hv', 'susy', 'alt', 'prime', 'bar', 'name', 'state', 'charge', 'mass']
     s = []
     for key in keys:
         s.append("-"*80)
@@ -113,17 +114,26 @@ def particle_to_latex(gd, bastardize=False):
             rep.append(r"\overline{")
     if gd["susy"]:
         rep.append(r"\tilde{")
-    rep.append(gd["name"])
+    if gd["hv"]: rep.append(gd["name"].lower())
+    else: rep.append(gd["name"])
     if gd["susy"]:
         rep.append(r"}")
     if gd["bar"]:
         rep.append(r"}")
 
-    if gd["sub"] or gd["techni"]:
+    if gd["sub"] or gd["techni"] or gd["hv"]:
         rep.append(r"_{")
         subs = []
+        if gd["hv"]:
+            tmp = ",v,".join(gd["hv"].split("v")).strip(",")
+            tmp = tmp.replace("E", "e", 1)
+            tmp = tmp.replace("MU", "mu", 1)
+            tmp = tmp.replace("TAU", "tau", 1)
+            subs.append(tmp)
         if gd["sub"]:
-            subs.extend(gd["sub"].strip("_").split("_"))
+            tmp = ",R,".join(gd["sub"].strip("_").split("R")).strip(",")
+            tmp = ",L,".join(tmp.split("L")).strip(",")
+            subs.extend(tmp.split("_"))
         if gd["techni"]:
             subs.append(gd["techni"].strip("_"))
         if gd["state"]:
