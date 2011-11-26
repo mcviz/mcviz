@@ -166,6 +166,10 @@ def load_single_event(ev, args):
             
             vertex_incoming.setdefault(int(record.vertex_out_barcode), set()).add(particle)
     
+    # Use default units if they are not specified
+    if units is None:
+        units = Units()
+        
     vertex = Vertex.from_hepmc(current_vertex, outgoing_particles)
     vertices[vertex.vno] = vertex
 
@@ -193,7 +197,7 @@ def load_single_event(ev, args):
     # Construct "initial" vertices
     for initial_particle in initial_particles:
         if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
-          pass
+            pass
         units.initial_check(initial_particle)
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
@@ -219,10 +223,6 @@ def load_single_event(ev, args):
     # Probably not the greatest way to do this, but oh well...
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
                                   if vertex.outgoing or vertex.incoming)
-
-    # Use default units if they are not specified
-    if units is None:
-        units = Units()
 
     return vertices, particles, units
 
