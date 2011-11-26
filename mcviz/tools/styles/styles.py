@@ -157,7 +157,6 @@ class LineWidthPt(Style):
     """
     Make the particle line width dependent on the transverse momentum.
     """
-    _name = "LineWidthPt"
     _args = [Arg("scale", float, "scale of the line effects", default=1.0),
              Arg("min", float, "minimal width of a line", default=0.1),]
     def __call__(self, layout):
@@ -174,7 +173,20 @@ class LineWidthPt(Style):
             particle = element.item
             if hasattr(particle, "pt"):
                 element.style_args["stroke-width"] = self.options["min"] + +self.options["scale"]*ln(particle.pt+1)*0.1
-            
+
+
+class LabelSizePt(Style):
+    """
+    Make the label size dependent on the transverse momentum.
+    """
+    _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
+    def __call__(self, layout):
+        for element in list(layout.edges) + list(layout.nodes):
+            particle = element.item
+            if not hasattr(particle, "pt"):
+                continue
+            element.label_size = self.options["scale"]*ln(particle.pt+1)*0.5 + 0.5
+
 
 class ThickenColor(Style):
     """

@@ -84,8 +84,7 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.reference, edge.label, edge.label_center,
-                           self.label_size, edge.item.subscripts)
-
+                               edge.label_size, edge.item.subscripts)
 
     def paint_vertex(self, node):
         if node.show and node.center:
@@ -95,8 +94,7 @@ class SVGPainter(StdPainter, FundamentalTool):
            
         if not node.label is None and node.center:
             self.doc.add_glyph(node.reference, node.label, node.center.tuple(),
-                               self.label_size,
-                               node.item.subscripts)
+                               node.label_size, node.item.subscripts)
 
 
 class NavigableSVGPainter(SVGPainter):

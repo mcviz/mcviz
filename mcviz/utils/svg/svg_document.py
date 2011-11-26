@@ -60,7 +60,7 @@ class SVGDocument(object):
         self.defined_pdgids = []
         self.svg.appendChild(self.defs)
 
-    def add_glyph(self, reference, pdgid, center, font_size, subscript = None):
+    def add_glyph(self, reference, pdgid, center, font_size, subscript=None):
 
         if not TexGlyph.exists(pdgid):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
