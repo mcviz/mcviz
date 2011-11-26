@@ -10,7 +10,7 @@ from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 
 
-DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "none", "stroke-width": "0.05"}
+DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "white", "stroke-width": "0.05"}
 DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black", 
                      "stroke-width": 0.05, "scale": 1}
 
