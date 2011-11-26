@@ -225,6 +225,33 @@ def shallow(graph_view, drop_depth=10):
         if obj not in keep_objects:
             graph_view.drop(obj)
             
+@Transform.decorate("RemoveInternal")
+def remove_mcinternal(graph_view):
+    internal_particles = set()
+    for obj in list(graph_view.particles):
+        if 80 < obj.pdgid  < 100:
+            #graph_view.drop(obj)
+            internal_particles.add(obj)
+    
+    
+    kill_objects = set()
+    
+    def walker(obj, depth):
+        kill_objects.add(obj)
+    
+    for vertex in internal_particles:
+        graph_view.walk(vertex, 
+            #vertex_action=walker, 
+            particle_action=walker)
+    
+    for ko in kill_objects:
+        graph_view.drop(ko)
+    
+    #for obj in to_yank:
+        #vertices = set((obj.start_vertex, obj.end_vertex))
+        #summary = graph_view.summarize_vertices(vertices)
+    
+            
 @Transform.decorate("MergeVertices")
 def merge_vertices(graph_view):
     """
