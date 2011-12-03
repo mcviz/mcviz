@@ -135,6 +135,11 @@ class FancyLines(Style):
                 edge.style_line_type = "hadron"
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_args["stroke-width"] = 0.2
+            elif "jet" in particle.tags:
+                edge.style_line_type = "jet"
+            elif "cut_summary" in particle.tags:
+                edge.style_line_type = "cut"
+                edge.style_args["n"] = edge.n_particles
             elif particle.gluon:
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_line_type = "gluon"

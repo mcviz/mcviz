@@ -245,52 +245,63 @@ def merge_vertices(graph_view):
     
 
 
-@Transform.decorate("Cut")
-def cut(graph_view):
+class Cut(Transform):
     """
-    So named because lots of gluons all going the same way looks like chainmail.
-    
-    This function removes sibling particles of the same type.
+    Cut away particles from the 'outside' of the graph
     """
-    final_state = [p for p in graph_view.particles if p.final_state]
-    
-    def cut(p): return p.pt < 5
-    
-    keep = set()
-    def mark(item, depth):
-        keep.add(item)
-        item.tag("pass")
-    
-    for particle in final_state:
-        if not cut(particle):
-            graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
-                            ascend=True)
-    
-    def pruner(item, depth):
-        if "pass" in item.tags:
-            return ()
-    
-    for vertex in graph_view.vertices:
-        if "pass" in vertex.tags:
-            cut_daughters = [p for p in vertex.outgoing if "pass" not in p.tags]
-            #print vertex, cut_daughters
-            if len(cut_daughters) > 2:
-                print cut_daughters
-                vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
-                #vsummary.tag("cluster")
-                psummary = graph_view.summarize_particles(set(cut_daughters))
-                psummary.tag("sum")
-                vsummary.tag("sum")
-                #psummary.tag("cluster")
-                #psummary.cluster_nparticles = len(Walk.particles)
-    
-    for p in graph_view.particles:
-       if p in keep:
-           continue
+    _name = "Cut"
+    _args = [Arg("pt", int, "minimum transverse momentum", default=5.0),
+             Arg("eta", int, "maximum absolute eta", default=None)]
+
+    def __call__(graph_view):
+        """
+        So named because lots of gluons all going the same way looks like chainmail.
+        
+        This function removes sibling particles of the same type.
+        """
+        final_state = [p for p in graph_view.particles if p.final_state]
+        pt_cut = self.options["pt"]
+        eta_cut = self.options["eta"]
+        passed_tag = "passed_cut"
+
+        if eta_cut is None:
+            cut = lambda p : p.pt < pt_cut
+        else:
+            cut = lambda p : p.pt < pt_cut or abs(p.eta) > eta_cut
+        
+        keep = set()
+        def mark(item, depth):
+            keep.add(item)
+            item.tag(passed_tag)
+        
+        for particle in final_state:
+            if not cut(particle):
+                graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
+                                ascend=True)
+        
+        def pruner(item, depth):
+            if passed_tag in item.tags:
+                return ()
+        
+        for vertex in graph_view.vertices:
+            if passed_tag in vertex.tags:
+                cut_daughters = [p for p in vertex.outgoing if passed_tag not in p.tags]
+                #print vertex, cut_daughters
+                if len(cut_daughters) > 2:
+                    print cut_daughters
+                    vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
+                    vsummary.tag("cut_summary")
+                    psummary = graph_view.summarize_particles(set(cut_daughters))
+                    psummary.tag("cut_summary")
+                    psummary.cut_nparticles = len(Walk.particles)
+        
+        for p in graph_view.particles:
+           if p in keep:
+               continue
+               
+           if p.start_vertex in keep: # and not p.start_vertex.hadronization:
+              # Don't discard
+              continue
+              
+           graph_view.drop(p)
            
-       if p.start_vertex in keep: # and not p.start_vertex.hadronization:
-          # Don't discard
-          continue
-          
-       graph_view.drop(p)
-       
