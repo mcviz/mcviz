@@ -10,7 +10,7 @@ from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 
 
-DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "none", "stroke-width": "0.05"}
+DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "white", "stroke-width": "0.05"}
 DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black", 
                      "stroke-width": 0.05, "scale": 1}
 
@@ -77,6 +77,45 @@ class SimpleColors(Style):
                     node.style_args["fill"] = initial_color
 
 
+class Highlight(Style):
+    """
+    Colour particles matching some criteria.
+    e.g. -sHighlight:6:color=blue highlights top quarks in blue,
+         -sHighlight:param=eta:0:2.5 highlights central particles,
+         -sHighlight:1000000:2000015 highlights susy particles
+    """
+    _name = "Highlight"
+    _args = [Arg("start", float, "start pdgid to highlight", default=6),
+             Arg("end", float, "end pdgid", default=0),
+             Arg("color", str, "highlight color", default="red"),
+             Arg("param", str, "parameter", default="pdgid"),]
+
+    def __call__(self, layout):
+        """ highlight all particles in rage of interest """
+        start = self.options["start"]
+        if self.options["end"] == 0:
+            end = start
+        else:
+            end = self.options["end"]
+        color = self.options["color"]
+        param = self.options["param"]
+
+        for edge in layout.edges:
+            try:
+                if start <= abs(getattr(edge.item, param)) <= end:
+                  edge.style_args["stroke"] = edge.style_args["fill"] = color
+            except AttributeError: # looks like the item doesn't have that param
+                pass
+
+        for node in layout.nodes:
+            try:
+                # label in Inline; particle in Dual
+                if start <= abs(getattr(node.item, param)) <= end:
+                    node.style_args["fill"] = color
+            except AttributeError: # looks like the item doesn't have that param
+                pass
+
+
 class FancyLines(Style):
     """
     Draw particle lines with arrows on them, and draw gluons with curls
@@ -104,12 +143,24 @@ class FancyLines(Style):
                     edge.style_line_type = "final_photon"
                 else:
                     edge.style_line_type = "photon"
+            elif particle.invisible:
+                print("got an invis")
+                edge.style_line_type = "invisible"
+            elif particle.squark:
+                edge.style_line_type = "sfermion"
             elif particle.colored:
                 edge.style_line_type = "fermion"
             elif particle.lepton:
                 edge.style_line_type = "fermion"
             elif particle.boson:
                 edge.style_line_type = "boson"
+            elif particle.gluino:
+                edge.style_args["scale"] = 0.2 * self.options["scale"]
+                edge.style_line_type = "gluino"
+            elif particle.chargino:
+                edge.style_line_type = "chargino"
+            elif particle.slepton:
+                edge.style_line_type = "sfermion"
             else:
                 edge.style_line_type = "hadron"
                 
@@ -118,7 +169,6 @@ class LineWidthPt(Style):
     """
     Make the particle line width dependent on the transverse momentum.
     """
-    _name = "LineWidthPt"
     _args = [Arg("scale", float, "scale of the line effects", default=1.0),
              Arg("min", float, "minimal width of a line", default=0.1),]
     def __call__(self, layout):
@@ -135,7 +185,20 @@ class LineWidthPt(Style):
             particle = element.item
             if hasattr(particle, "pt"):
                 element.style_args["stroke-width"] = self.options["min"] + +self.options["scale"]*ln(particle.pt+1)*0.1
-            
+
+
+class LabelSizePt(Style):
+    """
+    Make the label size dependent on the transverse momentum.
+    """
+    _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
+    def __call__(self, layout):
+        for element in list(layout.edges) + list(layout.nodes):
+            particle = element.item
+            if not hasattr(particle, "pt"):
+                continue
+            element.label_size = self.options["scale"]*ln(particle.pt+1)*0.5 + 0.5
+
 
 class ThickenColor(Style):
     """
@@ -175,3 +238,15 @@ class StatusColor(Style):
                 if hasattr(particle, "status"):
                     node.style_args["fill"] = colors[abs(particle.status) // 10]
             
+
+@Style.decorate("ColorPassing")
+def color_passing(layout):
+	for edge in layout.edges:
+		if "pass" in edge.item.tags:
+			edge.style_args["stroke"] = "#00ffff"
+			
+@Style.decorate("ColorFinal")
+def color_final(layout):
+	for edge in layout.edges:
+		if "pass" in edge.item.tags: #edge.item.final_state:
+			edge.style_args["stroke"] = "#ff0000"

@@ -86,14 +86,25 @@ def make_pythia_graph(records):
         else: # initial state vertex
             vno += 1
             vertex_dict[particle] = Vertex(vno, [], [particle])
-            
+
+    initial_particles = []
     for particle in particles:
         if particle.final_state:
             vno += 1
             vertex_dict[particle] = Vertex(vno, [particle], [])
+            if particle.color or particle.anticolor:
+                log.warning("found coloured final state particle"\
+                    ", this may indicate an incomplete input file")
+                log.debug("final state particle: {0:s} color: {1:d} anticolor {2:d}"\
+                    .format(repr(particle), particle.color, particle.anticolor))
         if particle.initial_state:
-            log.verbose("found initial particle: %s, %s", particle.no, particle.name)
-            
+            initial_particles.append(particle)
+    if len(initial_particles) != 2:
+        log.warning("found {0:d} incoming particles, this may indicate an incomplete input file"\
+            .format(len(initial_particles)))
+        log.debug("initial particles:")
+        for p in initial_particles: log.debug(repr(p))
+
     # Connect particles to their vertices
     for vertex in vertex_dict.itervalues():
         for particle in vertex.incoming:
@@ -104,15 +115,15 @@ def make_pythia_graph(records):
 
     vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
     
-    return vertex_dict, particle_dict, Units() #TODO: find out proper units for pythia 
+    return vertex_dict, particle_dict, Units()
         
-def load_event(filename, args):
+def load_event(args):
     """
     Parse a pythia event record from a log file.
     Numbers are converted to floats where possible.
     """
 
-    with open(filename) as fd:
+    with open(args.filename) as fd:
         lines = [line for line in (line.strip() for line in fd) if line]
 
     if START_COMPLETE in lines:

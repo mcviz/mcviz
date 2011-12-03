@@ -144,6 +144,8 @@ class ToolCreator(type):
         elif not "__metaclass__" in classdict:
             # only "Tool" is allowed to have no _type
             print "WARNING: Found Tool without type: %s" % name
+        if not hasattr(ncls, "_name"):
+            ncls._name = name
         return ncls
 
 class Tool(object):

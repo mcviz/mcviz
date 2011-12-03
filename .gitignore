@@ -11,5 +11,7 @@
 env/
 dist/
 build/
+examples
+distribute-*.tar.gz
 *.egg-info/
 /mcv

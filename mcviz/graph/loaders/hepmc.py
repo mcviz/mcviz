@@ -166,6 +166,10 @@ def load_single_event(ev, args):
             
             vertex_incoming.setdefault(int(record.vertex_out_barcode), set()).add(particle)
     
+    # Use default units if they are not specified
+    if units is None:
+        units = Units()
+        
     vertex = Vertex.from_hepmc(current_vertex, outgoing_particles)
     vertices[vertex.vno] = vertex
 
@@ -182,21 +186,19 @@ def load_single_event(ev, args):
         else:
             v = vertices[vertex_barcode]
             v.incoming = incoming_particles
-    
+
+    # Check theres only 2 incoming vertices
+    if len(initial_particles) != 2:
+        log.warning("found {0:d} incoming particles, this may indicate an incomplete input file"\
+            .format(len(initial_particles)))
+        log.debug("initial particles:")
+        for p in initial_particles: log.debug(repr(p))
+
     # Construct "initial" vertices
     for initial_particle in initial_particles:
         if str(initial_particle.no) in (event.beam_p1_barcode, event.beam_p2_barcode):
-            e = units.energy_mag * initial_particle.e
-            warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
-                       ", consider setting --units={new:s}eV if this is incorrect"
-            if e > 100000:
-                new = units.pick_energy_mag(initial_particle.e*0.0001)[1]
-                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
-            elif e < 100:
-                new = units.pick_energy_mag(initial_particle.e*100)[1]
-                log.warn(warning.format(*units.pick_energy_mag(initial_particle.e), new=new))
-            else:
-                log.verbose("initial particle of energy {0:.4g}{1:s}eV".format(*units.pick_energy_mag(initial_particle.e)))
+            pass
+        units.initial_check(initial_particle)
         vertices[vno] = Vertex(vno, outgoing=[initial_particle])
         vno -= 1
     
@@ -208,22 +210,27 @@ def load_single_event(ev, args):
         for p_out in vertex.outgoing:
             p_out.vertex_in = vertex
             p_out.mothers = vertex.incoming
+            
+    for i in particles:
+        particle = particles[i]
+        if particle.final_state and not particle.daughters:
+            if particle.color or particle.anticolor:
+                log.warning("found coloured final state particle"\
+                    ", this may indicate an incomplete input file")
+                log.debug("final state particle: {0:s} color: {1:d} anticolor {2:d}"\
+                    .format(repr(particle), particle.color, particle.anticolor))
 
     # Probably not the greatest way to do this, but oh well...
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
                                   if vertex.outgoing or vertex.incoming)
 
-    # Use default units if they are not specified
-    if units is None:
-        units = Units()
-
     return vertices, particles, units
 
-def load_event(filename, args):
+def load_event(args):
     """
     Load one event from a HepMC file
     """
-    filename, _, event_number = filename.partition(":")
+    filename, _, event_number = args.filename.partition(":")
     if event_number:
         try:
             event_number = int(event_number)

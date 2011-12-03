@@ -6,8 +6,9 @@ from mcviz.utils.timer import Timer; timer = Timer(log)
 from mcviz.utils.svg.svg_document import (
     XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
-from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
-                             boson, fermion, hadron, vertex)
+from mcviz.utils.svg import (identity, invisible, photon, final_photon,
+                             gluon, multigluon, boson, fermion, hadron,
+                             vertex, gluino, sfermion, chargino)
 
 from .painters import StdPainter
 
@@ -24,12 +25,16 @@ class SVGPainter(StdPainter, FundamentalTool):
     document_creator = SVGDocument
 
     type_map = {"identity": identity,
+                "invisible": invisible,
                 "photon": photon, 
                 "final_photon": final_photon,
                 "gluon": gluon, 
+                "gluino": gluino,
                 "multigluon": multigluon, 
                 "boson": boson, 
                 "fermion": fermion, 
+                "sfermion": sfermion,
+                "chargino": chargino,
                 "hadron": hadron, 
                 "vertex": vertex
                 }
@@ -84,8 +89,7 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.reference, edge.label, edge.label_center,
-                           self.label_size, edge.item.subscripts)
-
+                               edge.label_size, edge.item.subscripts)
 
     def paint_vertex(self, node):
         if node.show and node.center:
@@ -95,8 +99,7 @@ class SVGPainter(StdPainter, FundamentalTool):
            
         if not node.label is None and node.center:
             self.doc.add_glyph(node.reference, node.label, node.center.tuple(),
-                               self.label_size,
-                               node.item.subscripts)
+                               node.label_size, node.item.subscripts)
 
 
 class NavigableSVGPainter(SVGPainter):

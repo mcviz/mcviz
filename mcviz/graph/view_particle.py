@@ -34,15 +34,28 @@ class ViewParticle(ViewObject):
 
     @property
     def eta(self):
-        return -log(tan(atan2(self.pt, self.p[2])/2.))
+        try:
+            return -log(tan(atan2(self.pt, self.p[2])/2.))
+        except ValueError:       # catch pt == 0
+            return float("inf") * self.p[2]
 
     @property
     def colored(self):
         return self.color or self.anticolor
 
     @property
+    def invisible(self):
+        return abs(self.pdgid) in [12, 14, 16, 18, 25, 35, 36, 39,
+                               1000039, 1000012, 1000014, 1000016,
+                               1000022, 1000023, 1000025, 1000035]
+
+    @property
     def gluon(self):
         return self.pdgid == 21
+
+    @property
+    def gluino(self):
+        return self.pdgid == 1000021
 
     @property
     def photon(self):
@@ -57,10 +70,24 @@ class ViewParticle(ViewObject):
     @property
     def quark(self):
         return 1 <= abs(self.pdgid) <= 8
+
+    @property
+    def squark(self):
+        return (1000001 <= abs(self.pdgid) <= 1000006 or
+                2000001 <= abs(self.pdgid) <= 2000006)
     
     @property
     def lepton(self):
         return 11 <= abs(self.pdgid) <= 18
+
+    @property
+    def slepton(self):
+        return (1000011 <= abs(self.pdgid) <= 1000016 or
+                2000011 <= abs(self.pdgid) <= 2000016)
+
+    @property
+    def chargino(self):
+        return abs(self.pdgid) in [1000024, 1000037]
         
     @property
     def descends_both(self):

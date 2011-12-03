@@ -42,17 +42,12 @@ def run(args, argv):
     log.info("MCViz Copyright (C) 2011 : See http://mcviz.net/AUTHORS")
     log.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
-    
-    #if args.units:
-    #    units = Units(args.units)
-    #else:
-    #    units = Units()
 
     filename = args.filename
     log.verbose('trying to read event from "%s"' % filename)
     with timer('read event from "%s"' % filename):
         try:
-            event_graph = EventGraph.load(filename, args)
+            event_graph = EventGraph.load(args)
         except EventParseError, x:
             log.fatal("No success in reading events from %s!" % filename)
             raise FatalError
