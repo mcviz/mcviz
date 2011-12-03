@@ -22,14 +22,17 @@ def tag_by_hadronization_vertex(graph_view):
         
 def tag_by_jet(graph_view):
     from mcviz.jet import cluster_jets, JetAlgorithms
-    jets = cluster_jets([p for p in graph_view.particles if p.final_state], JetAlgorithms.antikt)
+    final_state_particles = [p for p in graph_view.particles if p.final_state]
+    jets = cluster_jets(final_state_particles, JetAlgorithms.antikt)
+    print "Converted %i final state particles into %i jets" % (len(final_state_particles), len(jets))
     tagged = []
     def pt(jet):
         return hypot(*jet.p[:2])
     for i, jet in enumerate(sorted(jets, key=pt, reverse=True)):
+        print "Created jet: np=%2i, %r, %r" % (len(jet.particles), jet.p, jet.e)
         if i >= 5:
             break
-        log.info("Created jet: np=%2i, %r, %r", len(jet.particles), jet.p, jet.e)
+
         for particle in jet.particles:
             particle.tags.add("jet%i" % i)
             tagged.append(particle)
