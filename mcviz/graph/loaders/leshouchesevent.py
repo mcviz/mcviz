@@ -5,6 +5,7 @@ import re
 from ... import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
+from mcviz.utils import Units
 from .. import EventParseError, Particle, Vertex
 
 
@@ -162,7 +163,9 @@ def make_lhe_graph(lines, init, args):
 #particles.remove(particle)
             continue
 
-    return vertex_dict, particle_dict, args.units
+    units = Units(args.units)
+
+    return vertex_dict, particle_dict, units
     
 def load_event(args):
     """
