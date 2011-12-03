@@ -74,6 +74,7 @@ def gluballs(graph_view, Retry):
             vertices.add(vertex)
                 
         graph_view.walk(vertex, vertex_action=walker)
+        
         if len(vertices) > 1:
             summary = graph_view.summarize_vertices(vertices)
             summary.tag("gluball")
@@ -242,3 +243,54 @@ def merge_vertices(graph_view):
         if len(vertices) >= 2:
             summary = graph_view.summarize_vertices(vertices)
     
+
+
+@Transform.decorate("Cut")
+def cut(graph_view):
+    """
+    So named because lots of gluons all going the same way looks like chainmail.
+    
+    This function removes sibling particles of the same type.
+    """
+    final_state = [p for p in graph_view.particles if p.final_state]
+    
+    def cut(p): return p.pt < 5
+    
+    keep = set()
+    def mark(item, depth):
+        keep.add(item)
+        item.tag("pass")
+    
+    for particle in final_state:
+        if not cut(particle):
+            graph_view.walk(particle, vertex_action=mark, particle_action=mark, 
+                            ascend=True)
+    
+    def pruner(item, depth):
+        if "pass" in item.tags:
+            return ()
+    
+    for vertex in graph_view.vertices:
+        if "pass" in vertex.tags:
+            cut_daughters = [p for p in vertex.outgoing if "pass" not in p.tags]
+            #print vertex, cut_daughters
+            if len(cut_daughters) > 2:
+                print cut_daughters
+                vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
+                #vsummary.tag("cluster")
+                psummary = graph_view.summarize_particles(set(cut_daughters))
+                psummary.tag("sum")
+                vsummary.tag("sum")
+                #psummary.tag("cluster")
+                #psummary.cluster_nparticles = len(Walk.particles)
+    
+    for p in graph_view.particles:
+       if p in keep:
+           continue
+           
+       if p.start_vertex in keep: # and not p.start_vertex.hadronization:
+          # Don't discard
+          continue
+          
+       graph_view.drop(p)
+       
