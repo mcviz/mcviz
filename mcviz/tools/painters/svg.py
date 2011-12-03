@@ -120,5 +120,4 @@ class MCVizWebNavigableSVGPainter(SVGPainter):
     document_creator = MCVizWebNavigableSVGDocument
     
     def paint_additional(self, layout):
-        for particle in layout.graph.particles:
-            self.doc.add_particle(particle)
+        self.doc.add_event_data(layout.graph)

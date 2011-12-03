@@ -6,7 +6,13 @@ var everything = null, marker = null;
 var zoom_value = 0;
 var ex = 0, ey = 0, mouse_position_in_lumispace = 0;
 
-$(function() {
+
+var viewdata = null;
+var eventdata = null;
+var ui = null;
+var particle_selector = null;
+
+function mcviz_init(event) {
     // Performed on script load
 
     c = $("#whole_document")[0];
@@ -42,9 +48,111 @@ $(function() {
     main_trans = everything.vTranslate = [x, y];
     
     update_transform();
+       
+    viewdata = get_mcvizns("viewdata");
+    eventdata = get_mcvizns("eventdata");
+    ui = $("#interface");
+    particle_selector = $("#selected-particle");
     
-});
+    function get_x(element) {
+        if (element.x)  return element.x.baseVal.value;
+        if (element.cx) return element.cx.baseVal.value;
+    }
+    
+    function get_y(element) {
+        if (element.y)  return element.y.baseVal.value;
+        if (element.cy) return element.cy.baseVal.value;
+    }
+    
+    function hover_particle(event) {
+        use_element = get_element(event);
+        
+        // Get interesting references
+        reference = $(use_element).attr("mcviz:r").split("_");
+        particle_ref = reference[0];
+        
+        selector_positioning_element = $("ellipse[mcviz\\:r=" + particle_ref + "]");
+        if (selector_positioning_element)
+            use_element = selector_positioning_element[0];
+        
+        particle_selector.attr("cx", get_x(use_element));
+        particle_selector.attr("cy", get_y(use_element));
+        particle_selector.attr("transform", $(use_element).attr("transform"));
+        
+        
+        particle_element = viewdata.find("particle[id=" + particle_ref + "]");
+        vertex_in  = viewdata.find("vertex[id=" + particle_element.attr("vin") + "]");
+        vertex_out = viewdata.find("vertex[id=" + particle_element.attr("vout") + "]");
+        
+        ui.find("#id")  .text(particle_element.attr("id"));
+        ui.find("#vin") .text(particle_element.attr("vout"));
+        ui.find("#vout").text(particle_element.attr("vin"));
+        
+        represented_particles = particle_element.attr("event").split(" ");
+        represented_particles = $.map(represented_particles, 
+            function(value) { 
+                return eventdata.find("particle[id=" + value + "]"); 
+            });
+        
+        
+        ui.find("#contents").text("Eta: " + represented_particles[0].attr("eta"));
+        
+        return;
+        items = ["id", "pdgid", "pt", "phi", "e", "m"];
+        for (var i = 0; i < items.length; i++) {
+            var value = items[i];
+            ui.find("#" + value).text(particle_element.attr(value));
+        }
+        
+    }
+    
+    // pt: eventdata.find("particle").map(function(i, p) { return $(p).attr(""); })
+    
+    $("use").hover(hover_particle);
+    $("ellipse[mcviz\\:r]").hover(hover_particle);
+    
+    $("button.#reset").click(function(event) {
+        $("[mcviz\\:r]").attr("opacity", null);
+    });
+    
+    function filter_particles(func) {
+        $("[mcviz\\:r]").attr("opacity", 0.25);
+        
+        good_ids = eventdata.find("particle")
+            .filter(func)
+            .map(function(i, p) { return $(p).attr("id"); });
+        
+        for (var i = 0; i < good_ids.length; i++) {
+            $("[mcviz\\:r=P" + good_ids[i] + "]").attr("opacity", null);
+        }
+    }
+    
+    $("button.#hidelowpt").click(function(event) {
+        //viewdata.find("particle").filter(function(p) { return p.attr(pt) < 
+        filter_particles(function(i, p) { return $(p).attr("pt") > 10; });
+    });
+    $("button.#hidehieta").click(function(event) {
+        //viewdata.find("particle").filter(function(p) { return p.attr(pt) < 
+        filter_particles(function(i, p) { return Math.abs($(p).attr("eta")) < 2; });
+    });
+}
 
+function get_mcvizns(what) {
+    var result = null;
+    result = $(what);
+    if (result.size()) return result;
+    result = $("mcviz\\:" + what);
+    return result;
+}
+
+function get_element(evt) {
+    var el = null;
+    if (evt.target.correspondingUseElement)
+        el = evt.target.correspondingUseElement;
+    else
+        el = evt.target;
+    return el
+}
 
 function update_transform() 
 {
