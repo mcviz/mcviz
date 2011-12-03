@@ -33,10 +33,10 @@ class EventGraph(object):
             except EventParseError:
                 log.debug("loader %s failed" % loader.__name__)
             except IOError as e:
-                log.exception('loading file "{0}" failed!'.format(filename))
+                log.exception('loading file "{0}" failed!'.format(args.filename))
                 raise FatalError
                 
-        raise EventParseError("No loaders succeeded on %s" % filename)
+        raise EventParseError("No loaders succeeded on %s" % args.filename)
     
     @classmethod
     def from_hepmc(cls, args):
