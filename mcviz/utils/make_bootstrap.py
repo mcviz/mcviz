@@ -26,7 +26,7 @@ output = virtualenv.create_bootstrap_script(textwrap.dedent("""
     
     def adjust_options(options, args):
         options.use_distribute = True
-        options.never_download = True
+        options.never_download = False
         options.search_dirs.append("dist/")
         args[:] = ["env"]
 """))
