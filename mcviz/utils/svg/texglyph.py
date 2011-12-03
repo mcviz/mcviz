@@ -273,17 +273,20 @@ class TexGlyph(object):
         if hasattr(glyph, "_with_bounding_box") and glyph._with_bounding_box:
             return glyph
 
+        wx, wy = glyph.dimensions
+        
         doc = minidom.parseString(glyph.xml)
         grp = doc.childNodes[0]
-        box = doc.createElement("rect")
-        box.setAttribute("x", "%.3f" % (glyph.xmin))
-        box.setAttribute("y", "%.3f" % (glyph.ymin))
-        wx, wy = glyph.dimensions
-        box.setAttribute("width", "%.3f" % wx)
-        box.setAttribute("height", "%.3f" % wy)
-        box.setAttribute("fill", "none")
-        box.setAttribute("stroke", "none")
+        box = doc.createElement("ellipse")
+        
+        box.setAttribute("cx", "%.3f" % (glyph.xmin + wx / 2))
+        box.setAttribute("cy", "%.3f" % (glyph.ymin + wy / 2))
+        box.setAttribute("rx", "%.3f" % (wx*1.2))
+        box.setAttribute("ry", "%.3f" % (wy*1.2))
+        box.setAttribute("fill", "red")
+        box.setAttribute("opacity", "0")
         grp.appendChild(box)
+        
         glyph._with_bounding_box = True
         glyph.dom = grp
         glyph.dom2xml()
