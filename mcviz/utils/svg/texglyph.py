@@ -269,7 +269,25 @@ class TexGlyph(object):
 
     @classmethod
     def from_pdgid(cls, pdgid):
-        return cls.get_library()[pdgid]
+        glyph = cls.get_library()[pdgid]
+        if hasattr(glyph, "_with_bounding_box") and glyph._with_bounding_box:
+            return glyph
+
+        doc = minidom.parseString(glyph.xml)
+        grp = doc.childNodes[0]
+        box = doc.createElement("rect")
+        box.setAttribute("x", "%.3f" % (glyph.xmin))
+        box.setAttribute("y", "%.3f" % (glyph.ymin))
+        wx, wy = glyph.dimensions
+        box.setAttribute("width", "%.3f" % wx)
+        box.setAttribute("height", "%.3f" % wy)
+        box.setAttribute("fill", "none")
+        box.setAttribute("stroke", "none")
+        grp.appendChild(box)
+        glyph._with_bounding_box = True
+        glyph.dom = grp
+        glyph.dom2xml()
+        return glyph
 
     @classmethod
     def exists(cls, pdgid):
@@ -286,6 +304,7 @@ class TexGlyph(object):
         self.ymin, self.ymax = None, None
         self.dom = None
         self.default_scale = 1
+        self._with_bounding_box = False
         self.build_svg()
 
     def build_svg(self, use_pdf = True):
