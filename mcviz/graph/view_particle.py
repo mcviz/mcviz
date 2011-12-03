@@ -248,3 +248,7 @@ class ViewParticleSummary(ViewParticle, Summary):
     @property
     def represented_particles(self):
         return [self.graph.event.particles[p] for p in self.particle_numbers]
+
+    @property
+    def n_particles(self):
+        return len(self.particle_numbers)
