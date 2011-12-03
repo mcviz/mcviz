@@ -6,6 +6,29 @@ from .texglyph import TexGlyph
 
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
+#gradientUnits="userSpaceOnUse">
+GRADIENT_XML = """<radialGradient id="red_blue" cx="0%" cy="0%" fx="100%" fy="100%">
+    <stop offset="0%" style="stop-color:rgb(255,0,0);stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:rgb(0,0,255);stop-opacity:1"/>
+</radialGradient>"""
+GRADIENT_XML = """<linearGradient id="red_blue" x1="0%" y1="50%" x2="50%" y2="100%">
+    <stop offset="0%" style="stop-color:rgb(255,0,0);stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:rgb(0,0,255);stop-opacity:1"/>
+</linearGradient>"""
+GRADIENT_XML="""<linearGradient id='fadeout' x1='0' y1='0' x2='1' y2='0'>
+    <stop stop-color='#00f' offset='0%' style='stop-opacity:1;' />
+    <stop stop-color='#00f' offset='100%' style='stop-opacity:0;' />
+</linearGradient>"""
+MARKER_XML="""
+<marker id='fadeline1' markerWidth='3' markerHeight='1'>
+    <line x1='0' y1='0' x2='5' y2='0' stroke='url(#fadeout)' stroke-width='1'/>
+</marker>
+<marker id='fadeline2' markerWidth='3' markerHeight='1'>
+    <line x1='0' y1='0' x2='5' y2='0' stroke='url(#fadeout)' stroke-width='1'/>
+</marker>
+<marker id='fadeline3' markerWidth='3' markerHeight='1'>
+    <line x1='0' y1='0' x2='5' y2='0' stroke='url(#fadeout)' stroke-width='1'/>
+</marker>"""
 
 
 class XMLNode(object):
@@ -55,6 +78,9 @@ class SVGDocument(object):
         self.svg.appendChild(RawNode('<rect id="background" x="0" y="0" width="%.1f" '
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
+        self.svg.appendChild(RawNode(GRADIENT_XML))
+        self.svg.appendChild(RawNode(MARKER_XML))
+        print(self.svg.children)
         
         self.defs = XMLNode("defs")
         self.defined_pdgids = []

@@ -145,6 +145,7 @@ def invisible_data(energy, spline, n_segments, n_segment):
     length = spline.length
     splineline = get_invisible_splines(length, n_segments, n_segment)
     if spline: splineline = spline.transform_splineline(splineline)
+    splineline.fidelity = 4 
     return splineline.svg_path_data
 
 # TUNING DEFAULTS
@@ -267,6 +268,53 @@ def multigluon(energy, spline, scale=1, **kwds):
     grp.appendChild(path1)
     grp.appendChild(path2)
     return grp
+
+def cut(energy, spline, n_particles, scale = 5, **kwds):
+    """Get an SVG fragment for a cut along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    n_segments = 8
+    mag = 1.0
+    if n_particles == 2:
+       splines = spline.bifurcate(mag)
+    elif n_particles > 2:
+       splines = spline.trifurcate(mag)
+    else:
+       splines = [spline]
+    all_paths = []
+    print(">>>%d, %f" %(n_particles,energy*scale))
+    for spline in splines:
+        print("", spline, spline.svg_path_data)
+        print(invisible_data(energy, spline, n_segments, 2))
+        paths = []
+        for i in range(n_segments*2):
+            opacity = i/(n_segments*2)
+            color = "rgb({0:d},{0:d},{0:d})".format(int(opacity*255))
+            opacity = (n_segments*2-i)/(n_segments*2)
+            paths.append(svgxml.createElement("path"))
+            paths[i].setAttribute("fill", "none")
+            paths[i].setAttribute("stroke", color)
+            paths[i].setAttribute("d", invisible_data(energy, spline, n_segments, i))
+        all_paths.extend(paths)
+    grp = svg_group(kwds)
+    for path in all_paths:
+        grp.appendChild(path)
+    return grp
+        
+#    arrowsize = (0.2 + energy) * scale * 3
+#    path = svgxml.createElement("path")
+#    path.setAttribute("fill", "none")
+#    path.setAttribute("stroke", "url(#fadeout)")
+#    #path.setAttribute("style", 'stroke:#00f;fill:none;stroke-width:0.01;')
+#    #path.setAttribute("marker-end", "url(#fadeline3)")
+#    path.setAttribute("d", spline.get_clipped(arrowsize*0.8).svg_path_data)
+#    arrow = svgxml.createElement("path")
+#    arrow.setAttribute("stroke", "url(#red_blue)")
+#    arrow.setAttribute("fill", "url(#red_blue)")
+#    arrow.setAttribute("d", pointed_arrow_data(arrowsize, spline))
+#    grp = svg_group(kwds)
+#    grp.appendChild(path)
+#    #grp.appendChild(arrow)
+#    return grp
 
 def boson(energy, spline, scale = 1, **kwds):
     """Get an SVG fragment for a boson along a spline

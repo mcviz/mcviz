@@ -16,6 +16,7 @@ class Spline(object):
         self.N = N
         self.sampled = False
         self._functionals = None
+        self.fidelity = 2
 
     def calculate_functionals(self):
         # calculate functional parameters of the spline
@@ -182,18 +183,31 @@ class Spline(object):
         p2 = self.points[2] + p3 - self.points[3]
         return Spline(p0, p1, p2, p3, self.N)
 
-    def bifurcate(self, amount=1.0):
+    def bifurcate(self, amount=1.0, start_amount=None):
+        if start_amount is None: start_amount=amount
         s1 = deepcopy(self)
-        s1.shift_by(Line(Point2D(0, amount), Point2D(self.length, amount)))
+        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
         s2 = deepcopy(self)
-        s2.shift_by(Line(Point2D(0, -amount), Point2D(self.length, -amount)))
+        s2.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
         return s1, s2
+
+    def trifurcate(self, amount=1.0, start_amount=None):
+        if start_amount is None: start_amount=amount
+        s1 = deepcopy(self)
+        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
+        s2 = deepcopy(self)
+        s3 = deepcopy(self)
+        s3.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
+        return s1, s2, s3
     
     @property
     def svg_path_data(self):
-        data = ["M%.2f %.2f" % self.points[0].tuple()]
+        f = self.fidelity
+        start_form = "M{0:.%df} {1:.%df}" % (f, f)
+        point_form = 'C{0:.%df} {1:.%df} {2:.%df} {3:.%df} {4:.%df} {5:.%df}' % (f,f,f,f,f,f)
+        data = [start_form.format(*self.points[0].tuple())]
         pts = (self.points[1].tuple() + self.points[2].tuple() + self.points[3].tuple())
-        data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
+        data.append(point_form.format(*pts))
         return "".join(data)
         #return "".join(self.raw_svg_path_data)
 
@@ -222,6 +236,7 @@ class SplineLine(object):
     def __init__(self, splines):
         self.splines = splines
         self.cumulative = None
+        self.fidelity = 2
 
     def shift_by(self, spline):
         if not self.cumulative:
@@ -231,11 +246,12 @@ class SplineLine(object):
             s.shift_by(spline, t, t + s.length)
             t += s.length
 
-    def bifurcate(self, amount=1.0):
+    def bifurcate(self, amount=1.0, start_amount=None):
+        if start_amount is None: start_amount=amount
         s1 = deepcopy(self)
-        s1.shift_by(Line(Point2D(0, amount), Point2D(self.length, amount)))
+        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
         s2 = deepcopy(self)
-        s2.shift_by(Line(Point2D(0, -amount), Point2D(self.length, -amount)))
+        s2.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
         return s1, s2
         if len(self.splines) == 1:
             # TODO. Somehow mess with the handles? Insert an inner control point
@@ -244,6 +260,15 @@ class SplineLine(object):
         spline1 = deepcopy(self).perturb("inward", amount)
         spline2 = deepcopy(self).perturb("outward", amount)
         return spline1, spline2
+
+    def trifurcate(self, amount=1.0, start_amount=None):
+        if start_amount is None: start_amount=amount
+        s1 = deepcopy(self)
+        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
+        s2 = deepcopy(self)
+        s3 = deepcopy(self)
+        s3.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
+        return s1, s2, s3
     
     def perturb(self, direction, amount):
         "Perturb the middle of a line inward or outward."
@@ -293,11 +318,13 @@ class SplineLine(object):
 
     @property
     def svg_path_data(self):
-
-        data = ["M%.2f %.2f" % self.splines[0].points[0].tuple()]
+        f = self.fidelity
+        start_form = "M{0:.%df} {1:.%df}" % (f, f)
+        point_form = 'C{0:.%df} {1:.%df} {2:.%df} {3:.%df} {4:.%df} {5:.%df}' % (f,f,f,f,f,f)
+        data = [start_form.format(*self.splines[0].points[0].tuple())]
         for s in self.splines:
             pts = (s.points[1].tuple() + s.points[2].tuple() + s.points[3].tuple())
-            data.append('C%.2f %.2f %.2f %.2f %.2f %.2f' % pts)
+            data.append(point_form.format(*pts))
         return " ".join(data)
 
         #return " ".join(s.svg_path_data for s in self.splines)

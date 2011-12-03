@@ -290,7 +290,7 @@ class Cut(Transform):
             if passed_tag in vertex.tags:
                 cut_daughters = [p for p in vertex.outgoing if passed_tag not in p.tags]
                 #print vertex, cut_daughters
-                if len(cut_daughters) > 2:
+                if len(cut_daughters) > 0:
                     vsummary = graph_view.summarize_vertices(set(d.end_vertex for d in cut_daughters))
                     vsummary.tag("cut_summary")
                     psummary = graph_view.summarize_particles(set(cut_daughters))

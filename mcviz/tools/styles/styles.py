@@ -20,8 +20,16 @@ class Default(Style):
     
     def __call__(self, layout):
         for edge in layout.edges:
-            edge.style_line_type = "identity"
-            edge.style_args.update(DEFAULT_EDGE_ARGS)
+            if "cut_summary" in edge.item.tags:
+                edge.style_line_type = "cut"
+                edge.style_args.update(DEFAULT_EDGE_ARGS)
+                try:
+                    edge.style_args["n"] = edge.n_particles
+                except AttributeError:
+                    pass
+            else:
+                edge.style_line_type = "identity"
+                edge.style_args.update(DEFAULT_EDGE_ARGS)
         
         for node in layout.nodes:
             node.style_args.update(DEFAULT_NODE_ARGS)
@@ -139,7 +147,10 @@ class FancyLines(Style):
                 edge.style_line_type = "jet"
             elif "cut_summary" in particle.tags:
                 edge.style_line_type = "cut"
-                edge.style_args["n"] = edge.n_particles
+                try:
+                    edge.style_args["n"] = edge.n_particles
+                except AttributeError:
+                    print("Edge has no n_particles property: ", edge)
             elif particle.gluon:
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_line_type = "gluon"
