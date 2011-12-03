@@ -143,12 +143,24 @@ class FancyLines(Style):
                     edge.style_line_type = "final_photon"
                 else:
                     edge.style_line_type = "photon"
+            elif particle.invisible:
+                print("got an invis")
+                edge.style_line_type = "invisible"
+            elif particle.squark:
+                edge.style_line_type = "sfermion"
             elif particle.colored:
                 edge.style_line_type = "fermion"
             elif particle.lepton:
                 edge.style_line_type = "fermion"
             elif particle.boson:
                 edge.style_line_type = "boson"
+            elif particle.gluino:
+                edge.style_args["scale"] = 0.2 * self.options["scale"]
+                edge.style_line_type = "gluino"
+            elif particle.chargino:
+                edge.style_line_type = "chargino"
+            elif particle.slepton:
+                edge.style_line_type = "sfermion"
             else:
                 edge.style_line_type = "hadron"
                 

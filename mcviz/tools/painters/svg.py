@@ -6,8 +6,9 @@ from mcviz.utils.timer import Timer; timer = Timer(log)
 from mcviz.utils.svg.svg_document import (
     XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
-from mcviz.utils.svg import (identity, photon, final_photon, gluon, multigluon,
-                             boson, fermion, hadron, vertex)
+from mcviz.utils.svg import (identity, invisible, photon, final_photon,
+                             gluon, multigluon, boson, fermion, hadron,
+                             vertex, gluino, sfermion, chargino)
 
 from .painters import StdPainter
 
@@ -24,12 +25,16 @@ class SVGPainter(StdPainter, FundamentalTool):
     document_creator = SVGDocument
 
     type_map = {"identity": identity,
+                "invisible": invisible,
                 "photon": photon, 
                 "final_photon": final_photon,
                 "gluon": gluon, 
+                "gluino": gluino,
                 "multigluon": multigluon, 
                 "boson": boson, 
                 "fermion": fermion, 
+                "sfermion": sfermion,
+                "chargino": chargino,
                 "hadron": hadron, 
                 "vertex": vertex
                 }

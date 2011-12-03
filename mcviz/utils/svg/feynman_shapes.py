@@ -6,6 +6,53 @@ svgxml = getDOMImplementation().createDocument(None, "svg", None)
 from ..spline import Spline, SplineLine, Point2D
 
 
+def get_boson_splines(length, amplitude, n_waves, power, amp):
+    N = n_waves * 2
+    wavelength = length / N
+    cntrl_strength = wavelength # OLD TUNING PARAMETER
+
+    # scaling envelope
+    divisor = N - 1
+    if power:
+        # TUNING PARAMETER
+        envelope = [1 - abs(2*i/divisor - 1)**power for i in range(N)]
+    else:
+        envelope = [1 for i in range(N)]
+
+    # x offsets of points:
+    px = [0.0] + [wavelength * (0.5 + i) for i in range(N)]
+    px.append(px[-1] + wavelength / 2)
+
+    # y offsets of points:
+    py = [0.0] + [amplitude * envelope[i] for i in range(N)] + [0.0]
+
+    splines = []
+    sgn = 1
+    for i in range(1, N + 2): # STYLE HALF OPEN PHOTONS: Was N+2
+        op  = Point2D(px[i-1], -sgn * py[i-1])
+        cp1 = Point2D(px[i-1], -sgn * py[i-1])
+        cp2 = Point2D(px[i], sgn * py[i])
+        dp  = Point2D(px[i], sgn * py[i])
+        if i == 1:
+            cp1 = op
+        elif i == N+1:
+            cp2 = dp
+        splines.append(Spline(op, cp1, cp2, dp))
+        sgn = -sgn
+    return SplineLine(splines)
+
+def get_invisible_splines(length, n_segments, n):
+    N = n_segments*2 - 1
+    wavelength = length / N
+
+    # x offsets of points:
+    px_start = wavelength*n
+    px_mid = wavelength*(n+0.5)
+    px_end = wavelength*(n+1)
+
+    splines = [Spline(Point2D(px_start, 0), Point2D(px_mid, 0), Point2D(px_mid, 0), Point2D(px_end, 0))]
+    return SplineLine(splines)
+
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
     N = n_waves * 2
     wavelength = length / N
@@ -75,6 +122,32 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
 # contain some policy
 
 # TUNING DEFAULTS
+def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
+    """Get the SVG path data for a boson.
+    energy must be between 0 and 1"""
+    length = spline.length
+    power = None
+    amp = amp * 0.5
+    # Here are parametrizations:
+    energy = min(1, max(0,energy))
+    amplitude = (0.5 + 0.5*energy) * amp * 3 # TUNING FUNCTION
+    n_per_10 = (n_min + energy * (n_max - n_min)) / amp
+    n = max(3, int(n_per_10 * length / 10))
+    splineline = get_boson_splines(length, amplitude, n, power,
+                                    amplitude)
+    if spline: splineline = spline.transform_splineline(splineline)
+    return splineline.svg_path_data
+
+# TUNING DEFAULTS
+def invisible_data(energy, spline, n_segments, n_segment):
+    """Get the SVG path data for an invisible particle segment.
+    energy must be between 0 and 1"""
+    length = spline.length
+    splineline = get_invisible_splines(length, n_segments, n_segment)
+    if spline: splineline = spline.transform_splineline(splineline)
+    return splineline.svg_path_data
+
+# TUNING DEFAULTS
 def photon_data(energy, spline, n_max = 10, n_min = 3, power = 5, amp = 1, half_open = False):
     """Get the SVG path data for a photon. 
     energy must be between 0 and 1"""
@@ -102,14 +175,6 @@ def gluon_data(energy, spline, n_max = 11, n_min = 1, amp = 1):
     splineline = get_gluon_splines(length, amplitude, n, amplitude)
     if spline: splineline = spline.transform_splineline(splineline)
     return splineline.svg_path_data
-
-# TUNING DEFAULTS
-def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
-    """Get the SVG path data for a boson.
-    energy must be between 0 and 1
-    either length or spline must be given."""
-    a = amp / 3 # TUNING PARAMETER
-    return photon_data(energy, spline, n_max, n_min, power = None, amp = a)
 
 def fermion_arrow_data(size, spline):
     """Returns the path data for an arrow in the middle of the given spline"""
@@ -170,13 +235,23 @@ def photon(energy, spline, scale = 1, **kwds):
     return grp
 
 def gluon(energy, spline, scale = 1, **kwds):
-    """Get an SVG fragment for a photon along a spline
+    """Get an SVG fragment for a gluon along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
     path = svgxml.createElement("path")
     path.setAttribute("fill", "none")
     path.setAttribute("d", gluon_data(energy, spline, amp = scale))
     grp = svg_group(kwds)
     grp.appendChild(path)
+    return grp
+
+def gluino(energy, spline, scale = 1, **kwds):
+    """Get an SVG fragment for a gluino along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    grp = gluon(energy, spline, scale = 1, **kwds)
+    path2 = svgxml.createElement("path")
+    path2.setAttribute("fill", "none")
+    path2.setAttribute("d", spline.svg_path_data)
+    grp.appendChild(path2)
     return grp
 
 def multigluon(energy, spline, scale=1, **kwds):
@@ -194,7 +269,7 @@ def multigluon(energy, spline, scale=1, **kwds):
     return grp
 
 def boson(energy, spline, scale = 1, **kwds):
-    """Get an SVG fragment for a photon along a spline
+    """Get an SVG fragment for a boson along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
     path = svgxml.createElement("path")
     path.setAttribute("fill", "none")
@@ -214,6 +289,36 @@ def fermion(energy, spline, scale = 1, **kwds):
     grp = svg_group(kwds)
     grp.appendChild(path)
     grp.appendChild(arrow)
+    return grp
+
+def sfermion(energy, spline, scale = 1, **kwds):
+    """Get an SVG fragment for a susy particle along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    grp = boson(energy, spline, scale=0.5*scale, **kwds)
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", spline.svg_path_data)
+    grp.appendChild(path)
+    return grp
+
+def chargino(energy, spline, scale = 1, **kwds):
+    grp = photon(energy, spline, scale, **kwds)
+    path = svgxml.createElement("path")
+    path.setAttribute("fill", "none")
+    path.setAttribute("d", spline.svg_path_data)
+    grp.appendChild(path)
+    return grp
+
+def invisible(energy, spline, scale = 1, **kwds):
+    n_segments = 8
+    paths = []
+    for i in range(n_segments):
+        paths.append(svgxml.createElement("path"))
+        paths[i].setAttribute("fill", "none")
+        paths[i].setAttribute("d", invisible_data(energy, spline, n_segments, i*2))
+    grp = svg_group(kwds)
+    for path in paths:
+        grp.appendChild(path)
     return grp
 
 def hadron(energy, spline, scale = 1, **kwds):
