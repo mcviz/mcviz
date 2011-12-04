@@ -29,7 +29,34 @@ class FixedHadronsLayout(BaseLayout):
                 obj.subgraph = "hadronization"
         return super(FixedHadronsLayout, self).process_node(obj)
 
-
+class FixedJetsLayout(BaseLayout):
+    """
+    Place all of the hadronization vertices on the same rank.
+    """
+    def __init__(self, *args, **kwargs):
+        super(FixedJetsLayout, self).__init__(*args, **kwargs)
+        self.jetnodes = {}
+    
+    def get_jetnode(self, tag, particle):
+        if tag in self.jetnodes: return self.jetnodes[tag]
+        result = LayoutNode(particle.item, label="CLUSTER")
+        self.jetnodes[tag] = result
+        return result
+        
+    def get_particle(self, particle):
+        part = super(FixedJetsLayout, self).get_particle(particle)
+        if particle.final:
+            for t in particle.tags:
+                if "jet" in t:
+                    cluster = self.get_jetnode(t, part)
+                    
+                    # I have no idea what I'm doing here.
+                    
+                    up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
+                    
+                    break
+        
+        return part
 class FixedInitialLayout(BaseLayout):
     """
     Place all of the initial vertices on the same rank.

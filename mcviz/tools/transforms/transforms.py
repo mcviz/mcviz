@@ -101,6 +101,39 @@ def chainmail(graph_view, Retry):
             summary.multiple_count = sum(getattr(x, "multiple_count", 1) for x in siblings)
             raise Retry
 
+_jet_algos = ("kt", "cambridge", "antikt", "genkt", "cambridge_for_passive", "genkt_for_passive", "ee_kt", "ee_genkt")
+class Jets(Transform):
+    _name = "Jets"
+    _args = [Arg("algorithm", str, "Jet Algorithm", default="antikt", choices=_jet_algos),
+             Arg("r", float, "Delta R for the Jet Algorithm", default=0.4),
+             Arg("tracks", Arg.bool, "Only cluster charged particles", default=False)]
+    def __call__(self, graph_view):
+        from mcviz.jet import cluster_jets, JetAlgorithms
+        from math import hypot
+        track_jets = self.options["tracks"]
+        if track_jets:
+            raise Exception("Unimplemented!")
+        def pselect(p):
+            return p.final_state and not p.invisible and (p.charge != 0 if track_jets else True)
+        final_state_particles = [p for p in graph_view.particles if pselect(p)]
+        jets = cluster_jets(final_state_particles, getattr(JetAlgorithms, self.options["algorithm"]))
+        print "Converted %i final state particles into %i jets" % (len(final_state_particles), len(jets))
+
+        def pt(jet):
+            return hypot(*jet.p[:2])
+        for i, jet in enumerate(sorted(jets, key=pt, reverse=True)):
+            print "Created jet: np=%2i, %r, %r" % (len(jet.particles), jet.p, jet.e)
+            if i >= 5:
+                break
+            jet_start_vertices = set(p.start_vertex for p in jet.particles)
+            jet_end_vertices = set(p.end_vertex for p in jet.particles)
+            vs_summary = graph_view.summarize_vertices(jet_start_vertices)
+            ve_summary = graph_view.summarize_vertices(jet_end_vertices)
+            p_summary = graph_view.summarize_particles(jet.particles)
+            vs_summary.tag("cluster")
+            ve_summary.tag("cluster")
+            p_summary.tag("cluster")
+
 @Transform.decorate("Clusters")
 def contract_clusters(graph_view):
     """

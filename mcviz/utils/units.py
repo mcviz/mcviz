@@ -20,7 +20,8 @@ length_units = ("mm", "cm")
 
 
 class Units(object):
-    def __init__(self, string = "GeV MM"):
+    def __init__(self, string = None):
+        if string is None: string = "GeV MM"
         self.energy_mag_string = ""
         self.energy_mag = 1
         self.length_mag_string = ""
