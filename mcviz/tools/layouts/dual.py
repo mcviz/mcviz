@@ -26,11 +26,22 @@ class DualLayout(BaseLayout, FundamentalTool):
             lo.width = lo.height = 1.0
         elif "cluster" in particle.tags:
             lo.label = "cluster (%.4g %seV)" % self.graph.units.pick_mag(particle.pt)
+        elif "cut_summary" in particle.tags:
+            pass #lo.label = None
+        elif "jet" in particle.tags:
+            jet_id = 0
+            for tag in particle.tags:
+               if tag != 'jet' and tag[:4] == 'jet_':
+                    jet_id = int(tag[4:]) + 1
+            lo.label = "jet {0:d} ({1:.4g} {2:s}eV)".format(jet_id, *self.graph.units.pick_mag(particle.pt))
         
         return lo
    
     def get_vertex(self, vertex, node_style=None):
         items = []
+
+        if "cut_summary" in vertex.tags and len(vertex.incoming) > 1:
+            return None
 
         need_help = False
         if self.options["helper_vertices"]:

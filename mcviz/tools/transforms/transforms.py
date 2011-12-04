@@ -204,19 +204,15 @@ def pluck(graph_view, start, end, param, keep_down, keep_up):
     Keep a specific vertex and particles travelling through it
     """
     
-    if end:
-        keep = range(start, end)
-    else:
-        keep = [start]
+    if not end:
+        end = start
 
     keep_particles = [] #particle for particle in graph_view.particles if abs(particle.pdgid) in keep]
     for particle in graph_view.particles:
         if particle.pdgid == -6: print(abs(getattr(particle, param)))
         if hasattr(particle, param):
-            if abs(getattr(particle, param)) in keep:
+            if start <= abs(getattr(particle, param)) <= end:
                 keep_particles.append(particle)
-        else:
-            print('nay')
 
     keep_objects = set()
     max_depth = keep_down
@@ -359,14 +355,14 @@ class Cut(Transform):
                     psummary.tag("cut_summary")
 
         for p in graph_view.particles:
-           if p in keep:
-               continue
+            if p in keep:
+                continue
 
-           if p.start_vertex in keep: # and not p.start_vertex.hadronization:
-              # Don't discard
-              continue
+            if p.start_vertex in keep: # and not p.start_vertex.hadronization:
+                # Don't discard
+                continue
 
-           graph_view.drop(p)
+            graph_view.drop(p)
 
         #Clean out 'dangling' vertices
         for vertex in graph_view.vertices:

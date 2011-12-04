@@ -3,9 +3,9 @@ from __future__ import division
 from math import log10
 
 from mcviz.tools import FundamentalTool, Arg
+from mcviz.graph import ViewVertex
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
-
 
 class FeynmanLayout(BaseLayout, FundamentalTool):
     """
@@ -15,6 +15,8 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
     _name = "Feynman"
 
     _args = [Arg("gluid", Arg.bool, "label gluons")]
+
+    dummy_number = -1000
     
     def get_subgraph(self, vertex):
         if vertex.initial:
@@ -59,8 +61,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.show = False
             
         elif "cut_summary" in vertex.tags:
-            lo.width = lo.height = 0.5
-            lo.style_args['opacity'] = 0.2
+            return None
             
         elif "summary" in vertex.tags:
             lo.width = lo.height = 1.0
@@ -77,7 +78,13 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
    
     def get_particle(self, particle):
 
-        lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
+        if "cut_summary" in particle.tags:
+            dummy = ViewVertex(self.graph)
+            dummy.order_number = self.dummy_number
+            self.dummy_number -= 1
+            lo = LayoutEdge(particle, particle.start_vertex, dummy)
+        else:
+            lo = LayoutEdge(particle, particle.start_vertex, particle.end_vertex)
         lo.label_size = self.options["label_size"]
 
         if "cluster" in particle.tags:
@@ -86,7 +93,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.label = None
         elif "cut_summary" in particle.tags:
             lo.label = None
-        elif "jet" in particle.tags or "cut_summary" in particle.tags:
+        elif "jet" in particle.tags:
             jet_id = 0
             for tag in particle.tags:
                if tag != 'jet' and tag[:4] == 'jet_':
