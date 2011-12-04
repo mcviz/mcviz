@@ -1,5 +1,5 @@
-/* http://keith-wood.name/svg.html
-   SVG for jQuery v1.4.2.
+﻿/* http://keith-wood.name/svg.html
+   SVG for jQuery v1.4.4.
    Written by Keith Wood (kbwood{at}iinet.com.au) August 2007.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -82,7 +82,9 @@ $.extend(SVGManager.prototype, {
 
 	/* Add the SVG object to its container. */
 	_attachSVG: function(container, settings) {
-		if ($(container).hasClass(this.markerClassName)) {
+		var svg = (container.namespaceURI == this.svgNS ? container : null);
+		var container = (svg ? null : container);
+		if ($(container || svg).hasClass(this.markerClassName)) {
 			return;
 		}
 		if (typeof settings == 'string') {
@@ -91,14 +93,20 @@ $.extend(SVGManager.prototype, {
 		else if (typeof settings == 'function') {
 			settings = {onLoad: settings};
 		}
-		$(container).addClass(this.markerClassName);
+		$(container || svg).addClass(this.markerClassName);
 		try {
-			var svg = document.createElementNS(this.svgNS, 'svg');
-			svg.setAttribute('version', '1.1');
-			svg.setAttribute('width', container.clientWidth);
-			svg.setAttribute('height', container.clientHeight);
-			container.appendChild(svg);
-			this._afterLoad(container, svg, settings);
+			if (!svg) {
+				svg = document.createElementNS(this.svgNS, 'svg');
+				svg.setAttribute('version', '1.1');
+				if (container.clientWidth > 0) {
+					svg.setAttribute('width', container.clientWidth);
+				}
+				if (container.clientHeight > 0) {
+					svg.setAttribute('height', container.clientHeight);
+				}
+				container.appendChild(svg);
+			}
+			this._afterLoad(container, svg, settings || {});
 		}
 		catch (e) {
 			if ($.browser.msie) {
@@ -107,7 +115,8 @@ $.extend(SVGManager.prototype, {
 				}
 				this._settings[container.id] = settings;
 				container.innerHTML = '<embed type="image/svg+xml" width="100%" ' +
-					'height="100%" src="' + (settings.initPath || '') + 'blank.svg"/>';
+					'height="100%" src="' + (settings.initPath || '') + 'blank.svg" ' +
+					'pluginspage="http://www.adobe.com/svg/viewer/install/main.html"/>';
 			}
 			else {
 				container.innerHTML = '<p class="svg_error">' +
@@ -142,9 +151,9 @@ $.extend(SVGManager.prototype, {
 	/* Post-processing once loaded. */
 	_afterLoad: function(container, svg, settings) {
 		var settings = settings || this._settings[container.id];
-		this._settings[container.id] = null;
+		this._settings[container ? container.id : ''] = null;
 		var wrapper = new this._wrapperClass(svg, container);
-		$.data(container, PROP_NAME, wrapper);
+		$.data(container || svg, PROP_NAME, wrapper);
 		try {
 			if (settings.loadURL) { // Load URL
 				wrapper.load(settings.loadURL, settings);
@@ -153,7 +162,7 @@ $.extend(SVGManager.prototype, {
 				wrapper.configure(settings.settings);
 			}
 			if (settings.onLoad && !settings.loadURL) { // Onload callback
-				settings.onLoad.apply(container, [wrapper]);
+				settings.onLoad.apply(container || svg, [wrapper]);
 			}
 		}
 		catch (e) {
@@ -179,7 +188,10 @@ $.extend(SVGManager.prototype, {
 		if (!$container.hasClass(this.markerClassName)) {
 			return;
 		}
-		$container.removeClass(this.markerClassName).empty();
+		$container.removeClass(this.markerClassName);
+		if (container.namespaceURI != this.svgNS) {
+			$container.empty();
+		}
 		$.removeData(container, PROP_NAME);
 	},
 
@@ -191,6 +203,13 @@ $.extend(SVGManager.prototype, {
 	   @param  extClass  (function) the extension class constructor */
 	addExtension: function(name, extClass) {
 		this._extensions.push([name, extClass]);
+	},
+
+	/* Does this node belong to SVG?
+	   @param  node  (element) the node to be tested
+	   @return  (boolean) true if an SVG node, false if not */
+	isSVGElem: function(node) {
+		return (node.nodeType == 1 && node.namespaceURI == $.svg.svgNS);
 	}
 });
 
@@ -209,12 +228,12 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Retrieve the width of the SVG object. */
 	_width: function() {
-		return this._container.clientWidth;
+		return (this._container ? this._container.clientWidth : this._svg.width);
 	},
 
 	/* Retrieve the height of the SVG object. */
 	_height: function() {
-		return this._container.clientHeight;
+		return (this._container ? this._container.clientHeight : this._svg.height);
 	},
 
 	/* Retrieve the root SVG element.
@@ -223,23 +242,29 @@ $.extend(SVGWrapper.prototype, {
 		return this._svg;
 	},
 
-	/* Configure the SVG root.
+	/* Configure a SVG node.
+	   @param  node      (element, optional) the node to configure
 	   @param  settings  (object) additional settings for the root
 	   @param  clear     (boolean) true to remove existing attributes first,
 	                     false to add to what is already there (optional)
 	   @return  (SVGWrapper) this root */
-	configure: function(settings, clear) {
+	configure: function(node, settings, clear) {
+		if (!node.nodeName) {
+			clear = settings;
+			settings = node;
+			node = this._svg;
+		}
 		if (clear) {
-			for (var i = this._svg.attributes.length - 1; i >= 0; i--) {
-				var attr = this._svg.attributes.item(i);
+			for (var i = node.attributes.length - 1; i >= 0; i--) {
+				var attr = node.attributes.item(i);
 				if (!(attr.nodeName == 'onload' || attr.nodeName == 'version' || 
 						attr.nodeName.substring(0, 5) == 'xmlns')) {
-					this._svg.attributes.removeNamedItem(attr.nodeName);
+					node.attributes.removeNamedItem(attr.nodeName);
 				}
 			}
 		}
 		for (var attrName in settings) {
-			this._svg.setAttribute(attrName, settings[attrName]);
+			node.setAttribute($.svg._attrNames[attrName] || attrName, settings[attrName]);
 		}
 		return this;
 	},
@@ -259,10 +284,10 @@ $.extend(SVGWrapper.prototype, {
 		if (element) {
 			for (var name in settings) {
 				if (settings[name] == null) {
-					element.removeAttribute(name);
+					element.removeAttribute($.svg._attrNames[name] || name);
 				}
 				else {
-					element.setAttribute(name, settings[name]);
+					element.setAttribute($.svg._attrNames[name] || name, settings[name]);
 				}
 			}
 		}
@@ -275,7 +300,10 @@ $.extend(SVGWrapper.prototype, {
 		names.splice(names.length, 0, 'settings');
 		var args = {};
 		var offset = 0;
-		if (values[0] != null && (typeof values[0] != 'object' || !values[0].nodeName)) {
+		if (values[0] != null && values[0].jquery) {
+			values[0] = values[0][0];
+		}
+		if (values[0] != null && !(typeof values[0] == 'object' && values[0].nodeName)) {
 			args['parent'] = null;
 			offset = 1;
 		}
@@ -294,7 +322,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a title.
-	   @param  parent    (element) the parent node for the new title (optional)
+	   @param  parent    (element or jQuery) the parent node for the new title (optional)
 	   @param  text      (string) the text of the title
 	   @param  settings  (object) additional settings for the title (optional)
 	   @return  (element) the new title node */
@@ -306,7 +334,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a description.
-	   @param  parent    (element) the parent node for the new description (optional)
+	   @param  parent    (element or jQuery) the parent node for the new description (optional)
 	   @param  text      (string) the text of the description
 	   @param  settings  (object) additional settings for the description (optional)
 	   @return  (element) the new description node */
@@ -318,7 +346,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a definitions node.
-	   @param  parent    (element) the parent node for the new definitions (optional)
+	   @param  parent    (element or jQuery) the parent node for the new definitions (optional)
 	   @param  id        (string) the ID of this definitions (optional)
 	   @param  settings  (object) additional settings for the definitions (optional)
 	   @return  (element) the new definitions node */
@@ -329,23 +357,23 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a symbol definition.
-	   @param  parent    (element) the parent node for the new symbol (optional)
+	   @param  parent    (element or jQuery) the parent node for the new symbol (optional)
 	   @param  id        (string) the ID of this symbol
 	   @param  x1        (number) the left coordinate for this symbol
 	   @param  y1        (number) the top coordinate for this symbol
-	   @param  x2        (number) the right coordinate for this symbol
-	   @param  y2        (number) the bottom coordinate for this symbol
+	   @param  width     (number) the width of this symbol
+	   @param  height    (number) the height of this symbol
 	   @param  settings  (object) additional settings for the symbol (optional)
 	   @return  (element) the new symbol node */
-	symbol: function(parent, id, x1, y1, x2, y2, settings) {
-		var args = this._args(arguments, ['id', 'x1', 'y1', 'x2', 'y2']);
-		return this._makeNode(args.parent, 'symbol', $.extend(
-			{id: args.id, viewBox: args.x1 + ' ' + args.y1 + ' ' + args.x2 + ' ' + args.y2},
+	symbol: function(parent, id, x1, y1, width, height, settings) {
+		var args = this._args(arguments, ['id', 'x1', 'y1', 'width', 'height']);
+		return this._makeNode(args.parent, 'symbol', $.extend({id: args.id,
+			viewBox: args.x1 + ' ' + args.y1 + ' ' + args.width + ' ' + args.height},
 			args.settings || {}));
 	},
 
 	/* Add a marker definition.
-	   @param  parent    (element) the parent node for the new marker (optional)
+	   @param  parent    (element or jQuery) the parent node for the new marker (optional)
 	   @param  id        (string) the ID of this marker
 	   @param  refX      (number) the x-coordinate for the reference point
 	   @param  refY      (number) the y-coordinate for the reference point
@@ -363,7 +391,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a style node.
-	   @param  parent    (element) the parent node for the new node (optional)
+	   @param  parent    (element or jQuery) the parent node for the new node (optional)
 	   @param  styles    (string) the CSS styles
 	   @param  settings  (object) additional settings for the node (optional)
 	   @return  (element) the new style node */
@@ -379,7 +407,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a script node.
-	   @param  parent    (element) the parent node for the new node (optional)
+	   @param  parent    (element or jQuery) the parent node for the new node (optional)
 	   @param  script    (string) the JavaScript code
 	   @param  type      (string) the MIME type for the code (optional, default 'text/javascript')
 	   @param  settings  (object) additional settings for the node (optional)
@@ -388,7 +416,7 @@ $.extend(SVGWrapper.prototype, {
 		var args = this._args(arguments, ['script', 'type'], ['type']);
 		var node = this._makeNode(args.parent, 'script', $.extend(
 			{type: args.type || 'text/javascript'}, args.settings || {}));
-		node.appendChild(this._svg.ownerDocument.createTextNode(this._escapeXML(args.script)));
+		node.appendChild(this._svg.ownerDocument.createTextNode(args.script));
 		if (!$.browser.mozilla) {
 			$.globalEval(args.script);
 		}
@@ -397,7 +425,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Add a linear gradient definition.
 	   Specify all of x1, y1, x2, y2 or none of them.
-	   @param  parent    (element) the parent node for the new gradient (optional)
+	   @param  parent    (element or jQuery) the parent node for the new gradient (optional)
 	   @param  id        (string) the ID for this gradient
 	   @param  stops     (string[][]) the gradient stops, each entry is
 	                     [0] is offset (0.0-1.0 or 0%-100%), [1] is colour, 
@@ -419,7 +447,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Add a radial gradient definition.
 	   Specify all of cx, cy, r, fx, fy or none of them.
-	   @param  parent    (element) the parent node for the new gradient (optional)
+	   @param  parent    (element or jQuery) the parent node for the new gradient (optional)
 	   @param  id        (string) the ID for this gradient
 	   @param  stops     (string[][]) the gradient stops, each entry
 	                     [0] is offset, [1] is colour, [2] is opacity (optional)
@@ -453,7 +481,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Add a pattern definition.
 	   Specify all of vx, vy, xwidth, vheight or none of them.
-	   @param  parent    (element) the parent node for the new pattern (optional)
+	   @param  parent    (element or jQuery) the parent node for the new pattern (optional)
 	   @param  id        (string) the ID for this pattern
 	   @param  x         (number) the x-coordinate for the left edge of the pattern
 	   @param  y         (number) the y-coordinate for the top edge of the pattern
@@ -474,8 +502,20 @@ $.extend(SVGWrapper.prototype, {
 		return this._makeNode(args.parent, 'pattern', $.extend(sets, args.settings || {}));
 	},
 
+	/* Add a clip path definition.
+	   @param  parent  (element) the parent node for the new element (optional)
+	   @param  id      (string) the ID for this path
+	   @param  units   (string) either 'userSpaceOnUse' (default) or 'objectBoundingBox' (optional)
+	   @return  (element) the new clipPath node */
+	clipPath: function(parent, id, units, settings) {
+		var args = this._args(arguments, ['id', 'units']);
+		args.units = args.units || 'userSpaceOnUse';
+		return this._makeNode(args.parent, 'clipPath', $.extend(
+			{id: args.id, clipPathUnits: args.units}, args.settings || {}));
+	},
+
 	/* Add a mask definition.
-	   @param  parent    (element) the parent node for the new mask (optional)
+	   @param  parent    (element or jQuery) the parent node for the new mask (optional)
 	   @param  id        (string) the ID for this mask
 	   @param  x         (number) the x-coordinate for the left edge of the mask
 	   @param  y         (number) the y-coordinate for the top edge of the mask
@@ -504,7 +544,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Add an embedded SVG element.
 	   Specify all of vx, vy, vwidth, vheight or none of them.
-	   @param  parent    (element) the parent node for the new node (optional)
+	   @param  parent    (element or jQuery) the parent node for the new node (optional)
 	   @param  x         (number) the x-coordinate for the left edge of the node
 	   @param  y         (number) the y-coordinate for the top edge of the node
 	   @param  width     (number) the width of the node
@@ -525,7 +565,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Create a group.
-	   @param  parent    (element) the parent node for the new group (optional)
+	   @param  parent    (element or jQuery) the parent node for the new group (optional)
 	   @param  id        (string) the ID of this group (optional)
 	   @param  settings  (object) additional settings for the group (optional)
 	   @return  (element) the new group node */
@@ -536,7 +576,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Add a usage reference.
 	   Specify all of x, y, width, height or none of them.
-	   @param  parent    (element) the parent node for the new node (optional)
+	   @param  parent    (element or jQuery) the parent node for the new node (optional)
 	   @param  x         (number) the x-coordinate for the left edge of the node (optional)
 	   @param  y         (number) the y-coordinate for the top edge of the node (optional)
 	   @param  width     (number) the width of the node (optional)
@@ -559,7 +599,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a link, which applies to all child elements.
-	   @param  parent    (element) the parent node for the new link (optional)
+	   @param  parent    (element or jQuery) the parent node for the new link (optional)
 	   @param  ref       (string) the target URL
 	   @param  settings  (object) additional settings for the link (optional)
 	   @return  (element) the new link node */
@@ -571,7 +611,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add an image.
-	   @param  parent    (element) the parent node for the new image (optional)
+	   @param  parent    (element or jQuery) the parent node for the new image (optional)
 	   @param  x         (number) the x-coordinate for the left edge of the image
 	   @param  y         (number) the y-coordinate for the top edge of the image
 	   @param  width     (number) the width of the image
@@ -589,7 +629,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw a path.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  path      (string or SVGPath) the path to draw
 	   @param  settings  (object) additional settings for the shape (optional)
 	   @return  (element) the new shape node */
@@ -601,7 +641,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Draw a rectangle.
 	   Specify both of rx and ry or neither.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  x         (number) the x-coordinate for the left edge of the rectangle
 	   @param  y         (number) the y-coordinate for the top edge of the rectangle
 	   @param  width     (number) the width of the rectangle
@@ -618,7 +658,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw a circle.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  cx        (number) the x-coordinate for the centre of the circle
 	   @param  cy        (number) the y-coordinate for the centre of the circle
 	   @param  r         (number) the radius of the circle
@@ -631,7 +671,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw an ellipse.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  cx        (number) the x-coordinate for the centre of the ellipse
 	   @param  cy        (number) the y-coordinate for the centre of the ellipse
 	   @param  rx        (number) the x-radius of the ellipse
@@ -645,7 +685,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw a line.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  x1        (number) the x-coordinate for the start of the line
 	   @param  y1        (number) the y-coordinate for the start of the line
 	   @param  x2        (number) the x-coordinate for the end of the line
@@ -659,7 +699,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw a polygonal line.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  points    (number[][]) the x-/y-coordinates for the points on the line
 	   @param  settings  (object) additional settings for the shape (optional)
 	   @return  (element) the new shape node */
@@ -669,7 +709,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw a polygonal shape.
-	   @param  parent    (element) the parent node for the new shape (optional)
+	   @param  parent    (element or jQuery) the parent node for the new shape (optional)
 	   @param  points    (number[][]) the x-/y-coordinates for the points on the shape
 	   @param  settings  (object) additional settings for the shape (optional)
 	   @return  (element) the new shape node */
@@ -690,7 +730,7 @@ $.extend(SVGWrapper.prototype, {
 
 	/* Draw text.
 	   Specify both of x and y or neither of them.
-	   @param  parent    (element) the parent node for the text (optional)
+	   @param  parent    (element or jQuery) the parent node for the text (optional)
 	   @param  x         (number or number[]) the x-coordinate(s) for the text (optional)
 	   @param  y         (number or number[]) the y-coordinate(s) for the text (optional)
 	   @param  value     (string) the text content or
@@ -711,7 +751,7 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Draw text along a path.
-	   @param  parent    (element) the parent node for the text (optional)
+	   @param  parent    (element or jQuery) the parent node for the text (optional)
 	   @param  path      (string) the ID of the path
 	   @param  value     (string) the text content or
 	                     (SVGText) text with spans and references
@@ -760,10 +800,10 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add a custom SVG element.
-	   @param  parent    (element) the parent node for the new element (optional)
+	   @param  parent    (element or jQuery) the parent node for the new element (optional)
 	   @param  name      (string) the name of the element
 	   @param  settings  (object) additional settings for the element (optional)
-	   @return  (element) the new title node */
+	   @return  (element) the new custom node */
 	other: function(parent, name, settings) {
 		var args = this._args(arguments, ['name']);
 		return this._makeNode(args.parent, args.name, args.settings || {});
@@ -785,15 +825,16 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Add an existing SVG node to the diagram.
-	   @param  parent  (element) the parent node for the new node (optional)
+	   @param  parent  (element or jQuery) the parent node for the new node (optional)
 	   @param  node    (element) the new node to add or
 	                   (string) the jQuery selector for the node or
 	                   (jQuery collection) set of nodes to add
 	   @return  (SVGWrapper) this wrapper */
 	add: function(parent, node) {
-		var args = this._args(arguments, ['node']);
+		var args = this._args((arguments.length == 1 ? [null, parent] : arguments), ['node']);
 		var svg = this;
 		args.parent = args.parent || this._svg;
+		args.node = (args.node.jquery ? args.node : $(args.node));
 		try {
 			if ($.svg._renesis) {
 				throw 'Force traversal';
@@ -801,7 +842,6 @@ $.extend(SVGWrapper.prototype, {
 			args.parent.appendChild(args.node.cloneNode(true));
 		}
 		catch (e) {
-			args.node = (args.node.jquery ? args.node : $(args.node));
 			args.node.each(function() {
 				var child = svg._cloneAsSVG(this);
 				if (child) {
@@ -812,7 +852,32 @@ $.extend(SVGWrapper.prototype, {
 		return this;
 	},
 
-	/* SVG nodes must belong to the SVG namespace, so clone and ensure this is so. */
+	/* Clone an existing SVG node and add it to the diagram.
+	   @param  parent  (element or jQuery) the parent node for the new node (optional)
+	   @param  node    (element) the new node to add or
+	                   (string) the jQuery selector for the node or
+	                   (jQuery collection) set of nodes to add
+	   @return  (element[]) collection of new nodes */
+	clone: function(parent, node) {
+		var svg = this;
+		var args = this._args((arguments.length == 1 ? [null, parent] : arguments), ['node']);
+		args.parent = args.parent || this._svg;
+		args.node = (args.node.jquery ? args.node : $(args.node));
+		var newNodes = [];
+		args.node.each(function() {
+			var child = svg._cloneAsSVG(this);
+			if (child) {
+				child.id = '';
+				args.parent.appendChild(child);
+				newNodes.push(child);
+			}
+		});
+		return newNodes;
+	},
+
+	/* SVG nodes must belong to the SVG namespace, so clone and ensure this is so.
+	   @param  node  (element) the SVG node to clone
+	   @return  (element) the cloned node */
 	_cloneAsSVG: function(node) {
 		var newNode = null;
 		if (node.nodeType == 1) { // element
@@ -822,7 +887,8 @@ $.extend(SVGWrapper.prototype, {
 				var attr = node.attributes.item(i);
 				if (attr.nodeName != 'xmlns' && attr.nodeValue) {
 					if (attr.prefix == 'xlink') {
-						newNode.setAttributeNS($.svg.xlinkNS, attr.localName, attr.nodeValue);
+						newNode.setAttributeNS($.svg.xlinkNS,
+							attr.localName || attr.baseName, attr.nodeValue);
 					}
 					else {
 						newNode.setAttribute(this._checkName(attr.nodeName), attr.nodeValue);
@@ -876,11 +942,17 @@ $.extend(SVGWrapper.prototype, {
 	                       onLoad      (function) callback after the document has loaded,
 	                                   'this' is the container, receives SVG object and
 	                                   optional error message as a parameter
+	                       parent      (string or element or jQuery) the parent to load
+	                                   into, defaults to top-level svg element
 	   @return  (SVGWrapper) this root */
 	load: function(url, settings) {
-		settings = (typeof settings == 'boolean'? {addTo: settings} :
-			(typeof settings == 'function'? {onLoad: settings} : settings || {}));
-		if (!settings.addTo) {
+		settings = (typeof settings == 'boolean' ? {addTo: settings} :
+			(typeof settings == 'function' ? {onLoad: settings} :
+			(typeof settings == 'string' ? {parent: settings} : 
+			(typeof settings == 'object' && settings.nodeName ? {parent: settings} :
+			(typeof settings == 'object' && settings.jquery ? {parent: settings} :
+			settings || {})))));
+		if (!settings.parent && !settings.addTo) {
 			this.clear(false);
 		}
 		var size = [this._svg.getAttribute('width'), this._svg.getAttribute('height')];
@@ -889,7 +961,7 @@ $.extend(SVGWrapper.prototype, {
 		var reportError = function(message) {
 			message = $.svg.local.errorLoadingText + ': ' + message;
 			if (settings.onLoad) {
-				settings.onLoad.apply(wrapper._container, [wrapper, message]);
+				settings.onLoad.apply(wrapper._container || wrapper._svg, [wrapper, message]);
 			}
 			else {
 				wrapper.text(null, 10, 20, message);
@@ -920,6 +992,7 @@ $.extend(SVGWrapper.prototype, {
 					(messages.length ? messages[0] : errors[0]).firstChild.nodeValue);
 				return;
 			}
+			var parent = (settings.parent ? $(settings.parent)[0] : wrapper._svg);
 			var attrs = {};
 			for (var i = 0; i < data.documentElement.attributes.length; i++) {
 				var attr = data.documentElement.attributes.item(i);
@@ -927,24 +1000,27 @@ $.extend(SVGWrapper.prototype, {
 					attrs[attr.nodeName] = attr.nodeValue;
 				}
 			}
-			wrapper.configure(attrs, true);
+			wrapper.configure(parent, attrs, !settings.parent);
 			var nodes = data.documentElement.childNodes;
 			for (var i = 0; i < nodes.length; i++) {
 				try {
 					if ($.svg._renesis) {
 						throw 'Force traversal';
 					}
-					wrapper._svg.appendChild(nodes[i].cloneNode(true));
+					parent.appendChild(wrapper._svg.ownerDocument.importNode(nodes[i], true));
+					if (nodes[i].nodeName == 'script') {
+						$.globalEval(nodes[i].textContent);
+					}
 				}
 				catch (e) {
-					wrapper.add(null, nodes[i]);
+					wrapper.add(parent, nodes[i]);
 				}
 			}
 			if (!settings.changeSize) {
-				wrapper.configure({width: size[0], height: size[1]});
+				wrapper.configure(parent, {width: size[0], height: size[1]});
 			}
 			if (settings.onLoad) {
-				settings.onLoad.apply(wrapper._container, [wrapper]);
+				settings.onLoad.apply(wrapper._container || wrapper._svg, [wrapper]);
 			}
 		};
 		if (url.match('<svg')) { // Inline SVG
@@ -963,9 +1039,10 @@ $.extend(SVGWrapper.prototype, {
 	},
 
 	/* Delete a specified node.
-	   @param  node  (element) the drawing node to remove
+	   @param  node  (element or jQuery) the drawing node to remove
 	   @return  (SVGWrapper) this root */
 	remove: function(node) {
+		node = (node.jquery ? node[0] : node);
 		node.parentNode.removeChild(node);
 		return this;
 	},
@@ -1031,14 +1108,6 @@ $.extend(SVGWrapper.prototype, {
 			}
 		}
 		return svgDoc;
-	},
-	
-	/* Escape reserved characters in XML. */
-	_escapeXML: function(text) {
-		text = text.replace(/&/g, '&amp;');
-		text = text.replace(/</g, '&lt;');
-		text = text.replace(/>/g, '&gt;');
-		return text;
 	}
 });
 

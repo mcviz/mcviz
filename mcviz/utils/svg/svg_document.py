@@ -1,6 +1,7 @@
 import re
 
 from pkg_resources import resource_string, resource_exists
+from textwrap import dedent
 
 from .texglyph import TexGlyph
 from ..nanodom import XMLNode, RawNode
@@ -10,6 +11,10 @@ GRADIENT_XML="""<linearGradient id='fadeout' x1='0' y1='0' x2='1' y2='0'>
     <stop stop-color='#00f' offset='0%' style='stop-opacity:1;' />
     <stop stop-color='#00f' offset='100%' style='stop-opacity:0;' />
 </linearGradient>"""
+
+def mkattrs(**kwargs):
+    return " ".join('{0}="{1}"'.format(*i) 
+                     for i in sorted(kwargs.iteritems()))
 
 class SVGDocument(object):
     def __init__(self, wx, wy, scale=1):
@@ -155,9 +160,11 @@ class NavigableSVGDocument(SVGDocument):
                           'xmlns="http://www.w3.org/2000/svg" '
                           'xmlns:xlink="http://www.w3.org/1999/xlink" '
                           'xmlns:mcviz="http://mcviz.net" '
-                          'id="whole_document"']
+                          'id="whole_document"',
+                          'onload="mcviz_init(evt)"']
         self.full_svg_document = self.svg
         self.svg = XMLNode("g", 'id="everything"')
+        self.full_svg_document.appendChild(self.svg)
     
     def inject_javascript(self, javascript_text):
         
@@ -184,7 +191,7 @@ class NavigableSVGDocument(SVGDocument):
         
         script_fragments = self.inject_javascript(script_fragments)
                          
-        self.full_svg_document.appendChild(self.svg)
+        #self.full_svg_document.appendChild(self.svg)
         self.full_svg_document.appendChild(RawNode(script_fragments))
         self.svg = self.full_svg_document
         result = super(NavigableSVGDocument, self).toprettyxml()
@@ -196,22 +203,105 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
     Overrides inject_javascript in the case that we're running within mcviz.web
     so that the URLs are correct
     """
-    def inject_javascript(self, javascript_text):
+    def inject_javascript_(self, javascript_text):
         
         def match(m):
             (javascript_filename,) = m.groups()
             
-            from mcviz.web import get_mcviz_data_url
-            javascript_path = get_mcviz_data_url() + javascript_filename
+            #from mcviz.web import get_mcviz_data_url
+            #data_url = get_mcviz_data_url()
+            from pkg_resources import resource_filename
+            data_url = "file://" + resource_filename("mcviz.utils.svg.data", "/")
+            javascript_path = data_url + javascript_filename
             
             stag = '<script type="text/javascript" xlink:href="%s"></script>'
             return stag % javascript_path
         
         return SCRIPT_TAG.sub(match, javascript_text)
     
-    def add_particle(self, p):
-        args = p.reference, getattr(p, "name", "-"), p.pt, p.pdgid
-        attrs = 'id="%s" name="%s" pt="%s" pdg="%s"' % args
-        self.svg.appendChild(XMLNode("mcviz:particle", attrs))
+    def add_event_data(self, graph):
+    
+        element = XMLNode("mcviz:eventdata", attrs='xmlns="http://mcviz.net"')
+        self.full_svg_document.appendChild(element)
+        
+        event = graph.event
+        
+        graph.particles
+        
+        for i, p in sorted(event.particles.iteritems()):
+            element.appendChild(XMLNode("particle", mkattrs(
+                id=p.no,
+                status=p.status,
+                pdgid=p.pdgid,
+                color=p.color,
+                anticolor=p.anticolor,
+                e=p.e,
+                pt=p.pt,
+                eta=p.eta,
+                phi=p.phi,
+                m=p.m,
+                daughters=" ".join("{0.no}".format(d) for d in sorted(p.daughters)),
+            )))
+            
+    
+        element = XMLNode("mcviz:viewdata", attrs='xmlns="http://mcviz.net"')
+        self.full_svg_document.appendChild(element)
+        
+        for p in graph.particles:            
+            element.appendChild(XMLNode("particle", mkattrs(
+                id=p.reference,
+                vin=p.start_vertex.reference,
+                vout=p.end_vertex.reference,
+                event=" ".join("{0}".format(i) for i in sorted(p.represented_numbers)),
+            )))
+        
+        for vertex in graph.vertices:
+            element.appendChild(XMLNode("vertex", mkattrs(
+                id=vertex.reference,
+                event=" ".join("{0}".format(i) for i in sorted(vertex.represented_numbers)),
+                pin=" ".join(p.reference for p in vertex.incoming),
+                pout=" ".join(p.reference for p in vertex.outgoing),
+            )))
+        
+        info = RawNode(dedent("""
+            <foreignObject x="5" y="5" width="300" height="400">
+                <html xmlns="http://www.w3.org/1999/xhtml">
+                <body style="margin: 0px;" id="interface">
+                    <!-- 
+                        Webkit hack. Works because the border is correctly drawn over the SVG.
+                    -->
+                    <span style="border: 400px solid rgba(180, 180, 250, .9);">.</span>
+                    
+                    <div id="particle_info" style="padding: 0px; margin-left: 0.3em; margin-top: -0.7em;">
+                    
+                        <button id="hidelowpt">Hide low pt</button>
+                        <button id="hidehieta">Hide eta > 2</button>
+                        <button id="reset">Show all</button>
+                    
+                        <div>Particle <span id="id"></span> in:<span id="vin"></span> out:<span id="vout"></span></div>
+                        <div id="contents">
+                        </div>
+                        <div id="template" style="display: none">
+                            <div id="pdgid"></div>
+                            <div id="pt"></div>
+                            <div id="eta"></div>
+                            <div id="phi"></div>
+                            <div id="e"></div>
+                            <div id="m"></div>
+                        </div>
+                    </div>
+                    
+                </body>
+                </html>
+            </foreignObject>
+
+            <rect stroke="black" stroke-width="2px" x="5" y="5" width="300" height="400" fill="none"/>
+        """))
+        
+        self.svg.appendChild(RawNode(dedent("""
+            <circle cx="-100" cy="-100" r="0.8px" stroke-width="0.1px" stroke="red" id="selected-particle" fill="none"/>
+        """)))
+        
+        self.full_svg_document.appendChild(info)
         
         

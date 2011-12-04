@@ -1,4 +1,4 @@
-from math import atan2, log as ln
+from math import atan2, log as ln, tan
 
 class Particle(object):
 
@@ -8,7 +8,7 @@ class Particle(object):
         self.e = e
         self.m = m
         self.pt = (px**2 + py**2)**0.5
-        #p.eta = -ln(tan(atan2(p.pt, pz)/2.))
+        self.eta = -ln(tan(atan2(self.pt, pz)/2.)) if self.pt else +999
         self.phi = atan2(px, py)
         self.e = e
         self.m = m
