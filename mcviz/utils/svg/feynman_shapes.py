@@ -391,7 +391,7 @@ def chargino(energy, spline, scale = 1, **kwds):
     return grp
 
 def invisible(energy, spline, scale = 1, **kwds):
-    n_segments = 8
+    n_segments = int(spline.length*2)
     paths = []
     for i in range(n_segments):
         paths.append(svgxml.createElement("path"))
