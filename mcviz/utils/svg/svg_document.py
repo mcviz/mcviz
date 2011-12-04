@@ -3,7 +3,7 @@ import re
 from pkg_resources import resource_string, resource_exists
 from textwrap import dedent
 
-from .texglyph import TexGlyph
+from .texglyph import TexGlyphLibrary
 from ..nanodom import XMLNode, RawNode
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
@@ -39,7 +39,7 @@ class SVGDocument(object):
 
     def add_glyph(self, reference, pdgid, center, font_size, subscript=None):
 
-        if not TexGlyph.exists(pdgid):
+        if not TexGlyphLibrary.exists(pdgid):
             return self.add_text_glyph(str(pdgid), center, font_size, subscript)
 
         x, y = center
@@ -48,15 +48,18 @@ class SVGDocument(object):
         x *= self.scale
         y *= self.scale
 
-        glyph = TexGlyph.from_pdgid(pdgid)
+        glyph = TexGlyphLibrary.from_pdgid(pdgid)
         if not pdgid in self.defined_pdgids:
+            if abs(pdgid) > 1000000000 or abs(pdgid) < 10:
+                print "adding pdgid ", pdgid, glyph.xml
+
             self.defs.appendChild(RawNode(glyph.xml))
             self.defined_pdgids.append(pdgid)
 
         if False: #options.debug_labels:
             wx, wy = glyph.dimensions
-            wx *= font_size * glyph.default_scale
-            wy *= font_size * glyph.default_scale
+            wx *= font_size
+            wy *= font_size
 
             box = XMLNode("rect")
             box.setAttribute("mcviz:r", reference)
@@ -67,8 +70,8 @@ class SVGDocument(object):
             box.setAttribute("fill", "red")
             self.svg.appendChild(box)
 
-        x -= 0.5 * (glyph.xmin + glyph.xmax) * font_size * glyph.default_scale
-        y -= 0.5 * (glyph.ymin + glyph.ymax) * font_size * glyph.default_scale
+        x -= 0.5 * (glyph.xmin + glyph.xmax) * font_size
+        y -= 0.5 * (glyph.ymin + glyph.ymax) * font_size
 
         use = XMLNode("use")
         use.setAttribute("mcviz:r", reference)
@@ -78,8 +81,8 @@ class SVGDocument(object):
         use.setAttribute("xlink:href", "#pdg%i"%pdgid)
         self.svg.appendChild(use)
 
-        xw = glyph.xmax * glyph.default_scale * font_size
-        yw = glyph.ymax * glyph.default_scale * font_size
+        xw = glyph.xmax * font_size
+        yw = glyph.ymax * font_size
         self.add_subscripts(subscript, (x, y), (xw, yw), font_size)
 
     def add_text_glyph(self, label, center, font_size, subscript = None):

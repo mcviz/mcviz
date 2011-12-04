@@ -5,7 +5,7 @@ from itertools import chain
 
 from mcviz.tools import Layout, Arg
 from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
-from mcviz.utils.svg import TexGlyph
+from mcviz.utils.svg import TexGlyphLibrary
 from mcviz.utils.graphviz import make_node, make_edge, PlainOutput, ref_prefix
 
 label_scale_factor = 72.0
@@ -137,10 +137,11 @@ class LayoutObject(object):
         elif isinstance(self.label, str):
             return self.label
         elif isinstance(self.label, int):
-            if TexGlyph.exists(self.label):
-                w, h = TexGlyph.from_pdgid(self.label).dimensions
-                w *= self.label_size
-                h *= self.label_size
+            if TexGlyphLibrary.exists(self.label):
+                glyph = TexGlyphLibrary.from_pdgid(self.label)
+                w, h = glyph.dimensions
+                w *= self.label_size/glyph.default_scale
+                h *= self.label_size/glyph.default_scale
                 table = '<<table border="1" cellborder="0"><tr>%s</tr></table>>'
                 td = '<td height="%.2f" width="%.2f"></td>' % (h, w)
                 return table % td
