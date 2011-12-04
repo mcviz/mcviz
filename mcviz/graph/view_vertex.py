@@ -152,3 +152,7 @@ class ViewVertexSummary(ViewVertex, Summary):
     @property
     def n_vertices(self):
         return len(self.vertex_numbers)
+
+    @property
+    def n_represented(self):
+        return self.n_vertices

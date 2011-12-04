@@ -24,7 +24,7 @@ class Default(Style):
                 edge.style_line_type = "cut"
                 edge.style_args.update(DEFAULT_EDGE_ARGS)
                 try:
-                    edge.style_args["n"] = edge.n_particles
+                    edge.style_args["n"] = edge.n_represented
                 except AttributeError:
                     pass
             else:
@@ -148,9 +148,9 @@ class FancyLines(Style):
             elif "cut_summary" in particle.tags:
                 edge.style_line_type = "cut"
                 try:
-                    edge.style_args["n"] = edge.n_particles
+                    edge.style_args["n"] = edge.n_represented
                 except AttributeError:
-                    pass # Edge has no n_particles property
+                    pass # Edge has no n_represented property
             elif particle.gluon:
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_line_type = "gluon"

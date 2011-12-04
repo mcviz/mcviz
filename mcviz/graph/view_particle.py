@@ -252,3 +252,7 @@ class ViewParticleSummary(ViewParticle, Summary):
     @property
     def n_particles(self):
         return len(self.particle_numbers)
+
+    @property
+    def n_represented(self):
+        return self.n_particles

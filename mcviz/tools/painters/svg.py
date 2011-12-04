@@ -87,7 +87,7 @@ class SVGPainter(StdPainter, FundamentalTool):
         if edge.show and edge.spline:
             display_func = self.type_map.get(edge.style_line_type, hadron)
             if edge.style_line_type == "cut":
-                display = display_func(spline=edge.spline, n_particles=edge.item.n_particles, **edge.style_args)
+                display = display_func(spline=edge.spline, n_represented=edge.item.n_represented, **edge.style_args)
             else: display = display_func(spline=edge.spline, **edge.style_args)
             self.doc.add_object(edge.reference, display)
 

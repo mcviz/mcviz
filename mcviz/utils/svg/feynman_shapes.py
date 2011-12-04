@@ -299,13 +299,13 @@ def jet(energy, spline, scale = 8, **kwds):
         grp.appendChild(path)
     return grp
 
-def cut(energy, spline, n_particles, scale = 8, **kwds):
+def cut(energy, spline, n_represented, scale = 8, **kwds):
     """Get an SVG fragment for a cut along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
     n_segments = 10
     mag = energy*scale
-    if n_particles > 2: offsets = [-mag, 0, mag] #spline.trifurcate(mag)
-    elif n_particles == 2: offsets = [-mag/2, mag/2] #spline.bifurcate(mag)
+    if n_represented > 2: offsets = [-mag, 0, mag] #spline.trifurcate(mag)
+    elif n_represented == 2: offsets = [-mag/2, mag/2] #spline.bifurcate(mag)
     else: offsets = [0]
     all_paths = []
     color = kwds.pop('stroke')

@@ -8,7 +8,6 @@ class DualLayout(BaseLayout, FundamentalTool):
     Feynman diagrams, shows particles as nodes.
     """
     _name = "Dual"
-    _global_args = ("label_size",)
     _args = [Arg("helper_vertices",Arg.bool,"add helper vertices if there are many-to-many vertices", default=True)]
 
     def get_subgraph(self, particle):

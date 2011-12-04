@@ -211,6 +211,7 @@ def pluck(graph_view, start, end, param, keep_down, keep_up):
 
     keep_particles = [] #particle for particle in graph_view.particles if abs(particle.pdgid) in keep]
     for particle in graph_view.particles:
+        if particle.pdgid == -6: print(abs(getattr(particle, param)))
         if hasattr(particle, param):
             if abs(getattr(particle, param)) in keep:
                 keep_particles.append(particle)
