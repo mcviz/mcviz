@@ -71,9 +71,8 @@ function mcviz_init(event) {
         reference = $(use_element).attr("mcviz:r").split("_");
         particle_ref = reference[0];
         
-        selector_positioning_element = $("ellipse[mcviz\\:r=" + particle_ref + "]");
-        if (selector_positioning_element)
-            use_element = selector_positioning_element[0];
+        // selector_positioning_element = $("ellipse[mcviz\\:r=" + particle_ref + "]");
+        // if (selector_positioning_element) use_element = selector_positioning_element[0];
         
         particle_selector.attr("cx", get_x(use_element));
         particle_selector.attr("cy", get_y(use_element));
@@ -109,7 +108,7 @@ function mcviz_init(event) {
     // pt: eventdata.find("particle").map(function(i, p) { return $(p).attr(""); })
     
     $("use").hover(hover_particle);
-    $("ellipse[mcviz\\:r]").hover(hover_particle);
+    //$("ellipse[mcviz\\:r]").hover(hover_particle);
     
     $("button.#reset").click(function(event) {
         $("[mcviz\\:r]").attr("opacity", null);
