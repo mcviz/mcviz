@@ -142,53 +142,42 @@ def contract_loops(graph_view):
         if particle.start_vertex == particle.end_vertex:
             graph_view.drop(particle)
 
-@Transform.decorate("PluckPDGID", args=[Arg("keep_pdgid_start", int, "id of particles to pick", default=6),
-                                   Arg("keep_pdgid_end", int, "last particle id for range", default=0),
-                                   Arg("keep_down", int, "max depth to descend from vertex", default=8),
-                                   Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
-def pluckpdgid(graph_view, keep_pdgid_start, keep_pdgid_end, keep_down, keep_up):
-    """
-    Keep a particles with given pdgid
-    """
-    
-    if keep_pdgid_end:
-        keep_pdgid = range(keep_pdgid_start, keep_pdgid_end)
-    else:
-        keep_pdgid = [keep_pdgid_start]
-    keep_particles = [particle for particle in graph_view.particles if abs(particle.pdgid) in keep_pdgid]
-    log.info("keeping particles: {0:s}".format(str(keep_particles)))
-    log.info("keeping pdgids: {0:s}".format(str(keep_pdgid)))
-
 @Transform.decorate("Pluck", args=[Arg("start", float, "start of range to keep", default=6),
                                    Arg("end", float, "end of range", default=0),
                                    Arg("param", str, "parameter of interest", default="pdgid"),
                                    Arg("keep_down", int, "max depth to descend from vertex", default=8),
                                    Arg("keep_up", int, "max depth to ascend from vertex", default=20)])
-def pluck(graph_view, vno_keep, keep_down, keep_up):
+def pluck(graph_view, start, end, param, keep_down, keep_up):
     """
     Keep a specific vertex and particles travelling through it
     """
     
-    keep_objects = set()
-    # Some generators don't have VN3; give nice message if we can't find vno_keep
-    for particle in graph_view.particles:
-      if abs(particle.pdgid) == 6: log.info("particle {0} has pdgid = {1}".format(particle.particle_number, particle.pdgid))
-    try:
-        keep_vertex = graph_view.v_map[vno_keep]
-    except KeyError:
-        log.error("vertex %d not found in input graph" %vno_keep)
-        return
+    if end:
+        keep = range(start, end)
+    else:
+        keep = [start]
 
+    keep_particles = [] #particle for particle in graph_view.particles if abs(particle.pdgid) in keep]
+    for particle in graph_view.particles:
+        if hasattr(particle, param):
+            if abs(getattr(particle, param)) in keep:
+                keep_particles.append(particle)
+        else:
+            print('nay')
+
+    keep_objects = set()
     max_depth = keep_down
     def walker(vertex, depth):
         keep_objects.add(vertex)
         log.debug("vertex depth = %d" %depth)
         if depth > max_depth:
             return ()
-        
-    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker)
-    max_depth = keep_up
-    graph_view.walk(keep_vertex, vertex_action=walker, particle_action=walker, ascend=True)
+
+    for p in keep_particles:    
+        max_depth = keep_down
+        graph_view.walk(p.start_vertex, vertex_action=walker, particle_action=walker)
+        max_depth = keep_up
+        graph_view.walk(p.start_vertex, vertex_action=walker, particle_action=walker, ascend=True)
     
     for obj in list(graph_view.particles) + list(graph_view.vertices):
         if obj not in keep_objects:
