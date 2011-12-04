@@ -150,7 +150,7 @@ class FancyLines(Style):
                 try:
                     edge.style_args["n"] = edge.n_particles
                 except AttributeError:
-                    print("Edge has no n_particles property: ", edge)
+                    pass # Edge has no n_particles property
             elif particle.gluon:
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_line_type = "gluon"

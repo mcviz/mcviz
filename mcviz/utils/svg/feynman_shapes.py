@@ -5,6 +5,12 @@ svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
 from ..spline import Spline, SplineLine, Point2D
 
+COLOR = {'black' : (0, 0, 0),
+         'green' : (0, 127, 0),
+         'red'   : (255, 0, 0),
+         'blue'  : (0, 0, 255),
+         'orange': (255, 166, 0)
+}
 
 def get_boson_splines(length, amplitude, n_waves, power, amp):
     N = n_waves * 2
@@ -41,7 +47,7 @@ def get_boson_splines(length, amplitude, n_waves, power, amp):
         sgn = -sgn
     return SplineLine(splines)
 
-def get_invisible_splines(length, n_segments, n):
+def get_segment_splines(length, n_segments, n, offset):
     N = n_segments*2 - 1
     wavelength = length / N
 
@@ -50,7 +56,10 @@ def get_invisible_splines(length, n_segments, n):
     px_mid = wavelength*(n+0.5)
     px_end = wavelength*(n+1)
 
-    splines = [Spline(Point2D(px_start, 0), Point2D(px_mid, 0), Point2D(px_mid, 0), Point2D(px_end, 0))]
+    if px_start: py_start = offset*px_start
+    else: py_start = 0
+
+    splines = [Spline(Point2D(px_start, py_start), Point2D(px_mid, offset*px_mid), Point2D(px_mid, offset*px_mid), Point2D(px_end, offset*px_end))]
     return SplineLine(splines)
 
 def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False):
@@ -139,13 +148,13 @@ def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
     return splineline.svg_path_data
 
 # TUNING DEFAULTS
-def invisible_data(energy, spline, n_segments, n_segment):
-    """Get the SVG path data for an invisible particle segment.
+def segment_data(energy, spline, n_segments, n_segment, offset=0):
+    """Get the SVG path data for an particle line segment.
     energy must be between 0 and 1"""
     length = spline.length
-    splineline = get_invisible_splines(length, n_segments, n_segment)
+    splineline = get_segment_splines(length, n_segments, n_segment, offset)
     if spline: splineline = spline.transform_splineline(splineline)
-    splineline.fidelity = 4 
+    splineline.fidelity = 4
     return splineline.svg_path_data
 
 # TUNING DEFAULTS
@@ -272,30 +281,35 @@ def multigluon(energy, spline, scale=1, **kwds):
 def cut(energy, spline, n_particles, scale = 5, **kwds):
     """Get an SVG fragment for a cut along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
-    n_segments = 8
-    mag = 1.0
-    if n_particles == 2:
-       splines = spline.bifurcate(mag)
-    elif n_particles > 2:
-       splines = spline.trifurcate(mag)
-    else:
-       splines = [spline]
+    n_segments = 10
+    mag = energy*scale
+    if n_particles > 2: offsets = [-mag, 0, mag] #spline.trifurcate(mag)
+    elif n_particles == 2: offsets = [-mag/2, mag/2] #spline.bifurcate(mag)
+    else: offsets = [0]
     all_paths = []
-    print(">>>%d, %f" %(n_particles,energy*scale))
-    for spline in splines:
-        print("", spline, spline.svg_path_data)
-        print(invisible_data(energy, spline, n_segments, 2))
+    color = kwds.pop('stroke')
+    if color[0] == '#':
+          rgb = (color[1:3], color[3:5], color[5:7])
+          r, g, b = [int(c, 16) for c in rgb]
+          color = (r,g,b)
+    elif color in COLOR: color = COLOR[color]
+    else: color = (0, 0, 0)
+    for offset in offsets:
         paths = []
         for i in range(n_segments*2):
-            opacity = i/(n_segments*2)
-            color = "rgb({0:d},{0:d},{0:d})".format(int(opacity*255))
+            opacity = i/(n_segments*2.0)
+            transparency = 1.0 - opacity
+            w = 255 * opacity
+            t = transparency
+            stroke = "rgb({0:d},{1:d},{2:d})".format(int(w + t * color[0]), int(w + t * color[1]), int(w + t * color[2]))
             opacity = (n_segments*2-i)/(n_segments*2)
             paths.append(svgxml.createElement("path"))
-            paths[i].setAttribute("fill", "none")
-            paths[i].setAttribute("stroke", color)
-            paths[i].setAttribute("d", invisible_data(energy, spline, n_segments, i))
+#            paths[i].setAttribute("fill", "none")
+            paths[i].setAttribute("stroke", stroke)
+            paths[i].setAttribute("d", segment_data(energy, spline, n_segments, i, offset))
         all_paths.extend(paths)
     grp = svg_group(kwds)
+    grp.setAttribute("fill", "none")
     for path in all_paths:
         grp.appendChild(path)
     return grp
@@ -363,7 +377,7 @@ def invisible(energy, spline, scale = 1, **kwds):
     for i in range(n_segments):
         paths.append(svgxml.createElement("path"))
         paths[i].setAttribute("fill", "none")
-        paths[i].setAttribute("d", invisible_data(energy, spline, n_segments, i*2))
+        paths[i].setAttribute("d", segment_data(energy, spline, n_segments, i*2))
     grp = svg_group(kwds)
     for path in paths:
         grp.appendChild(path)
