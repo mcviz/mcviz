@@ -4,7 +4,7 @@ import logging
 
 from contextlib import contextmanager
 
-
+FORCE_COLOR = "FORCE_COLOR" in os.environ
 VERBOSE_LEVEL = 15
 logging.addLevelName(VERBOSE_LEVEL, "VERBOSE")
 
@@ -132,7 +132,7 @@ def get_log_handler(singleton={}):
         
     handler = logging.StreamHandler()
     FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s"
-    if os.isatty(handler.stream.fileno()):
+    if os.isatty(handler.stream.fileno()) or FORCE_COLOR:
         handler.setFormatter(ColoredFormatter(insert_seqs(FORMAT)))
     else:
         handler.setFormatter(MCVizFormatter(remove_seqs(FORMAT)))
