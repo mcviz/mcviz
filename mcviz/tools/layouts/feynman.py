@@ -44,19 +44,23 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.dot_args.update(node_style)
         
         # Put clusters in the same graphviz "group".
-        if "after_cluster" in vertex.tags:        
+        if "after_cluster" in vertex.tags or "jet" in vertex.tags:        
             lo.dot_args["group"] = "cluster_%i" % vertex.cluster_index
         elif (all("after_cluster" in p.tags for p in vertex.outgoing) and 
               vertex.outgoing):
             cluster_particle = (p for p in vertex.outgoing if "after_cluster" in p.tags).next()
             lo.dot_args["group"] = "cluster_%i" % cluster_particle.cluster_index
-             
+
         if vertex.initial:
             # Big red initial vertices
             lo.width = lo.height = 1.0
         elif vertex.final:
             # Don't show final particle vertices
             lo.show = False
+            
+        elif "cut_summary" in vertex.tags:
+            lo.width = lo.height = 1.0
+            lo.style_args['opacity'] = 0.2
             
         elif "summary" in vertex.tags:
             lo.width = lo.height = 1.0
@@ -79,6 +83,9 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
         if "cluster" in particle.tags:
             lo.label = "cluster (%.4g %seV)" % self.graph.units.pick_mag(particle.pt)
         elif (particle.gluon or particle.photon) and not self.options["gluid"]:
+            lo.label = None
+        elif "jet" in particle.tags or "cut_summary" in particle.tags:
+            print(particle.tags)
             lo.label = None
         else:
             lo.label = particle.pdgid

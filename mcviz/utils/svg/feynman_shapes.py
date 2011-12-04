@@ -152,6 +152,7 @@ def segment_data(energy, spline, n_segments, n_segment, offset=0):
     """Get the SVG path data for an particle line segment.
     energy must be between 0 and 1"""
     length = spline.length
+    offset /= length*energy
     splineline = get_segment_splines(length, n_segments, n_segment, offset)
     if spline: splineline = spline.transform_splineline(splineline)
     splineline.fidelity = 4
@@ -278,15 +279,14 @@ def multigluon(energy, spline, scale=1, **kwds):
     grp.appendChild(path2)
     return grp
 
-def jet(energy, spline, scale = 5, **kwds):
-    """Get an SVG fragment for a cut along a spline
+def jet(energy, spline, scale = 8, **kwds):
+    """Get an SVG fragment for a jet along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
     n_segments = 10
     mag = energy*scale
     offsets = [-mag, 0, mag]
     all_paths = []
     kwds['stroke-width'] = energy*scale*3
-    print(kwds)
     for offset in offsets:
         paths = []
         for i in range(n_segments*2):
@@ -299,7 +299,7 @@ def jet(energy, spline, scale = 5, **kwds):
         grp.appendChild(path)
     return grp
 
-def cut(energy, spline, n_particles, scale = 5, **kwds):
+def cut(energy, spline, n_particles, scale = 8, **kwds):
     """Get an SVG fragment for a cut along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
     n_segments = 10
