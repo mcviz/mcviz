@@ -8,7 +8,7 @@ from mcviz.utils.svg.svg_document import (
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
 from mcviz.utils.svg import (identity, invisible, photon, final_photon,
                              gluon, multigluon, boson, fermion, hadron,
-                             vertex, gluino, sfermion, chargino, cut)
+                             vertex, gluino, sfermion, chargino, cut, jet)
 
 from .painters import StdPainter
 
@@ -37,7 +37,8 @@ class SVGPainter(StdPainter, FundamentalTool):
                 "chargino": chargino,
                 "hadron": hadron, 
                 "vertex": vertex,
-                "cut":cut
+                "cut":cut,
+                "jet":jet
                 }
 
     def __call__(self, workspace, layout):
@@ -85,8 +86,6 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.show and edge.spline:
             display_func = self.type_map.get(edge.style_line_type, hadron)
-            #print(edge.item)
-            #if hasattr(edge.item, 'ref') and edge.item.ref == 'P264':
             if edge.style_line_type == "cut":
                 display = display_func(spline=edge.spline, n_particles=edge.item.n_particles, **edge.style_args)
             else: display = display_func(spline=edge.spline, **edge.style_args)

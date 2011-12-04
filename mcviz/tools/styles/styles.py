@@ -139,12 +139,12 @@ class FancyLines(Style):
             if not hasattr(particle, "gluon"):
                 return
             # colouring
-            if "cluster" in particle.tags:
+            if "jet" in particle.tags:
+                edge.style_line_type = "jet"
+            elif "cluster" in particle.tags:
                 edge.style_line_type = "hadron"
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_args["stroke-width"] = 0.2
-            elif "jet" in particle.tags:
-                edge.style_line_type = "jet"
             elif "cut_summary" in particle.tags:
                 edge.style_line_type = "cut"
                 try:
@@ -160,7 +160,6 @@ class FancyLines(Style):
                 else:
                     edge.style_line_type = "photon"
             elif particle.invisible:
-                print("got an invis")
                 edge.style_line_type = "invisible"
             elif particle.squark:
                 edge.style_line_type = "sfermion"

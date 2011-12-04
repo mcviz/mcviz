@@ -130,9 +130,9 @@ class Jets(Transform):
             vs_summary = graph_view.summarize_vertices(jet_start_vertices)
             ve_summary = graph_view.summarize_vertices(jet_end_vertices)
             p_summary = graph_view.summarize_particles(jet.particles)
-            vs_summary.tag("cluster")
-            ve_summary.tag("cluster")
-            p_summary.tag("cluster")
+            vs_summary.tag("jet")
+            ve_summary.tag("jet")
+            p_summary.tag("jet")
 
 @Transform.decorate("Clusters")
 def contract_clusters(graph_view):

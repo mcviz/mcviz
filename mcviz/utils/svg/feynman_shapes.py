@@ -278,6 +278,27 @@ def multigluon(energy, spline, scale=1, **kwds):
     grp.appendChild(path2)
     return grp
 
+def jet(energy, spline, scale = 5, **kwds):
+    """Get an SVG fragment for a cut along a spline
+    energy must be between 0 and 1. kwds are added to SVG"""
+    n_segments = 10
+    mag = energy*scale
+    offsets = [-mag, 0, mag]
+    all_paths = []
+    kwds['stroke-width'] = energy*scale*3
+    print(kwds)
+    for offset in offsets:
+        paths = []
+        for i in range(n_segments*2):
+            paths.append(svgxml.createElement("path"))
+            paths[i].setAttribute("d", segment_data(energy, spline, n_segments, i, offset))
+        all_paths.extend(paths)
+    grp = svg_group(kwds)
+    grp.setAttribute("fill", "none")
+    for path in all_paths:
+        grp.appendChild(path)
+    return grp
+
 def cut(energy, spline, n_particles, scale = 5, **kwds):
     """Get an SVG fragment for a cut along a spline
     energy must be between 0 and 1. kwds are added to SVG"""
@@ -302,9 +323,7 @@ def cut(energy, spline, n_particles, scale = 5, **kwds):
             w = 255 * opacity
             t = transparency
             stroke = "rgb({0:d},{1:d},{2:d})".format(int(w + t * color[0]), int(w + t * color[1]), int(w + t * color[2]))
-            opacity = (n_segments*2-i)/(n_segments*2)
             paths.append(svgxml.createElement("path"))
-#            paths[i].setAttribute("fill", "none")
             paths[i].setAttribute("stroke", stroke)
             paths[i].setAttribute("d", segment_data(energy, spline, n_segments, i, offset))
         all_paths.extend(paths)
