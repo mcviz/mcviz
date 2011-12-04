@@ -33,7 +33,7 @@ def get_option_parser():
 
     o("--units", action="store", dest="units")
 
-    o("--output_file", action="store", help="Filename for output_file")
+    o("--output_file", action="store", help="Filename for output_file", default="mcviz.svg")
 
     o("filename", nargs='?', default=None)
 
