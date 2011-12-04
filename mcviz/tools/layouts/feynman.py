@@ -44,7 +44,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.dot_args.update(node_style)
         
         # Put clusters in the same graphviz "group".
-        if "after_cluster" in vertex.tags or "jet" in vertex.tags:        
+        if "after_cluster" in vertex.tags:
             lo.dot_args["group"] = "cluster_%i" % vertex.cluster_index
         elif (all("after_cluster" in p.tags for p in vertex.outgoing) and 
               vertex.outgoing):
@@ -59,7 +59,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.show = False
             
         elif "cut_summary" in vertex.tags:
-            lo.width = lo.height = 1.0
+            lo.width = lo.height = 0.5
             lo.style_args['opacity'] = 0.2
             
         elif "summary" in vertex.tags:
