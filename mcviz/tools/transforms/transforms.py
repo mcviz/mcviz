@@ -82,6 +82,23 @@ def gluballs(graph_view, Retry):
             summary.gluball_nvertices = nv
             raise Retry
 
+@Transform.decorate("Categorize")
+def categorize(graph_view):
+    """
+    Categorize all final state particles with the same pdgid into one particle
+    """
+    for vertex in graph_view.vertices:
+        final_state_particles = [p for p in vertex.outgoing if p.final_state]
+        by_pdgid = {}
+        for p in final_state_particles:
+            by_pdgid.setdefault(p.pdgid, []).append(p)
+        for k, particles in by_pdgid.iteritems():
+            if len(particles) > 1:
+                graph_view.summarize_vertices(p.end_vertex for p in particles).tag("category")
+                summary = graph_view.summarize_particles(particles)
+                summary.tag("category")
+                summary.subscripts.append(("x%i" % len(particles), "under"))
+
 @Transform.decorate("Chainmail")
 @retrying
 def chainmail(graph_view, Retry):
