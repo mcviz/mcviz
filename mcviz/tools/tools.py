@@ -208,12 +208,13 @@ class Tool(object):
         return args
 
     @classmethod
-    def build_tools(cls, tool_type, settings):
+    def build_tools(cls, tool_type, settings, global_args):
         type_cls = tool_types[tool_type]
         classes = [s.get_class(tool_type) for s in settings]
         if type_cls._merge_classes:
             specific_class = cls.create_specific_class(tool_type, classes)
             tool = specific_class()
+            tool.read_global_args(global_args)
             for s in settings:
                 tool.read_settings(s)
             tools = [tool]
@@ -221,6 +222,7 @@ class Tool(object):
             tools = []
             for setting in settings:
                 tool = setting.get_class(tool_type)()
+                tool.read_global_args(global_args)
                 tool.read_settings(setting)
                 tools.append(tool)
         return tools
@@ -255,6 +257,10 @@ class Tool(object):
         classname = "%s_specific" % tool_type
         log.debug("Creating %s with bases %r", classname, bases)
         return classobj(classname, bases, {})
+
+    def read_global_args(self, global_args):
+        for arg in self.global_args():
+            self.options[arg] = getattr(global_args, arg)
 
     def read_settings(self, setting):
         my_args = self.args()

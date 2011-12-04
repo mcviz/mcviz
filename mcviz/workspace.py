@@ -29,17 +29,17 @@ class GraphWorkspace(object):
         with self.timer('load all tools'):
             try:
                 settings = ToolSetting.settings_from_options(options)
-                self.tools_from_settings(settings)
+                self.tools_from_settings(settings, options)
             except ArgParseError, e:
                 self.log.fatal("Parse error in arguments: %s" % e.args[0])
                 raise FatalError
 
-    def tools_from_settings(self, settings):
+    def tools_from_settings(self, settings, global_args):
         optionsets = settings.pop("optionset")
-        for optionset in Tool.build_tools("optionset", optionsets):
+        for optionset in Tool.build_tools("optionset", optionsets, global_args):
             optionset(settings)
         for tool_type in settings:
-            tools = Tool.build_tools(tool_type, settings[tool_type])
+            tools = Tool.build_tools(tool_type, settings[tool_type], global_args)
             self.tools[tool_type] = tools
     
     def apply_tools(self, tool_type, *args):

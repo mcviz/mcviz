@@ -7,16 +7,15 @@ from mcviz.utils.timer import Timer; timer = Timer(log, log.VERBOSE)
 from new import classobj
 
 class GraphvizEngine(LayoutEngine):
-    _global_args = [("extra_gv_options")]
-    _args = [Arg("dump", Arg.bool, "dump raw graphviz input", default=False),
-             Arg("extra", str, "extra graphviz options", default="")]
+    _global_args = ["dump_dot"]
+    _args = [Arg("extra", str, "extra graphviz options", default="")]
     _base = True
 
     def graphviz_pass(self, engine, graphviz_options, dot_data):
         log.debug("dot_data hash: 0x%0X", hash(dot_data))
 
         # Dump the whole dot file before passing it to graphviz if requested
-        if self.options["dump"]:
+        if self.options["dump_dot"]:
             log.debug("Data passed to %s:" % engine)
             # TODO: flush log FD
             print dot_data
@@ -35,7 +34,7 @@ class GraphvizEngine(LayoutEngine):
         if not output.strip():
             log.error("No output from %s " % engine)
             log.error("There may be too many constraints on the graph.")
-        if self.options["dump"]:
+        if self.options["dump_dot"]:
             log.debug("Data received from %s:" % engine)
             print output
         return output
