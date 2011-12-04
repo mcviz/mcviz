@@ -33,6 +33,8 @@ def get_option_parser():
 
     o("--units", action="store", dest="units")
 
+    o("--output_file", action="store", help="Filename for output_file")
+
     o("filename", nargs='?', default=None)
 
     g = p.add_argument_group("The MCViz Toolbox")

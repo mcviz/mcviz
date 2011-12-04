@@ -7,6 +7,7 @@ from os.path import basename
 from mcviz.tools import Painter, FundamentalTool, Arg
 
 class StdPainter(Painter):
+    _global_args = ("output_file",)
     _args = (Arg("output_file", str, "output filename", default="mcviz.svg"),)
     _base = True
 
