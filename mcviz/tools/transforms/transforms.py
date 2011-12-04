@@ -133,6 +133,7 @@ class Jets(Transform):
             vs_summary.tag("jet")
             ve_summary.tag("jet")
             p_summary.tag("jet")
+            p_summary.tag("jet_{0:d}".format(i))
 
 @Transform.decorate("Clusters")
 def contract_clusters(graph_view):

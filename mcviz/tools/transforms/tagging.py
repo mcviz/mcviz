@@ -5,7 +5,6 @@ from math import hypot
 def tag(graph_view):
     tag_by_progenitors(graph_view)
     tag_by_hadronization_vertex(graph_view)
-    tag_by_jet(graph_view)
 
 def tag_by_progenitors(graph_view):
     """

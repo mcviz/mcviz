@@ -84,9 +84,15 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.label = "cluster (%.4g %seV)" % self.graph.units.pick_mag(particle.pt)
         elif (particle.gluon or particle.photon) and not self.options["gluid"]:
             lo.label = None
-        elif "jet" in particle.tags or "cut_summary" in particle.tags:
-            print(particle.tags)
+        elif "cut_summary" in particle.tags:
             lo.label = None
+        elif "jet" in particle.tags or "cut_summary" in particle.tags:
+            jet_id = 0
+            for tag in particle.tags:
+               if tag != 'jet' and tag[:4] == 'jet_':
+                    jet_id = int(tag[4:]) + 1
+            if not jet_id: print(particle.tags)
+            lo.label = "jet {0:d} ({1:.4g} {2:s}eV)".format(jet_id, *self.graph.units.pick_mag(particle.pt))
         else:
             lo.label = particle.pdgid
 
