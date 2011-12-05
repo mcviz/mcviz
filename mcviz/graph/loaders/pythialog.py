@@ -116,28 +116,42 @@ def make_pythia_graph(records):
     vertex_dict = dict((v.vno,v) for v in vertex_dict.values())
     
     return vertex_dict, particle_dict, Units()
-        
+
 def load_event(args):
     """
     Parse a pythia event record from a log file.
     Numbers are converted to floats where possible.
     """
 
-    with open(args.filename) as fd:
+    filename, _, event_number = args.filename.partition(":")
+    if event_number:
+        try:
+            event_number = int(event_number)
+        except ValueError:
+            log.fatal("Failed to convert filename part to an integer. Filename "
+                      "should have the form 'string[:int(event number)]'")
+            raise FatalError()
+    else:
+        event_number = 0
+
+    with open(filename) as fd:
         lines = [line for line in (line.strip() for line in fd) if line]
 
+    header = None
     if START_COMPLETE in lines:
-        first = lines.index(START_COMPLETE) + 2
-        last = first + lines[first:].index(END_LIST) - 1
+        header = START_COMPLETE
     elif START_COMBINED in lines:
-        first = lines.index(START_COMBINED) + 2
-        last = first + lines[first:].index(END_LIST) - 1
+        header = START_COMBINED
     elif START_HARD in lines:
-        first = lines.index(START_HARD) + 2
-        last = first + lines[first:].index(END_LIST) - 1
+        header = START_HARD
     else:
         raise EventParseError("Failed to read pythia log file: "
                                "no complete event listing found")
+
+    first = 0
+    for i in range(event_number+1):
+        first = lines.index(header, first) + 2
+    last = first + lines[first:].index(END_LIST) - 1
 
     def maybe_num(s):
         try: return float(s)
