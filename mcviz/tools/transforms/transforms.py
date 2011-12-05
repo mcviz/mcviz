@@ -310,13 +310,13 @@ class Cut(Transform):
     _args = [Arg("cut", float, "cut value", default=5),
              Arg("param", str, "parameter to cut on", default="pt"),
              Arg("abs", Arg.bool, "take abs value of param", default=True),
-             Arg("less_than", Arg.bool, "remove particles less cut", default=True),]
+             Arg("reverse", Arg.bool, "reverse cut", default=False),]
 
     def __call__(self, graph_view):
         cut = self.options["cut"]
         param = self.options["param"]
         take_abs = self.options["abs"]
-        less_than = self.options["less_than"]
+        reverse = self.options["reverse"]
         final_state = [p for p in graph_view.particles if p.final_state]
 
         passed_tag = "passed_cut"
@@ -324,10 +324,10 @@ class Cut(Transform):
             if hasattr(p, param):
                 value = getattr(p, param)
                 if take_abs: value = abs(value)
-                if less_than:
-                    return value <= cut
-                else:
+                if reverse:
                     return cut <= value
+                else:
+                    return value <= cut
             else: return True
 
         keep = set()

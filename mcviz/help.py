@@ -74,8 +74,7 @@ def print_tool_help(indent, tool, links=False):
     
     from inspect import getfile
     
-    definition = getfile(tool)[len(dirname(getfile(mcviz))):].rstrip("co")
-    #definition = repr(tool)
+    definition = getfile(tool)[len(dirname(getfile(mcviz.main))):].rstrip("co")
     
     base_str = " (base)" if (hasattr(tool, "_base") and tool._base) else ""
     text.append(("  * **{0}**{1}:\n"
