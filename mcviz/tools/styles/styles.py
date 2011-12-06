@@ -139,13 +139,16 @@ class FancyLines(Style):
             if not hasattr(particle, "gluon"):
                 return
             # colouring
+            edge.style_args["n_cut_represent"] = 2
+            #edge.style_args["n_cut_represent"] = getattr(edge, "n_represented", None)
             if "jet" in particle.tags:
                 edge.style_line_type = "jet"
             elif "cluster" in particle.tags:
                 edge.style_line_type = "hadron"
                 edge.style_args["scale"] = 0.2 * self.options["scale"]
                 edge.style_args["stroke-width"] = 0.2
-            elif "cut_summary" in particle.tags:
+            elif "cut_summary_arse" in particle.tags:
+                
                 edge.style_line_type = "cut"
                 try:
                     edge.style_args["n"] = edge.n_represented

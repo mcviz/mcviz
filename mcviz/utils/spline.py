@@ -184,20 +184,22 @@ class Spline(object):
         return Spline(p0, p1, p2, p3, self.N)
 
     def bifurcate(self, amount=1.0, start_amount=None):
-        if start_amount is None: start_amount=amount
+        if start_amount is None: 
+            start_amount = amount
         s1 = deepcopy(self)
-        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
+        s1.shift_by(Line(Point2D(0, 0), Point2D(self.length, amount)))
         s2 = deepcopy(self)
-        s2.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
+        s2.shift_by(Line(Point2D(0, 0), Point2D(self.length, -amount)))
         return s1, s2
 
     def trifurcate(self, amount=1.0, start_amount=None):
         if start_amount is None: start_amount=amount
         s1 = deepcopy(self)
-        s1.shift_by(Line(Point2D(0, start_amount), Point2D(self.length, amount)))
+        s1.shift_by(Line(Point2D(0, 0), Point2D(self.length, 0)))
         s2 = deepcopy(self)
+        s2.shift_by(Line(Point2D(0, 0), Point2D(self.length, +amount)))
         s3 = deepcopy(self)
-        s3.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
+        s3.shift_by(Line(Point2D(0, 0), Point2D(self.length, -amount)))
         return s1, s2, s3
     
     @property

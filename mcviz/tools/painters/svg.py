@@ -86,10 +86,25 @@ class SVGPainter(StdPainter, FundamentalTool):
 
         if edge.show and edge.spline:
             display_func = self.type_map.get(edge.style_line_type, hadron)
-            if edge.style_line_type == "cut":
-                display = display_func(spline=edge.spline, n_represented=edge.item.n_represented, **edge.style_args)
-            else: display = display_func(spline=edge.spline, **edge.style_args)
-            self.doc.add_object(edge.reference, display)
+            if edge.style_args["n_cut_represent"] is not None:
+                n = edge.style_args["n_cut_represent"]
+                n = 3
+                if n == 1:
+                    display = display_func(spline=edge.spline, **edge.style_args)
+                    self.doc.add_object(edge.reference, display)
+                elif n == 2:
+                    for s in edge.spline.bifurcate(edge.spline.length / 10.):
+                        display = display_func(spline=s, **edge.style_args)
+                        self.doc.add_object(edge.reference, display)
+                else:
+                    # 3 or more
+                    for s in edge.spline.trifurcate(edge.spline.length / 10.):
+                        display = display_func(spline=s, **edge.style_args)
+                        self.doc.add_object(edge.reference, display)
+                
+            else: 
+                display = display_func(spline=edge.spline, **edge.style_args)
+                self.doc.add_object(edge.reference, display)
 
         if edge.label and edge.label_center:
             self.doc.add_glyph(edge.reference, edge.label, edge.label_center,

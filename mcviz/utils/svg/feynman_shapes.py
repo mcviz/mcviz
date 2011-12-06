@@ -3,7 +3,9 @@ from __future__ import division
 from xml.dom.minidom import getDOMImplementation
 svgxml = getDOMImplementation().createDocument(None, "svg", None)
 
-from ..spline import Spline, SplineLine, Point2D
+import mcviz
+from mcviz.utils.spline import Spline, SplineLine, Point2D, Line
+#from ..spline import 
 
 COLOR = {'black' : (0, 0, 0),
          'green' : (0, 127, 0),
@@ -304,17 +306,26 @@ def cut(energy, spline, n_represented, scale = 8, **kwds):
     energy must be between 0 and 1. kwds are added to SVG"""
     n_segments = 10
     mag = energy*scale
-    if n_represented > 2: offsets = [-mag, 0, mag] #spline.trifurcate(mag)
-    elif n_represented == 2: offsets = [-mag/2, mag/2] #spline.bifurcate(mag)
-    else: offsets = [0]
+    
+    if n_represented > 2: 
+        offsets = [-mag, 0, mag] #spline.trifurcate(mag)
+    elif n_represented == 2: 
+        offsets = [-mag/2, mag/2] #spline.bifurcate(mag)
+    else: 
+        offsets = [0]
+        
     all_paths = []
+    
     color = kwds.pop('stroke')
     if color[0] == '#':
           rgb = (color[1:3], color[3:5], color[5:7])
           r, g, b = [int(c, 16) for c in rgb]
           color = (r,g,b)
-    elif color in COLOR: color = COLOR[color]
-    else: color = (0, 0, 0)
+    elif color in COLOR: 
+        color = COLOR[color]
+    else: 
+        color = (0, 0, 0)
+        
     for offset in offsets:
         paths = []
         for i in range(n_segments*2):
@@ -436,9 +447,9 @@ def vertex(pt, rx, ry, **kwds):
         ellipse.setAttribute(kw, str(val))
     return ellipse
 
-#if __name__=="__main__":
-def test():
-    from spline import Spline, SplineLine, Line
+if __name__=="__main__":
+#def test():
+    #from mcvizspline import Spline, SplineLine, Line
     
     spline1 = Spline((5.0, -10), (20.000, -10), (15.0, 30.000), (40.0, 10.000))
     spline2 = Spline((40, 10), (65, -10), (60, 30), (80, 20))
@@ -480,7 +491,7 @@ def test():
         x = 10
         y = 400 + i*25
         e = 0.6
-        l = Line((0,0),((i + 0.5) / n * 180, 10))
+        l = Line((0,0),((i + 0.5) / n * 100, 10))
         doc.appendChild(photon(e, l, transform="translate(%i,%i)" % (x, y),**args)).toprettyxml()
         doc.appendChild(gluon(e, l, transform="translate(%i,%i)" % (x+250, y),**args)).toprettyxml()
         doc.appendChild(boson(e, l, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
