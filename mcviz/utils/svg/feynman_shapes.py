@@ -138,10 +138,10 @@ def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
     power = None
     amp = amp * 0.5
     # Here are parametrizations:
-    energy = min(1, max(0,energy))
+    energy = min(1, max(0, energy))
     amplitude = (0.5 + 0.5*energy) * amp * 3 # TUNING FUNCTION
-    n_per_10 = (n_min + energy * (n_max - n_min)) / amp
-    n = max(3, int(n_per_10 * length / 10))
+    n_per_10 = 1 + (n_min + energy * (n_max - n_min)) / amp
+    n = max(1, int(n_per_10 * length / 10))
     splineline = get_boson_splines(length, amplitude, n, power,
                                     amplitude)
     if spline: splineline = spline.transform_splineline(splineline)
