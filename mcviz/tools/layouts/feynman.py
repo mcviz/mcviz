@@ -3,7 +3,7 @@ from __future__ import division
 from math import log10
 
 from mcviz.tools import FundamentalTool, Arg
-from mcviz.graph import ViewVertex
+from mcviz.graph import ViewVertex, ViewParticle
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
 
@@ -118,7 +118,7 @@ class InlineLabelsLayout(FeynmanLayout):
     def get_particle(self, particle):
             
         down = super(InlineLabelsLayout, self).get_particle(particle)
-        if not down.label:
+        if not down.label:# or "jet" in particle.tags:
             return down
        
         middle = LayoutNode(down.item, label=down.label)
@@ -127,7 +127,15 @@ class InlineLabelsLayout(FeynmanLayout):
         #middle.dot_args["shape"] = "square"
         middle.dot_args["group"] = "particlelabels"
         
-        up = LayoutEdge(down.item, down.coming, middle.item, **down.args)
+        if 'jet' in down.item.tags: #Make a dummy item for the upstream particle
+            item = ViewParticle(self.graph)
+            item.pdgid = 0
+            item.color = item.anticolor = None
+            item.order_number = -1000
+        else:
+            item = down.item
+
+        up = LayoutEdge(item, down.coming, middle.item, **down.args)
         down.coming = middle.item
         up.label = down.label = None
         up.port_going = None

@@ -7,10 +7,6 @@ from .texglyph import TexGlyph
 from ..nanodom import XMLNode, RawNode
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
-GRADIENT_XML="""<linearGradient id='fadeout' x1='0' y1='0' x2='1' y2='0'>
-    <stop stop-color='#00f' offset='0%' style='stop-opacity:1;' />
-    <stop stop-color='#00f' offset='100%' style='stop-opacity:0;' />
-</linearGradient>"""
 
 def mkattrs(**kwargs):
     return " ".join('{0}="{1}"'.format(*i) 
@@ -31,7 +27,6 @@ class SVGDocument(object):
         self.svg.appendChild(RawNode('<rect id="background" x="0" y="0" width="%.1f" '
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
-        self.svg.appendChild(RawNode(GRADIENT_XML))
         
         self.defs = XMLNode("defs")
         self.defined_pdgids = []

@@ -123,6 +123,7 @@ class Jets(Transform):
     _name = "Jets"
     _args = [Arg("algorithm", str, "Jet Algorithm", default="antikt", choices=_jet_algos),
              Arg("r", float, "Delta R for the Jet Algorithm", default=0.4),
+             Arg("n_max", int, "Maximum number of jets to form", default=5),
              Arg("tracks", Arg.bool, "Only cluster charged particles", default=False)]
     def __call__(self, graph_view):
         from mcviz.jet import cluster_jets, JetAlgorithms
@@ -140,7 +141,7 @@ class Jets(Transform):
             return hypot(*jet.p[:2])
         for i, jet in enumerate(sorted(jets, key=pt, reverse=True)):
             print "Created jet: np=%2i, %r, %r" % (len(jet.particles), jet.p, jet.e)
-            if i >= 5:
+            if i >= self.options["n_max"]:
                 break
             jet_start_vertices = set(p.start_vertex for p in jet.particles)
             jet_end_vertices = set(p.end_vertex for p in jet.particles)
