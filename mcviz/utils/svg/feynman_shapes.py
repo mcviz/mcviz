@@ -131,7 +131,7 @@ def get_gluon_splines(length, amplitude, n_waves, amp):
 # contain some policy
 
 # TUNING DEFAULTS
-def boson_data(energy, spline, n_max = 1, n_min = 1, amp = 1):
+def boson_data(energy, spline, n_max=1, n_min=1, amp=1):
     """Get the SVG path data for a boson.
     energy must be between 0 and 1"""
     length = spline.length
@@ -159,12 +159,12 @@ def segment_data(energy, spline, n_segments, n_segment, offset=0):
     return splineline.svg_path_data
 
 # TUNING DEFAULTS
-def photon_data(energy, spline, n_max = 10, n_min = 3, power = 5, amp = 1, half_open = False):
+def photon_data(energy, spline, n_max=10, n_min=3, power=5, amp=1, half_open=False):
     """Get the SVG path data for a photon. 
     energy must be between 0 and 1"""
     length = spline.length
     # Here are parametrizations:
-    energy = min(1, max(0,energy))
+    energy = min(1, max(0, energy))
     amplitude = (0.5 + 0.5*energy) * amp # TUNING FUNCTION
     n_per_10 = (n_min + energy * (n_max - n_min)) / amp
     n = max(2, int(n_per_10 * length / 10))
@@ -354,7 +354,7 @@ def boson(energy, spline, scale = 1, **kwds):
     energy must be between 0 and 1. kwds are added to SVG"""
     path = svgxml.createElement("path")
     path.setAttribute("fill", "none")
-    path.setAttribute("d", boson_data(energy, spline, amp = scale))
+    path.setAttribute("d", boson_data(energy, spline, amp=scale))
     grp = svg_group(kwds)
     grp.appendChild(path)
     return grp
