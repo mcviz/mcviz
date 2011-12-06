@@ -7,7 +7,7 @@ from .tools.tools import tool_types, tool_classes
 
 help_topics = ["all", "examples"] + tool_types.keys()
 
-GIT_URL = "https://github.com/mcviz/repo/tree/master/mcviz"
+GIT_URL = "https://github.com/mcviz/mcviz/tree/master/mcviz"
 
 
 def print_type_help(cls, links=False):

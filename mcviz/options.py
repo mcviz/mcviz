@@ -10,7 +10,7 @@ from .tools import tool_type_options
 
 
 def get_option_parser():
-    usage = ("usage: %(prog)s [options] {hepmc_file|pythia_log}[:<number of event in file, 0 is first>]\n"
+    usage = ("usage: %(prog)s [options] {hepmc_file|lhe_file|pythia_log}[:<event index, 0 first>]\n"
              "       for example: %(prog)s --demo pythia_01.log:2")
     epilog = ("\nTo show extensive help, type %(prog)s --help all\n"
              "To show help on a specific tool %(prog)s --help [tool]"
@@ -33,9 +33,9 @@ def get_option_parser():
 
     o("--units", action="store", dest="units")
 
-    o("--output_file", action="store", help="Filename for output_file", default="mcviz.svg")
+    o("--output_file", action="store", help="Filename for output file", default="mcviz.svg")
 
-    o("filename", nargs='?', default=None)
+    o("filename", nargs='?', help="Input file name, optionally followed by event index e.g. pythia_01.log:2", default=None)
 
     g = p.add_argument_group("The MCViz Toolbox")
     o = g.add_argument
