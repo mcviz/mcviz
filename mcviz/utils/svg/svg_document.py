@@ -3,7 +3,7 @@ import re
 from pkg_resources import resource_string, resource_exists
 from textwrap import dedent
 
-from .texglyph import TexGlyph
+from .texglyph import TexGlyph, default_args
 from ..nanodom import XMLNode, RawNode
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
@@ -28,9 +28,16 @@ class SVGDocument(object):
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
         
+        defhead = XMLNode("defs")
+        defgroup = XMLNode("g")
         self.defs = XMLNode("defs")
         self.defined_pdgids = []
-        self.svg.appendChild(self.defs)
+        defgroup.appendChild(self.defs)
+        defhead.appendChild(defgroup)
+        self.svg.appendChild(defhead)
+
+        for att in default_args:
+            defgroup.setAttribute(att, default_args[att])
 
     def add_glyph(self, reference, pdgid, center, font_size, subscript=None):
 
@@ -45,6 +52,7 @@ class SVGDocument(object):
 
         glyph = TexGlyph.from_pdgid(pdgid)
         if not pdgid in self.defined_pdgids:
+            #print("Adding node: {0:s}".format(glyph.xml))
             self.defs.appendChild(RawNode(glyph.xml))
             self.defined_pdgids.append(pdgid)
 

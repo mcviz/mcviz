@@ -47,6 +47,27 @@ GREEK_ALTERNATES = "(%s)" % "|".join("[%c%c]%s" % (g[0].upper(), g[0], g[1:])
                                      for g, c in GREEK_NAMECHARS)
 GREEK_FINDER = re.compile(GREEK_ALTERNATES)
 
+default_args = {
+        "fill" : "none",
+        "fill-opacity" : "1",
+        "fill-rule" : "evenodd",
+        "font-size-adjust" : "none",
+        "font-stretch" : "normal",
+        "font-style" : "normal",
+        "font-variant" : "normal",
+        "font-weight" : "normal",
+        "letter-spacing" : "normal",
+        "stroke" : "black",
+        "stroke-dasharray" : "none",
+        "stroke-dashoffset" : "0",
+        "stroke-linecap" : "butt",
+        "stroke-linejoin" : "miter",
+        "stroke-miterlimit" : "10.433",
+        "stroke-opacity" : "1",
+        "text-anchor" : "start",
+        "word-spacing" : "normal",
+        "xml:space" : "preserve"}
+
 grp_susy = r"(?P<susy>\~)?"
 grp_name = r"(?P<name>[A-Za-z8/]+?)"
 grp_hv = r"(?P<hv>(E|MU|TAU)?(?<!fla)[v](Up|Dn|Diag)?)?"
@@ -277,6 +298,8 @@ class TexGlyph(object):
         
         doc = minidom.parseString(glyph.xml)
         grp = doc.childNodes[0]
+        for att in default_args:
+            grp.removeAttribute(att)
         box = doc.createElement("ellipse")
         
         box.setAttribute("cx", "%.3f" % (glyph.xmin + wx / 2))
