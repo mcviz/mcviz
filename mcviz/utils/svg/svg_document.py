@@ -25,11 +25,14 @@ class SVGDocument(object):
         self.scale = scale
         self.slim = True
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
-        self.svg = XMLNode("svg", 
+        self.doc = XMLNode("svg",
             'version="1.1" viewBox="%s" '
             'xmlns="http://www.w3.org/2000/svg" '
             'xmlns:mcviz="http://mcviz.net" '
             'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
+
+        self.svg = XMLNode("g", 'id="everything"')
+        self.doc.appendChild(self.svg)
         
         # Adds a big white background rect
         self.svg.appendChild(RawNode('<rect id="background" x="0" y="0" width="%.1f" '
@@ -179,7 +182,7 @@ class SVGDocument(object):
         out.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
-        return "".join(['<?xml version="1.0" encoding="UTF-8"?>', unicode(self.svg)])
+        return "".join(['<?xml version="1.0" encoding="UTF-8"?>', unicode(self.doc)])
 
 
 class NavigableSVGDocument(SVGDocument):
@@ -193,15 +196,12 @@ class NavigableSVGDocument(SVGDocument):
         self.slim = False
         
         # No viewbox for a NavigableSVGDocument
-        self.svg.attrs = ['version="1.1" '
+        self.doc.attrs = ['version="1.1" '
                           'xmlns="http://www.w3.org/2000/svg" '
                           'xmlns:xlink="http://www.w3.org/1999/xlink" '
                           'xmlns:mcviz="http://mcviz.net" '
                           'id="whole_document"',
                           'onload="mcviz_init(evt)"']
-        self.full_svg_document = self.svg
-        self.svg = XMLNode("g", 'id="everything"')
-        self.full_svg_document.appendChild(self.svg)
     
     def inject_javascript(self, javascript_text):
         
@@ -228,9 +228,7 @@ class NavigableSVGDocument(SVGDocument):
         
         script_fragments = self.inject_javascript(script_fragments)
                          
-        #self.full_svg_document.appendChild(self.svg)
-        self.full_svg_document.appendChild(RawNode(script_fragments))
-        self.svg = self.full_svg_document
+        self.doc.appendChild(RawNode(script_fragments))
         result = super(NavigableSVGDocument, self).toprettyxml()
         return result
         
@@ -259,7 +257,7 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
     def add_event_data(self, graph):
     
         element = XMLNode("mcviz:eventdata", attrs='xmlns="http://mcviz.net"')
-        self.full_svg_document.appendChild(element)
+        self.doc.appendChild(element)
         
         event = graph.event
         
@@ -282,7 +280,7 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
             
     
         element = XMLNode("mcviz:viewdata", attrs='xmlns="http://mcviz.net"')
-        self.full_svg_document.appendChild(element)
+        self.doc.appendChild(element)
         
         for p in graph.particles:            
             element.appendChild(XMLNode("particle", mkattrs(
@@ -339,6 +337,6 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
             <circle cx="-100" cy="-100" r="0.8px" stroke-width="0.1px" stroke="red" id="selected-particle" fill="none"/>
         """)))
         
-        self.full_svg_document.appendChild(info)
+        self.doc.appendChild(info)
         
         
