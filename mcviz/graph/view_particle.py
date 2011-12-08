@@ -117,7 +117,7 @@ class ViewParticleSingle(ViewParticle):
         self.particle_number = particle_number
         self.graph.p_map[particle_number] = self
         energy_mag = lambda x: x * self.graph.units.energy_mag
-        self.p = map(energy_mag, self.event_particle.p)
+        self.p = tuple(map(energy_mag, self.event_particle.p))
         self.e = energy_mag(self.event_particle.e)
         self.m = energy_mag(self.event_particle.m)
         self.pdgid = self.event_particle.pdgid
