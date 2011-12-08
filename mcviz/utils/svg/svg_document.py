@@ -2,11 +2,18 @@ import re
 
 from pkg_resources import resource_string, resource_exists
 from textwrap import dedent
+from copy import deepcopy
+
+from mcviz.tools.styles.styles import DEFAULT_NODE_ARGS, DEFAULT_EDGE_ARGS
 
 from .texglyph import TexGlyph, default_args
 from ..nanodom import XMLNode, RawNode
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
+DEFAULT_EDGE_ARGS = deepcopy(DEFAULT_EDGE_ARGS)
+DEFAULT_EDGE_ARGS.pop("energy")
+DEFAULT_EDGE_ARGS.pop("scale")
+DEFAULT_EDGE_ARGS["stroke-linecap"] = "round"
 
 def mkattrs(**kwargs):
     return " ".join('{0}="{1}"'.format(*i) 
@@ -16,6 +23,7 @@ class SVGDocument(object):
     def __init__(self, wx, wy, scale=1):
 
         self.scale = scale
+        self.slim = True
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
         self.svg = XMLNode("svg", 
             'version="1.1" viewBox="%s" '
@@ -28,16 +36,29 @@ class SVGDocument(object):
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
         
+
         defhead = XMLNode("defs")
         defgroup = XMLNode("g")
         self.defs = XMLNode("defs")
         self.defined_pdgids = []
         defgroup.appendChild(self.defs)
-        defhead.appendChild(defgroup)
+        self.new_space_group(defgroup, default_args, defhead)
         self.svg.appendChild(defhead)
 
-        for att in default_args:
-            defgroup.setAttribute(att, default_args[att])
+        self.line_group = XMLNode("g")
+        self.new_space_group(self.line_group, DEFAULT_EDGE_ARGS)
+
+        self.ellipse_group = XMLNode("g")
+        self.new_space_group(self.ellipse_group, DEFAULT_NODE_ARGS)
+
+
+    def new_space_group(self, group, args, parent=None):
+        if parent is None: parent = self.svg
+        for att in args:
+            group.setAttribute(att, args[att])
+        group.setAttribute("transform", "scale(%.3f)" % (self.scale))
+        parent.appendChild(group)
+
 
     def add_glyph(self, reference, pdgid, center, font_size, subscript=None):
 
@@ -139,11 +160,23 @@ class SVGDocument(object):
             txt.appendChild(subscript)
             self.svg.appendChild(txt)
 
+    def slim_element(self, element, tag, args):
+        if element.tagName == tag and all([element.getAttribute(att) == str(args[att]) for att in args]):
+            for att in args:
+                element.removeAttribute(att)
+            return True
+
+
     def add_object(self, reference, element):
+        if self.slim and self.slim_element(element, "ellipse", DEFAULT_NODE_ARGS):
+            out = self.ellipse_group
+        elif self.slim and self.slim_element(element, "g", DEFAULT_EDGE_ARGS):
+            out = self.line_group
+        else: out = self.svg
         element.setAttribute("mcviz:r", reference)
         assert not element.getAttribute("transform")
         element.setAttribute("transform", "scale(%.3f)" % (self.scale))
-        self.svg.appendChild(RawNode(element.toxml()))
+        out.appendChild(RawNode(element.toxml()))
 
     def toprettyxml(self):
         return "".join(['<?xml version="1.0" encoding="UTF-8"?>', unicode(self.svg)])
@@ -157,6 +190,7 @@ class NavigableSVGDocument(SVGDocument):
 
     def __init__(self, *args, **kwargs):
         super(NavigableSVGDocument, self).__init__(*args, **kwargs)
+        self.slim = False
         
         # No viewbox for a NavigableSVGDocument
         self.svg.attrs = ['version="1.1" '
