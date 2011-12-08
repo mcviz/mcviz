@@ -26,7 +26,7 @@ class ViewParticle(ViewObject):
     
     @property
     def pt(self):
-        return (self.p[0]**2 + self.p[1]**2)**0.5 * self.graph.units.energy_mag
+        return (self.p[0]**2 + self.p[1]**2)**0.5
 
     @property
     def phi(self):
@@ -116,9 +116,10 @@ class ViewParticleSingle(ViewParticle):
         super(ViewParticle, self).__init__(graph)
         self.particle_number = particle_number
         self.graph.p_map[particle_number] = self
-        self.p = self.event_particle.p
-        self.e = self.event_particle.e
-        self.m = self.event_particle.m
+        energy_mag = lambda x: x * self.graph.units.energy_mag
+        self.p = map(energy_mag, self.event_particle.p)
+        self.e = energy_mag(self.event_particle.e)
+        self.m = energy_mag(self.event_particle.m)
         self.pdgid = self.event_particle.pdgid
         self.name = self.event_particle.name
         self.color = self.event_particle.color
