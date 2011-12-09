@@ -147,7 +147,7 @@ class ThreePainter(StdPainter, FundamentalTool):
                 linewidth = log10(1+p.e)
                 #A("{p.p} {p.e} {p.pdgid} {0.style_args}".format(, p=p))
                 A("[{p.p[0]}, {p.p[1]}, {p.p[2]}, {p.e}, {linewidth}, {color}, {depth}],".format(
-                    p=p, color=color, linewidth=round(linewidth, 2), 
+                    p=p, color=get_color(color), linewidth=round(linewidth, 2),
                     depth=getattr(p, "distance_to_final_vertex", 0)))
         
         A("]")
