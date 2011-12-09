@@ -40,12 +40,28 @@ class GraphvizEngine(LayoutEngine):
         return output
 
     def __call__(self, layout):
-        engine = self._name
-        opts = self.options["extra"].split()
-        if not any(opt.startswith("-T") for opt in opts):
-            opts.append("-Tplain")
-        plain = self.graphviz_pass(engine, opts, self.dot(layout))
-        layout.update_from_plain(plain)
+        """
+        Run graphviz
+        """
+        engine, options = self.get_graphviz_options()
+        data = self.graphviz_pass(engine, options, self.dot(layout))
+        self.update(layout, data)
+    
+    def get_graphviz_options(self):
+        """
+        Return (binary, option list)
+        """
+        options = self.options["extra"].split()
+        if not any(options.startswith("-T") for opt in options):
+            options.append("-Tplain")
+        return self._name, options
+    
+    def update(self, layout, data):
+        """
+        Update the `layout` with information from `data`, obtained from a
+        graphviz run.
+        """
+        layout.update_from_plain(data)
 
     def dot(self, layout):
         out = ["digraph pythia {"]
@@ -105,7 +121,7 @@ class DotEngine(GraphvizEngine):
 class FDPEngine(GraphvizEngine):
     _name = "fdp"
     
-    def dot(self, layout):
+    def dot(self, layout, extra=()):
         """ tuning parameters specific to FDP:
          * K (GC, 0.3) - ideal edge length, overruled by edge len
          * sep (G, +4) - minimal (additive) margin. no plus -> multiplicative
@@ -128,6 +144,7 @@ class FDPEngine(GraphvizEngine):
         """
 
         out = ["digraph pythia {"]
+        out.extend(extra)
         out.append('K=1.0;')
         out.append('sep="+30";')
         out.append('overlap="6:";') # tradeoff between speed and overlap quality
