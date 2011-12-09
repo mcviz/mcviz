@@ -7,7 +7,7 @@ from .. import FatalError
 from . import Spline, SplineLine, Point2D
 
 
-ref_prefix = "MCVIZ_REF_"
+REF_PREFIX = "MCVIZ_REF_"
 
 def run_graphviz(layout_engine, input_dot, options=[]):
     args = [layout_engine] + options
@@ -93,7 +93,7 @@ class PlainOutput(object):
         self.scale, self.width, self.height = map(float, parameters)
 
     def handle_node(self, parameters):
-        node_ref = parameters[0][len(ref_prefix):]
+        node_ref = parameters[0][len(REF_PREFIX):]
         x, y = float(parameters[1]), self.height - float(parameters[2])
         w, h = float(parameters[3]), float(parameters[4])
         self.nodes[node_ref] = Point2D(x, y), (w, h)
@@ -122,14 +122,14 @@ class PlainOutput(object):
         else:
             splineline = SplineLine(self.get_splines(control_points))
 
-        if remaining[0].startswith(ref_prefix):
+        if remaining[0].startswith(REF_PREFIX):
             label_position = None
         else:
             label = remaining[0].strip('"')
             label_position = (float(remaining[1]), self.height - float(remaining[2]))
             remaining = remaining[3:]
 
-        edge_ref = remaining[0][len(ref_prefix):]
+        edge_ref = remaining[0][len(REF_PREFIX):]
 
         self.edge_lines[edge_ref] = splineline
         self.edge_label[edge_ref] = label_position
