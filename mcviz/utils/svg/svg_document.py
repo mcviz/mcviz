@@ -11,9 +11,12 @@ from ..nanodom import XMLNode, RawNode
 
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
 DEFAULT_EDGE_ARGS = deepcopy(DEFAULT_EDGE_ARGS)
+print(DEFAULT_EDGE_ARGS)
 DEFAULT_EDGE_ARGS.pop("energy")
 DEFAULT_EDGE_ARGS.pop("scale")
 DEFAULT_EDGE_ARGS["stroke-linecap"] = "round"
+print(DEFAULT_EDGE_ARGS)
+CUT_ARGS = {"fill":"none", "stroke-linecap":"round", "stroke-width":"0.05"}
 
 def mkattrs(**kwargs):
     return " ".join('{0}="{1}"'.format(*i) 
@@ -50,6 +53,9 @@ class SVGDocument(object):
 
         self.line_group = XMLNode("g")
         self.new_space_group(self.line_group, DEFAULT_EDGE_ARGS)
+
+        self.cut_group = XMLNode("g")
+        self.new_space_group(self.cut_group, CUT_ARGS)
 
         self.ellipse_group = XMLNode("g")
         self.new_space_group(self.ellipse_group, DEFAULT_NODE_ARGS)
@@ -167,6 +173,7 @@ class SVGDocument(object):
         if element.tagName == tag and all([element.getAttribute(att) == str(args[att]) for att in args]):
             for att in args:
                 element.removeAttribute(att)
+            #if tag == "g": print(element.getAttribute("stroke-linecap"))
             return True
 
 
@@ -175,6 +182,8 @@ class SVGDocument(object):
             out = self.ellipse_group
         elif self.slim and self.slim_element(element, "g", DEFAULT_EDGE_ARGS):
             out = self.line_group
+        elif self.slim and self.slim_element(element, "g", CUT_ARGS):
+            out = self.cut_group
         else: out = self.svg
         element.setAttribute("mcviz:r", reference)
         assert not element.getAttribute("transform")
