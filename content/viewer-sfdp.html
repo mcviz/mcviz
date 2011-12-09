@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)http://mrdoob.github.com/three.js/examples/canvas_lines_sphere.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>three.js canvas - lines - sphere</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+            body {
+                background-color: #ffffff;
+                margin: 0px;
+                overflow: hidden;
+            }
+
+            a {
+                color:#0078ff;
+            }
+        </style>
+    </head>
+    <body>
+
+        <script src="Three.js"></script>
+        <script src="Stats.js"></script>
+
+        <script src="RequestAnimationFrame.js"></script>
+        <script src="data.js"></script>
+        <script>
+            stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            container = document.createElement( 'div' );
+            document.body.appendChild( container ); 
+            container.appendChild( stats.domElement ); 
+
+            var SCREEN_WIDTH = window.innerWidth,
+            SCREEN_HEIGHT = window.innerHeight,
+
+            mouseX = 0, mouseY = 0,
+
+            windowHalfX = window.innerWidth / 2,
+            windowHalfY = window.innerHeight / 2,
+
+            SEPARATION = 200,
+            AMOUNTX = 10,
+            AMOUNTY = 10,
+
+            camera, scene, renderer;
+
+            init();
+            animate();
+
+            function init() {
+
+                var container, separation = 100, amountX = 50, amountY = 50,
+                particles, particle;
+
+                container = document.createElement('div');
+                document.body.appendChild(container);
+
+                camera = new THREE.PerspectiveCamera( 75, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 10000 );
+                camera.position.z = 1000;
+
+                scene = new THREE.Scene();
+
+                renderer = new THREE.CanvasRenderer();
+                //renderer = new THREE.WebGLRenderer();
+                renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+                container.appendChild(renderer.domElement);
+
+                // particles
+
+                var PI2 = Math.PI * 2;
+                var material = new THREE.ParticleCanvasMaterial( {
+
+                    color: 0,
+                    program: function ( context ) {
+
+                        context.beginPath();
+                        context.arc( 0, 0, 1, 0, PI2, true );
+                        context.closePath();
+                        context.fill();
+
+                    }
+
+                } );
+
+                for ( var i = 0; i < 0; i ++ ) {
+
+                    particle = new THREE.Particle( material );
+                    particle.position.x = Math.random() * 2 - 1;
+                    particle.position.y = Math.random() * 2 - 1;
+                    particle.position.z = Math.random() * 2 - 1;
+                    particle.position.normalize();
+                    particle.position.multiplyScalar( Math.random() * 100 + 450 );
+                    scene.add( particle );
+
+                }
+
+                // lines
+
+                for (var i = 0; i < 0; i++) {
+
+                    var geometry = new THREE.Geometry();
+
+                    var vector = new THREE.Vector3( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+                    vector.normalize();
+                    vector.multiplyScalar( 450 );
+
+                    geometry.vertices.push( new THREE.Vertex( vector ) );
+
+                    var vector2 = vector.clone();
+                    vector2.multiplyScalar( Math.random() * 0.5 + 1 );
+
+                    geometry.vertices.push( new THREE.Vertex( vector2 ) );
+
+                    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 0.1, color: 0xff0000, opacity: Math.random() } ) );
+                    scene.add( line );
+                }
+                
+                cg = new THREE.CylinderGeometry(20, 20, 2000, 20, 2, false);
+                cg.rotate
+                c = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ color: 0x111111, opacity: 0.4 }), false, false, false);
+                c.rotation.z = PI2 / 4;
+                c.updateMatrix();
+                //m = new THREE.Matrix4();
+                //m.setRotationZ(100);
+                //c.updateMatrix(m);
+                //scene.add(c);
+                                
+                mul = 10 * (32. / maxdistance);
+
+                for (var i = 0; i < data.length; i++) {
+                    item = data[i];
+                    
+                    x1 = item[0];
+                    y1 = item[1];
+                    z1 = item[2];
+                    x2 = item[3];
+                    y2 = item[4];
+                    z2 = item[5];
+                    color = item[6];
+                    linewidth = item[7];
+
+                    var geometry = new THREE.Geometry();
+
+                    //var vector = new THREE.Vector3(z1, y1, x1);
+                    var vector = new THREE.Vector3(z1, y1, x1);
+                    var vector2 = new THREE.Vector3(z2, y2, x2);
+                    //vector.multiplyScalar( 0.1 );
+                    //vector2.multiplyScalar( 0.1 );
+
+                    geometry.vertices.push( new THREE.Vertex( vector ) );
+                    geometry.vertices.push( new THREE.Vertex( vector2 ) );
+
+                    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { 
+                        linewidth: linewidth, color: color, opacity: 0.8 } 
+                    ) );
+                    scene.add( line );
+                }
+                
+                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+                document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+                document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+            }
+
+            function onDocumentMouseMove(event) {
+                mouseX = event.clientX - windowHalfX;
+                mouseY = event.clientY - windowHalfY;
+            }
+
+            function onDocumentTouchStart( event ) {
+                if ( event.touches.length > 1 ) {
+                    event.preventDefault();
+
+                    mouseX = event.touches[ 0 ].pageX - windowHalfX;
+                    mouseY = event.touches[ 0 ].pageY - windowHalfY;
+                }
+            }
+
+            function onDocumentTouchMove( event ) {
+                if ( event.touches.length == 1 ) {
+                    event.preventDefault();
+
+                    mouseX = event.touches[ 0 ].pageX - windowHalfX;
+                    mouseY = event.touches[ 0 ].pageY - windowHalfY;
+                }
+            }
+
+            function animate() {
+
+                requestAnimationFrame( animate );
+
+                render();
+                stats.update()
+
+            }
+
+            function render() {
+
+                camera.position.x += ( mouseX - camera.position.x ) * .05;
+                camera.position.y += ( - mouseY + 200 - camera.position.y ) * .05;
+                camera.lookAt( scene.position );
+
+                renderer.render( scene, camera );
+
+            }
+
+        </script><div><canvas width="1458" height="793"></canvas></div>
+    
+
+</body>
+</html>
