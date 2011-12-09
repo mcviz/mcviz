@@ -48,7 +48,8 @@ def particle_color(particle):
     elif particle.boson:
         return "magenta"
     elif particle.lepton:
-        return "#EFDECD" # "Almond"
+        #return "#EFDECD" # "Almond"
+        return "#9BDDFF" # "Columbia blue"
     else:
         return "black"
 
