@@ -151,8 +151,8 @@ class ToolCreator(type):
 class Tool(object):
     __metaclass__ = ToolCreator
 
-    """Name of this tool"""
-    #_name = "Empty"
+    """Mode of current setup"""
+    _modeset = "2D"
 
     """list of Arguments to this tool (Arg class)"""
     _args = ()

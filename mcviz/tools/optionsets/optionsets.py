@@ -22,6 +22,19 @@ class CommandLineOptionSet(OptionSet):
         defstyle = "Default"
         if not defstyle in [s.name for s in tools["style"]]:
             tools["style"].insert(0, ToolSetting(defstyle))
+
+class ThreeDOptionSet(OptionSet):
+    _name = "3d"
+
+    def __call__(self, tools):
+        for tool_type in sorted(tool_types.keys()):
+            tools.setdefault(tool_type, [])
+        setdefault(tools, "painter", "navisvg")
+        setdefault(tools, "layout-engine", "dot")
+        setdefault(tools, "layout", "Feynman")
+        defstyle = "Default"
+        if not defstyle in [s.name for s in tools["style"]]:
+            tools["style"].insert(0, ToolSetting(defstyle))
             
 class DemoOptionSet(CommandLineOptionSet):
     _name = "demo"

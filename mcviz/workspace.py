@@ -82,7 +82,9 @@ class GraphWorkspace(object):
         # Get the specified layout class and create a layout of the graph
         self.log.verbose("applying layout classes")
         with self.timer("layout the graph", self.log.VERBOSE):
+            print(self.tools["layout"]._name)
             layout, = self.tools["layout"]
+            print(layout)
             self.layout = layout(self.graph_view)
 
     def run_layout_engine(self):
