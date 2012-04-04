@@ -219,7 +219,10 @@ class ViewParticleSummary(ViewParticle, Summary):
                     anticolor.add(ep.anticolor)
                     pdgids.add(ep.pdgid)
 
-        self.p = tuple(momentum)
+        energy_mag = lambda x: x * self.graph.units.energy_mag
+        self.p = tuple(map(energy_mag, momentum))
+        self.e = energy_mag(self.e)
+        self.m = energy_mag(self.m)
 
         self.pdgid = min(pdgids)
         self.color, self.anticolor = max(color), max(anticolor)
