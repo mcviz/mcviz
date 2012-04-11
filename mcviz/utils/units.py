@@ -94,31 +94,31 @@ class Units(object):
         """
         e = self.energy_mag * initial_particle.e
         log.verbose("initial particle of energy {0:.4g}{1:s}eV"
-            .format(*self.pick_energy_mag(initial_particle.e)))
+            .format(*self.pick_mag(e)))
         if e > 100000:
-            new = self.pick_energy_mag(initial_particle.e*0.0000001)
+            new = self.pick_mag(e*0.0000001)
         elif e < 100:
-            new = self.pick_energy_mag(initial_particle.e*100)
+            new = self.pick_mag(e*100)
         else:
             log.verbose("initial particle of energy {0:.4g}{1:s}eV"
-                .format(*self.pick_energy_mag(initial_particle.e)))
+                .format(*self.pick_mag(e)))
             return
 
         if self.auto:
             self.set_energy(new[1]+"eV")
             info = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
                        ", units have been changed to {new:s}eV"
-            log.info(info.format(*self.pick_energy_mag(initial_particle.e), new=new[1]))
+            log.info(info.format(*self.pick_mag(initial_particle.e * self.energy_mag), new=new[1]))
         else:
             warning = "Input has beam particle with an energy of {0:.4g}{1:s}eV"\
                        ", consider setting --units={new:s}eV or auto if this is incorrect"
-            log.warn(warning.format(*self.pick_energy_mag(initial_particle.e), new=new[1]))
+            log.warn(warning.format(*self.pick_mag(initial_particle.e * self.energy_mag), new=new[1]))
         return
 
 if __name__ == '__main__':
     u = Units()
     def trial(value):
-        print("{0:f} GeV is represented: {1:g}{2:s}eV".format(value, *u.pick_energy_mag(value)))
+        print("{0:f} GeV is represented: {1:g}{2:s}eV".format(value, *u.pick_mag(value * energy_mag)))
     trial(1234567890.123456789)
     trial(34567890.123456789)
     trial(547890.123456789)
