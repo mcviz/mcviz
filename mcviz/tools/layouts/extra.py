@@ -29,9 +29,32 @@ class FixedHadronsLayout(BaseLayout):
                 obj.subgraph = "hadronization"
         return super(FixedHadronsLayout, self).process_node(obj)
 
+class FixedFinalLayout(BaseLayout):
+    """
+    Place all final vertices on the same rank.
+    """
+    _name = "FixFinal"
+
+    def process(self):
+        sg_options = self.subgraph_options.setdefault("final", [])
+        # rank=same means that the objects in this group should be laid out
+        # on the same line
+        sg_options.append('rank="same"')
+        return super(FixedFinalLayout, self).process()
+
+    def process_node(self, obj):
+        if isinstance(obj.item, ViewVertex):
+            if obj.item.final:
+                obj.subgraph = "final"
+        elif (obj.item.start_vertex.final and
+              not isinstance(obj.item, ViewParticleSummary)):
+            if obj.dot_args.get("group", "") != "particlelabels":
+                obj.subgraph = "final"
+        return super(FixedFinalLayout, self).process_node(obj)
+
 class FixedJetsLayout(BaseLayout):
     """
-    Place all of the hadronization vertices on the same rank.
+    Place all of the jet vertices on the same rank.
     """
     def __init__(self, *args, **kwargs):
         super(FixedJetsLayout, self).__init__(*args, **kwargs)
