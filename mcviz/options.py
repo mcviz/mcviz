@@ -61,9 +61,12 @@ def get_option_parser():
     o("--links", action="store_true", help=SUPPRESS)
     return p
     
-def parse_options(argv=sys.argv):
+def parse_options(arguments=None):
     parser = get_option_parser()
-    args = parser.parse_args()
+    if arguments is None:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(arguments)
 
     if args.demo:
         args.optionset = ["demo"]
