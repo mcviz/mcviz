@@ -5,6 +5,7 @@ This whole module is begging for a refactor, but by some miracle it works.
 from ... import log; log = log.getChild(__name__)
 
 from mcviz.utils import Units
+from mcviz.utils.trydecompress import try_decompress
 from .. import EventParseError, Particle, Vertex
 
 # Pythia status codes:
@@ -135,7 +136,8 @@ def load_event(args):
         event_number = 0
 
     with open(filename) as fd:
-        lines = [line for line in (line.strip() for line in fd) if line]
+        lines = try_decompress(fd.read()).split("\n")
+        lines = [line for line in (line.strip() for line in lines) if line]
 
     header = None
     if START_COMPLETE in lines:

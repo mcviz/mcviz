@@ -6,6 +6,7 @@ from ... import log; log = log.getChild(__name__)
 
 from mcviz import FatalError
 from mcviz.utils import Units
+from mcviz.utils.trydecompress import try_decompress
 from .. import EventParseError, Particle, Vertex
 
 
@@ -184,7 +185,8 @@ def load_event(args):
         event_number = 0
     
     with open(filename) as fd:
-        match = LHE_TEXT.search(fd.read())
+        data = try_decompress(fd.read())
+        match = LHE_TEXT.search(data)
     
     if not match:
         raise EventParseError("Failed to parse LHE data")
