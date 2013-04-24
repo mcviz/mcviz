@@ -22,8 +22,8 @@ class Color(Annotation):
     """
     _name = "color"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles, lambda p: p.color)
-        self.annotate_particles(graph.particles, lambda p: -p.anticolor)
+        self.annotate_particles(graph.particles, lambda p: int(p.color))
+        self.annotate_particles(graph.particles, lambda p: int(-p.anticolor))
 
 
 class Status(Annotation):
