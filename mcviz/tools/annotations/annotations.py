@@ -62,4 +62,19 @@ class PDGID(Annotation):
     _name = "pdg"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: str(p.pdgid))
-        
+
+class PDFInfo(Annotation):
+    """
+    Annotate beam particles with pdf information
+    """
+    _name = "pdfinfo"
+    def __call__(self, graph):
+        for ip in graph.initial_particles:
+            if ip.reference == "P1":
+                pdfinfo = graph.event.pdfinfo
+                ip.subscripts.append(("id: %s" % pdfinfo.id1, "left"))
+                ip.subscripts.append(("x: %f" % float(pdfinfo.x1), "left"))
+            elif ip.reference == "P2":
+                pdfinfo = graph.event.pdfinfo
+                ip.subscripts.append(("id: %s" % pdfinfo.id2, "left"))
+                ip.subscripts.append(("x: %f" % float(pdfinfo.x2), "left"))

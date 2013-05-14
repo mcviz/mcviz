@@ -7,13 +7,14 @@ from . import EventParseError
 #from mcviz.tests.test_graph import graph_is_consistent
 
 class EventGraph(object):
-    def __init__(self, vertices, particles, units):
+    def __init__(self, vertices, particles, units, pdfinfo=None):
         """
         `records`: A list containing many particles
         """
         self.vertices = vertices
         self.particles = particles
         self.units = units
+        self.pdfinfo = pdfinfo
         # Graph consistency checks
         #graph_is_consistent(self)
 
@@ -41,8 +42,9 @@ class EventGraph(object):
     @classmethod
     def from_hepmc(cls, args):
         from .loaders.hepmc import load_event
-        vertices, particles, units = load_event(args)
-        return cls(vertices, particles, units)
+        vertices, particles, units, pdfinfo = load_event(args)
+        return cls(vertices, particles, units, pdfinfo)
+
 
         
     @classmethod
