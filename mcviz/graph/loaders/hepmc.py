@@ -129,7 +129,9 @@ def load_single_event(ev, args):
         units = None
     
     orphans = 0
-    
+
+    pdfinfo = None
+
     # Loop over event records.
     # Read a vertex, then read N particles. When we get to the next vertex, 
     # associate the N particles with the previous vertexEventParseError
@@ -169,7 +171,10 @@ def load_single_event(ev, args):
                 initial_particles.append(particle)
             
             vertex_incoming.setdefault(int(record.vertex_out_barcode), set()).add(particle)
-    
+
+        elif isinstance(record, HPDF):
+            pdfinfo = record
+
     # Use default units if they are not specified
     if units is None:
         units = Units()
@@ -228,7 +233,7 @@ def load_single_event(ev, args):
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
                                   if vertex.outgoing or vertex.incoming)
 
-    return vertices, particles, units
+    return vertices, particles, units, pdfinfo
 
 def load_event(args):
     """
