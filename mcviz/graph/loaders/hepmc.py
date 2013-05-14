@@ -32,7 +32,9 @@ HEvent = namedtuple("HEvent",
     "id interaction_count ev_scale alpha_qcd alpha_qed signal_proc_id "
     "signal_proc_vertex_barcode num_vertices beam_p1_barcode beam_p2_barcode "
     "random_states weights")
-HVertex = namedtuple("HVertex", 
+HPDF = namedtuple("HPDF",
+    "id1 id2 x1 x2 scalePDF pdf1 pdf2 pdf_id1 pdf_id2")
+HVertex = namedtuple("HVertex",
     "barcode id x y z ctau num_orphan_incoming num_outgoing weights")
 HParticle = namedtuple("HParticle",
     "barcode pdgid px py pz energy mass status pol_theta pol_phi "
@@ -105,6 +107,8 @@ def make_record(record):
         u = Units(record[0] + " " + record[1])
         return u
 
+    elif type_ == "F":
+        return HPDF._make(record)
 
 def load_single_event(ev, args):
     """
