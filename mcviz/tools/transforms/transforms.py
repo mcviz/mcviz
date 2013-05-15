@@ -312,7 +312,10 @@ class Cut(Transform):
              Arg("param", str, "parameter to cut on", default="pt"),
              Arg("abs", Arg.bool, "take abs value of param", default=True),
              Arg("reverse", Arg.bool, "reverse cut", default=False),
-             Arg("exact", Arg.bool, "exact cut", default=False)
+             Arg("exact", Arg.bool, "exact cut", default=False),
+             Arg("mothers", Arg.bool, "cut on mother parameters", default=False),
+             Arg("daughters", Arg.bool, "cut on daughter parameters", default=False),
+             Arg("final_state", Arg.bool, "cut on final state particles only", default=True),
              ]
 
     def __call__(self, graph_view):
@@ -321,7 +324,16 @@ class Cut(Transform):
         take_abs = self.options["abs"]
         reverse = self.options["reverse"]
         exact = self.options["exact"]
-        final_state = [p for p in graph_view.particles if p.final_state]
+        mothers = self.options["mothers"]
+        daughters = self.options["daughters"]
+
+        # when cutting on daugthers don't restrict on final state particles
+        final_state = self.options["final_state"] if not daughters else False
+
+        if final_state:
+            particles = [p for p in graph_view.particles if p.final_state]
+        else:
+            particles = graph_view.particles
 
         passed_tag = "passed_cut"
         def cutter(p):
@@ -343,11 +355,22 @@ class Cut(Transform):
         def mark(item, depth):
             keep.add(item)
             item.tag(passed_tag)
-        
-        for particle in final_state:
-            if not cutter(particle):
-                graph_view.walk(particle, vertex_action=mark, particle_action=mark,
-                                ascend=True)
+
+        for particle in particles:
+
+            if mothers:
+                loop_over = particle.mothers
+            elif daughters:
+                loop_over = particle.daughters
+            else:
+                loop_over = [particle]
+
+            for p in loop_over:
+                if not cutter(p):
+                    graph_view.walk(p, vertex_action=mark, particle_action=mark, ascend=True)
+                    # also display the particle whose mother or daughter passed the cut
+                    if mothers or daughters:
+                        graph_view.walk(particle, vertex_action=mark, particle_action=mark, ascend=True)
 
         def pruner(item, depth):
             if passed_tag in item.tags:
