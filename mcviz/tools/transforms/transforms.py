@@ -311,25 +311,33 @@ class Cut(Transform):
     _args = [Arg("cut", float, "cut value", default=5),
              Arg("param", str, "parameter to cut on", default="pt"),
              Arg("abs", Arg.bool, "take abs value of param", default=True),
-             Arg("reverse", Arg.bool, "reverse cut", default=False),]
+             Arg("reverse", Arg.bool, "reverse cut", default=False),
+             Arg("exact", Arg.bool, "exact cut", default=False)
+             ]
 
     def __call__(self, graph_view):
         cut = self.options["cut"]
         param = self.options["param"]
         take_abs = self.options["abs"]
         reverse = self.options["reverse"]
+        exact = self.options["exact"]
         final_state = [p for p in graph_view.particles if p.final_state]
 
         passed_tag = "passed_cut"
         def cutter(p):
+
+            reject = True
+
             if hasattr(p, param):
                 value = getattr(p, param)
                 if take_abs: value = abs(value)
-                if reverse:
-                    return cut <= value
+
+                if exact:
+                    reject = (value != cut)
                 else:
-                    return value <= cut
-            else: return True
+                    reject = (value <= cut)
+
+            return (reject if not reverse else not reject)
 
         keep = set()
         def mark(item, depth):
