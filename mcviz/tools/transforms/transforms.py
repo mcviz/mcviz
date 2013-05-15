@@ -325,20 +325,19 @@ class Cut(Transform):
 
         passed_tag = "passed_cut"
         def cutter(p):
+
+            reject = True
+
             if hasattr(p, param):
                 value = getattr(p, param)
                 if take_abs: value = abs(value)
-                if reverse:
-                    if not exact:
-                        return cut <= value
-                    else:
-                        return cut == value
+
+                if exact:
+                    reject = (value != cut)
                 else:
-                    if not exact:
-                        return value <= cut
-                    else:
-                        return cut != value
-            else: return True
+                    reject = (value <= cut)
+
+            return (reject if not reverse else not reject)
 
         keep = set()
         def mark(item, depth):
