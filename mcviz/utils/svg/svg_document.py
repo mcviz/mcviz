@@ -123,6 +123,8 @@ class SVGDocument(object):
                 x, y = x - xw/2, y + yw + font_size*0.4
             elif pos == "over":
                 x, y = x - xw/2, y - font_size*0.4
+            elif pos == "left":
+                x, y = x - len(subscript)/5., y
 
             txt = XMLNode("text")
             txt.setAttribute("x", "%.3f" % (x))
