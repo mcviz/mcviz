@@ -368,6 +368,8 @@ class Cut(Transform):
             keep.add(item)
             item.tag(passed_tag)
 
+        particles_to_walk = set()
+
         for particle in particles:
 
             if mothers:
@@ -379,10 +381,13 @@ class Cut(Transform):
 
             for p in loop_over:
                 if not cutter(p):
-                    graph_view.walk(p, vertex_action=mark, particle_action=mark, ascend=True)
+                    particles_to_walk.add(p)
                     # also display the particle whose mother or daughter passed the cut
                     if mothers or daughters:
-                        graph_view.walk(particle, vertex_action=mark, particle_action=mark, ascend=True)
+                        particles_to_walk.add(particle)
+
+        for p in particles_to_walk:
+            graph_view.walk(p, vertex_action=mark, particle_action=mark, ascend=True)
 
         def pruner(item, depth):
             if passed_tag in item.tags:
