@@ -305,7 +305,19 @@ def merge_vertices(graph_view):
 
 class Cut(Transform):
     """
-    Cut away particles from the 'outside' of the graph
+    Cut away particles from the 'outside' of the graph (default). When
+    'final_state' is set to force, also cut on 'inner' particles.
+
+    Instead of taking the value of the parameter of a particle
+    directly, it can be checked against the value of its mother or
+    daugther when the corresponding boolean flags are true. E.g. to
+    draw all particles with at least one mother with pt > 5 GeV, do:
+
+    '-tCut:cut=5:param=pt:mothers=True'
+
+    'final_state' is automatically set to 'False' if 'mothers' or
+    'daugthers' is True.
+
     """
     _name = "Cut"
     _args = [Arg("cut", float, "cut value", default=5),
