@@ -7669,7 +7669,8 @@ jQuery.fn.delay = function( time, type ) {
 	opt = select.appendChild( document.createElement("option") );
 	input = div.getElementsByTagName("input")[ 0 ];
 
-	a.style.cssText = "top:1px";
+	// The following breaks in svg documents
+	//a.style.cssText = "top:1px";
 
 	// Test setAttribute on camelCase class. If it works, we need attrFixes when doing get/setAttribute (ie6/7)
 	support.getSetAttribute = div.className !== "t";
