@@ -1,42 +1,36 @@
 #! /usr/bin/env python
 
-from mcviz.graph import EventGraph
+from mcviz.graph import EventGraph, GraphView
 from copy import deepcopy
 import sys
 sys.setrecursionlimit(10000)
 
 def graph_is_consistent(graph):
-    for no in graph.vertices:
-        v = graph.vertices[no]
-        assert v.vno == no
-
+    for vertex in graph.vertices:
         #print "VERTEX: ", v
         #print "INCOMING: ", v.incoming
-        for p in v.incoming:
-            assert v == p.vertex_out
+        for p in vertex.incoming:
+            assert vertex == p.end_vertex
             #print p, p.daughters, v.outgoing
-            assert p.daughters.issubset(v.outgoing)
+            assert all(daughter in vertex.outgoing for daughter in p.daughters)
 
         #print "OUTGOING: ", v.outgoing
-        for p in v.outgoing:
-            assert v == p.vertex_in
-            assert p.mothers.issubset(v.incoming)
+        for p in vertex.outgoing:
+            assert vertex == p.start_vertex
+            assert all(mother in vertex.incoming for mother in p.mothers)
 
-    for no in graph.particles:
-        p = graph.particles[no]
-        assert p.no == no
-
+    for particle in graph.particles:
         #print "PARTICLE: ", p
 
         #print "MOTHERS: ", p.mothers
-        for m in p.mothers:
+        for m in particle.mothers:
             #print m, m.daughters
-            assert p in m.daughters
+            assert particle in m.daughters
 
         #print "DAUGHTERS: ", p.daughters
-        for d in p.daughters:
+        for d in particle.daughters:
             #print d, d.mothers
-            assert p in d.mothers
+            assert particle in d.mothers
 
 def graph_view_is_consistent(graph):
     for v in graph.vertices:
@@ -79,31 +73,33 @@ def graph_view_is_consistent(graph):
 
 event_graph = None
 def setup():
-    test_file = "inputs/pythia01.out"
+    test_file = "examples/pythia/LHC/out01"
     from mcviz.options import parse_options
-    options, args = parse_options([])
-    global event_graph
-    event_graph = EventGraph.from_pythia_log(test_file, options)
+    parser, args = parse_options([])
+    args.filename = test_file
+    global event_graph, view_graph
+    event_graph = EventGraph.from_pythia_log(args)
+    view_graph = GraphView(event_graph)
 
 def get_bottom_nodes(top):
     #if top.
     pass 
 
 def test_graph():
-    graph = deepcopy(event_graph)
+    graph = deepcopy(view_graph)
     N = len(event_graph.particles)
     assert graph.particles
     graph_is_consistent(graph)
     print "removing one vertex"
-    for no in graph.particles.keys():
-        if graph.particles[no].vertex_in and graph.particles[no].vertex_out:
-            graph.contract_particle(graph.particles[no])
+    for particle in graph.particles:
+        if particle.start_vertex and particle.end_vertex:
+            graph.summarize_particles([particle])
             break
     graph_is_consistent(graph)
     print "removing all vertices"
-    for no in graph.particles.keys():
-        if no in graph.particles and not graph.particles[no].initial_state and not graph.particles[no].final_state:
-            graph.contract_particle(graph.particles[no])
+    for particle in graph.particles:
+        if particle in graph.particles and not particle.initial_state and not particle.final_state:
+            graph.summarize_particles([particle])
     assert N == len(event_graph.particles)
 
 def test_momentum():
@@ -113,7 +109,7 @@ def test_momentum():
         assert abs(psum) < 0.05
 
     connection_to_system = set()
-    for vertex in event_graph.vertices.values():
+    for vertex in view_graph.vertices:
         if not vertex.edge:
             for i in (0,1,2):
                 p_in = sum(particle.p[i] for particle in vertex.incoming)
