@@ -1861,8 +1861,6 @@ def after_install(options, home_dir):
         print "Finished! Now to run mcviz, type ./mcv"
 
 def adjust_options(options, args):
-    options.use_distribute = True
-    options.search_dirs.append("dist/")
     args[:] = ["env"]
 
 
