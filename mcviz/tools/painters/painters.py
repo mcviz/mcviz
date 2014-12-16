@@ -1,8 +1,7 @@
 from __future__ import division
 
-from .. import log; log = log.getChild(__name__)
-
-from os.path import basename
+from .. import log
+LOG = log.getChild(__name__)
 
 from mcviz.tools import Painter, FundamentalTool, Arg
 
@@ -12,23 +11,24 @@ class StdPainter(Painter):
     _base = True
 
     def write_data(self, data_string):
+        """Push data to Painters endpoint"""
         output_file = self.options["output_file"]
         # Dump the data to stdout if required
-        log.debug("data hash: 0x%0X", hash(data_string))
+        LOG.debug("data hash: 0x%0X", hash(data_string))
         if output_file == "-":
             print data_string
         elif hasattr(output_file, "write"):
             output_file.write(data_string.encode("UTF-8"))
         else:
             # Write the data to file otherwise
-            log.info('writing "%s"' % output_file)
-            with open(output_file, "w") as f:
-                f.write(data_string.encode("UTF-8"))
+            LOG.info('writing "%s"' % output_file)
+            with open(output_file, "w") as handle:
+                handle.write(data_string.encode("UTF-8"))
 
     def recalculate_boundingbox(self):
-        # if we do not know the scale; (i.e. bounding box) calculate it
+        """If we do not know the scale; (i.e. bounding box) calculate it"""
         x_min, y_min, x_max, y_max = 0, 0, 0, 0
-        def get_minmax(x,y):
+        def get_minmax(x, y):
             return min(x, x_min), min(y, y_min), max(x, x_max), max(y, y_max)
 
         for edge in self.layout.edges:
