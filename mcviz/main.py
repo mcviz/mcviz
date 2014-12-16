@@ -1,77 +1,83 @@
 #! /usr/bin/env python2.6
+"""
+MCViz - Visualize Monte Carlo Events
+Copyright (C) 2011 : See http://mcviz.net/AUTHORS
 
-# MCViz - Visualize Monte Carlo Events
-# Copyright (C) 2011 : See http://mcviz.net/AUTHORS
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 
 from textwrap import dedent
 
-from . import log; log = log.getChild(__name__)
+from . import log
+LOG = log.getChild(__name__)
 
-from . import EventGraph, EventParseError, GraphWorkspace, FatalError, parse_options
+from . import EventGraph, EventParseError, GraphWorkspace, FatalError, \
+parse_options
 
 from .logger import get_logger_level, log_level
-from .utils import Units
-from .utils.timer import Timer; timer = Timer(log, log.VERBOSE)
+# from .utils import Units
+from .utils.timer import Timer
+TIMER = Timer(log, log.VERBOSE)
 from .help import run_help
 
 def run(args, argv):
-
+    """Load event and apply tools to resulting Workspace"""
     # Activate the python debugger if requested
     if args.debug:
-        from IPython.Shell import IPShellEmbed
-        ip = IPShellEmbed(["-pdb"], rc_override=dict(quiet=True))
+        import IPython
+        IPython.embed()
 
     if not args.filename:
-        log.fatal("Please specify an HepMC file or Pythia log file to run on. "
+        LOG.fatal("Please specify an HepMC, LHE or Pythia log file to run on. "
                   "Use --help for help.")
         raise FatalError
 
-    log.info("MCViz Copyright (C) 2011 : See http://mcviz.net/AUTHORS")
-    log.info("Licensed under GNU AGPL version 3. "
+    LOG.info("MCViz Copyright (C) 2011 : See http://mcviz.net/AUTHORS")
+    LOG.info("Licensed under GNU AGPL version 3. "
              "Please see http://mcviz.net/license.txt")
 
     filename = args.filename
-    log.verbose('trying to read event from "%s"' % filename)
-    with timer('read event from "%s"' % filename):
+    LOG.verbose('trying to read event from "%s"' % filename)
+    with TIMER('read event from "%s"' % filename):
         try:
             event_graph = EventGraph.load(args)
-        except EventParseError, x:
-            log.fatal("No success in reading events from %s!" % filename)
+        except EventParseError:
+            LOG.fatal("No success in reading events from %s!" % filename)
             raise FatalError
-    log.info('drawing event from "%s"' % (filename))
+    LOG.info('drawing event from "%s"' % (filename))
 
-    gw = GraphWorkspace("local", event_graph, cmdline=" ".join(argv))
-    gw.load_tools(args)
-    gw.run()
+    workspace = GraphWorkspace("local", event_graph, cmdline=" ".join(argv))
+    workspace.load_tools(args)
+    workspace.run()
 
 def real_main(argv):
+    """Parse arguments then call run"""
     parser, args = parse_options()
     if args.help:
         with log_level(log.ERROR):
             return run_help(parser, args)
-        
+
     try:
         with log_level(get_logger_level(args.quiet, args.verbose)):
-            with timer("complete run"):
+            with TIMER("complete run"):
                 run(args, argv)
         return 0
     except FatalError:
         return -1
-            
+
 def main():
+    """Wrap real_main in profiler if requested"""
     from sys import argv
 
     if "--profile" in argv:
@@ -83,7 +89,7 @@ def main():
             #######
             Profilestats had a problem. Did you install it?
             Are you in the right environment?
-            See the mcviz/utils/bootstrap_extenv.sh and source 
+            See the mcviz/utils/bootstrap_extenv.sh and source
             mcviz/utils/extenv/bin/activate
             #######""").strip()
             raise
@@ -91,4 +97,3 @@ def main():
         to_run = real_main
 
     return to_run(argv)
-

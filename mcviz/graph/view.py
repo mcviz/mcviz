@@ -1,30 +1,39 @@
+"""Intermediate graph representation
+This is manipulated by tools and holds styling information"""
+
 from mcviz.utils import OrderedSet
 
-from .view_object import ViewObject, Summary
+from .view_object import ViewObject
 from .view_particle import ViewParticle, ViewParticleSingle, ViewParticleSummary
 from .view_vertex import ViewVertex, ViewVertexSingle, ViewVertexSummary
 from .walk import walk
 
 class GraphView(object):
+    """Intermediate graph representation"""
     def __init__(self, event_graph):
         self.event = event_graph
         self.units = event_graph.units
 
         # create central maps (define structure)
         self.v_map, self.p_map = {}, {}
-        for v in event_graph.vertices.keys():
-            ViewVertexSingle(self, v)
-        for p in event_graph.particles.keys():
-            ViewParticleSingle(self, p)
+        for vertex in event_graph.vertices.keys():
+            ViewVertexSingle(self, vertex)
+        for particle in event_graph.particles.keys():
+            ViewParticleSingle(self, particle)
 
         self.init_cache()
-        
+
     def __str__(self):
-        args = (sum(isinstance(p, ViewParticleSingle) for p in self.p_map.values()),
-                sum(isinstance(v, ViewVertexSingle) for v in self.v_map.values()),
-                sum(isinstance(p, ViewParticleSummary) for p in self.p_map.values()),
-                sum(isinstance(v, ViewVertexSummary) for v in self.v_map.values()))
-        return "GraphView contains: %i particles, %i vertices (%i, %i summarized)" % args
+        args = (sum(isinstance(p, ViewParticleSingle)
+                    for p in self.p_map.values()),
+                sum(isinstance(v, ViewVertexSingle)
+                    for v in self.v_map.values()),
+                sum(isinstance(p, ViewParticleSummary)
+                    for p in self.p_map.values()),
+                sum(isinstance(v, ViewVertexSummary)
+                    for v in self.v_map.values()))
+        return "GraphView contains: {0:i} particles, {1:i} vertices " \
+               "({2:i}, {3:i} summarized)".format(*args)
 
     def init_cache(self):
         """ cache input graph topology """
@@ -80,21 +89,23 @@ class GraphView(object):
         return self.numbers_to_particles(self._initial_particles)
 
     def summarize_particles(self, particles):
+        """Replace list of Particles with a ParticleSummary"""
         elementary_particles = []
-        for p in particles:
-            if isinstance(p, ViewParticleSummary):
-                elementary_particles.extend(p.particle_numbers)
+        for particle in particles:
+            if isinstance(particle, ViewParticleSummary):
+                elementary_particles.extend(particle.particle_numbers)
             else:
-                elementary_particles.append(p.particle_number)
+                elementary_particles.append(particle.particle_number)
         return ViewParticleSummary(self, elementary_particles)
 
     def summarize_vertices(self, vertices):
+        """Replace list of Vertices with a VertexSummary"""
         elementary_vertices = []
-        for p in vertices:
-            if isinstance(p, ViewVertexSummary):
-                elementary_vertices.extend(p.vertex_numbers)
+        for vertex in vertices:
+            if isinstance(vertex, ViewVertexSummary):
+                elementary_vertices.extend(vertex.vertex_numbers)
             else:
-                elementary_vertices.append(p.vertex_number)
+                elementary_vertices.append(vertex.vertex_number)
         return ViewVertexSummary(self, elementary_vertices)
 
     def drop(self, obj):
@@ -106,77 +117,49 @@ class GraphView(object):
         if isinstance(obj, ViewParticle):
             for pn in obj.represented_numbers:
                 self.p_map[pn] = None
-            
+
             if obj.start_vertex and obj.start_vertex.dangling:
                 self.drop(obj.start_vertex)
             if obj.end_vertex and obj.end_vertex.dangling:
                 self.drop(obj.end_vertex)
-            
+
         elif isinstance(obj, ViewVertex):
             for vn in obj.represented_numbers:
                 self.v_map[vn] = None
-            
+
             for particle in obj.through:
                 self.drop(particle)
 
-    def walk(self, obj, 
-        particle_action=lambda p, d: None, vertex_action=lambda p, d: None,
-        loop_action=lambda p, d: None, ascend=False):
+    def walk(self, obj,
+             particle_action=lambda p, d: None,
+             vertex_action=lambda p, d: None,
+             loop_action=lambda p, d: None, ascend=False):
+        """Visit all particles and vertices in the graph"""
         def walk_action(obj, depth):
             if isinstance(obj, ViewParticle):
-                next_vertices = particle_action(obj, depth) if particle_action else None
+                next_vertices = particle_action(obj, depth) \
+                                if particle_action else None
                 if next_vertices is None:
-                    next_vertices = (obj.start_vertex,) if ascend else (obj.end_vertex,)
+                    next_vertices = (obj.start_vertex,) \
+                                    if ascend else (obj.end_vertex,)
                 return next_vertices
             elif isinstance(obj, ViewVertex):
-                next_particles = vertex_action(obj, depth) if vertex_action else None
+                next_particles = vertex_action(obj, depth) \
+                                 if vertex_action else None
                 if next_particles is None:
                     next_particles = obj.incoming if ascend else obj.outgoing
                 return next_particles
             else:
-                raise NotImplementedError("Unknown object in graph: %s" % obj.__class__.__name__)
+                raise NotImplementedError("Unknown object in graph: {0:s}" \
+                                          .format(obj.__class__.__name__))
         return walk(obj, walk_action, loop_action)
-    
-    def tag(self, obj, tag, particles=False, vertices=False, ascend=False): 
+
+    def tag(self, obj, tag, particles=False, vertices=False, ascend=False):
         particle_action = ViewObject.tagger(tag) if particles else None
         vertex_action = ViewObject.tagger(tag) if vertices else None
         return self.walk(obj, particle_action, vertex_action, ascend=ascend)
 
-    def set(self, obj, key, f, particles=False, vertices=False, ascend=False): 
+    def set(self, obj, key, f, particles=False, vertices=False, ascend=False):
         particle_action = ViewObject.attr_setter(key, f) if particles else None
         vertex_action = ViewObject.attr_setter(key, f) if vertices else None
         return self.walk(obj, particle_action, vertex_action, ascend=ascend)
-    
-    @property
-    def has_loop(self):
-        """
-        Returns true if loops exist in the graph
-        """
-        class Store:
-            result = False
-        
-        def found_loop(particle, depth):
-            Store.result = True
-        
-        for particle in self.initial_particles:
-            self.walk(particle, loop_action=found_loop)
-        
-        return Store.result
-        
-    @property
-    def depth(self):
-        """
-        Returns the maximum depth of the graph, and sets .depth attributes on 
-        all of the particles.
-        """
-        class Store:
-            maxdepth = 0
-            
-        def walker(particle, depth):
-            particle.depth = depth
-            Store.maxdepth = max(depth, Store.maxdepth)
-        
-        for particle in self.initial_particles:
-            self.walk_descendants(particle, walker)
-        
-        return Store.maxdepth
