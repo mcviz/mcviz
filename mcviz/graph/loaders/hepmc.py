@@ -264,10 +264,14 @@ def load_event(args):
     #if version != (2, 06, 01):
         #log.warning("Warning: Only tested with hepmc 2.06.01")
     lines = result["events"].split("\n")
-    
-    for i, event in izip(xrange(event_number+1), event_generator(lines)):
-        # Load only one event
-        pass
+    event = None
+    for i, event in enumerate(event_generator(lines)):
+        if i == event_number:
+            break
+    else:
+        LOG.fatal("Input does not contain an event {0:d}!".format(event_number))
+        raise FatalError
+    # print(event)
     return load_single_event(event, args)
 
 if __name__ == "__main__":
