@@ -1,3 +1,4 @@
+
 from math import atan2, log as ln, tan
 
 class Particle(object):
@@ -17,21 +18,23 @@ class Particle(object):
         self.vertex_in = None
         self.vertex_out = None
 
+        self.mothers = self.daughters = None
+
     @classmethod
     def from_pythia(cls, record):
         (no, pdgid, name, status, mother1, mother2, daughter1, daughter2,
-         color1, color2, px, py, pz, e, m) = record
+         color1, color2, px, py, pz, energy, mass) = record
 
-        p = cls(px, py, pz, e, m)
-        p.no = int(no)
-        p.pdgid = pdgid
-        p.name = name.strip("(").strip(")")
-        p.status = int(status)
-        p.mothers = [int(m) for m in (mother1, mother2) if m != 0]
-        p.daughters = [int(d) for d in (daughter1, daughter2) if d != 0]
-        p.color, p.anticolor = int(color1), int(color2)
+        particle = cls(px, py, pz, energy, mass)
+        particle.no = int(no)
+        particle.pdgid = pdgid
+        particle.name = name.strip("(").strip(")")
+        particle.status = int(status)
+        particle.mothers = [int(m) for m in (mother1, mother2) if m != 0]
+        particle.daughters = [int(d) for d in (daughter1, daughter2) if d != 0]
+        particle.color, particle.anticolor = int(color1), int(color2)
 
-        return p
+        return particle
 
     @classmethod
     def from_lhe(cls, no, part):
@@ -40,30 +43,29 @@ class Particle(object):
         # lifetime is invarient lifetime in mm
         # spin=9 particles are unpolarized or unknown
 
-        p = cls(part.PUP1, part.PUP2, part.PUP3, part.PUP4, part.PUP5)
-        p.no = no
-        p.pdgid = part.IDUP
-        p.name = ""
-        p.status = part.ISTUP
-        p.mothers = [m for m in (part.MOTHUP1, part.MOTHUP2) if m != 0]
-        p.daughters = []
-        p.color, p.anticolor = part.ICOLUP1, part.ICOLUP2
+        particle = cls(part.PUP1, part.PUP2, part.PUP3, part.PUP4, part.PUP5)
+        particle.no = no
+        particle.pdgid = part.IDUP
+        particle.name = ""
+        particle.status = part.ISTUP
+        particle.mothers = [m for m in (part.MOTHUP1, part.MOTHUP2) if m != 0]
+        particle.daughters = []
+        particle.color, particle.anticolor = part.ICOLUP1, part.ICOLUP2
 
-        return p
+        return particle
 
     @classmethod
     def from_hepmc(cls, hparticle):
         hp = hparticle
-        p = cls(*map(float, (hp.px, hp.py, hp.pz, hp.energy, hp.mass)))
-        p.hparticle = hp
-        p.no = int(hp.barcode)
-        p.pdgid = int(hp.pdgid)
-        p.name = ""
-        p.status = int(hp.status)
-        p.mothers = p.daughters = None
-        p.color, p.anticolor = hp.flow.pop(1, 0), hp.flow.pop(2, 0)
-        p.other_flow = hp.flow
-        return p
+        particle = cls(*map(float, (hp.px, hp.py, hp.pz, hp.energy, hp.mass)))
+        particle.hparticle = hp
+        particle.no = int(hp.barcode)
+        particle.pdgid = int(hp.pdgid)
+        particle.name = ""
+        particle.status = int(hp.status)
+        particle.color, particle.anticolor = hp.flow.pop(1, 0), hp.flow.pop(2, 0)
+        particle.other_flow = hp.flow
+        return particle
 
     def __repr__(self):
         return "<Particle id=%i name=%s>" % (self.no, self.name)
@@ -81,8 +83,3 @@ class Particle(object):
     def final_state(self):
         "No daughters"
         return not bool(self.daughters)
-
-
-
-
-

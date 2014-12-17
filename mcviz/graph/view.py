@@ -42,19 +42,22 @@ class GraphView(object):
         self._initial_particles = []
         self._particles = sorted(self.p_map.keys())
         self._vertices = sorted(self.v_map.keys())
-        for nr in self._particles:
-            p = self.event.particles[nr]
-            if p.vertex_in:
-                self._start_vertex[nr] = p.vertex_in.vno if p.vertex_in else None
-            if p.vertex_out:
-                self._end_vertex[nr] = p.vertex_out.vno if p.vertex_out else None
+        for number in self._particles:
+            particle = self.event.particles[number]
+            if particle.vertex_in:
+                self._start_vertex[number] = particle.vertex_in.vno \
+                                             if particle.vertex_in else None
+            if particle.vertex_out:
+                self._end_vertex[number] = particle.vertex_out.vno \
+                                           if particle.vertex_out else None
 
-        for nr in self._vertices:
-            v = self.event.vertices[nr]
-            self._incoming[nr] = sorted([p.no for p in self.event.vertices[nr].incoming])
-            self._outgoing[nr] = sorted([p.no for p in self.event.vertices[nr].outgoing])
-            if not self._incoming[nr]:
-                self._initial_particles.extend(self._outgoing[nr])
+        for number in self._vertices:
+            self._incoming[number] = sorted([p.no \
+                    for p in self.event.vertices[number].incoming])
+            self._outgoing[number] = sorted([p.no \
+                    for p in self.event.vertices[number].outgoing])
+            if not self._incoming[number]:
+                self._initial_particles.extend(self._outgoing[number])
 
     def numbers_to_particles(self, numbers):
         return OrderedSet(p for p in (self.p_map[nr] for nr in numbers) if p)

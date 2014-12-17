@@ -197,10 +197,6 @@ class ViewParticleSummary(ViewParticle, Summary):
         self._start_vertices = sorted(chain(*[v.represented_numbers for v in start_vertices]))
         self._end_vertices = sorted(chain(*[v.represented_numbers for v in end_vertices]))
 
-        # for the assertion:
-        self.start_vertex
-        self.end_vertex
-
         # Extract quantities from particles that go into the end vertex of this summary
         self.name = ",".join(set(p.name for p in self.represented_particles))
         self.m = 0

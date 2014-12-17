@@ -28,13 +28,13 @@ class ViewObject(object):
         """
         Return a function which tags particles with `what`
         """
-        def tag(obj, depth):
+        def tag(obj, _):
             obj.tags.add(what)
         return tag
 
     @classmethod
     def attr_setter(self, what, func):
-        def dosetattr(obj, depth):
+        def dosetattr(obj, _):
             setattr(obj, what, func(obj))
         return dosetattr
 
