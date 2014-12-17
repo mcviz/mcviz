@@ -15,3 +15,7 @@ examples
 distribute-*.tar.gz
 *.egg-info/
 /mcv
+
+*.hepmc
+*.log
+*.lhe
