@@ -1,9 +1,11 @@
+
 from __future__ import division
 
-from .. import log
-LOG = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from mcviz.tools import Painter, FundamentalTool, Arg
+from mcviz.tools.tools import FundamentalTool, Arg
+from mcviz.tools.types import Painter
 
 class StdPainter(Painter):
     _global_args = ("output_file",)

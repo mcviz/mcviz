@@ -1,9 +1,10 @@
-import dual
-import extra
-import feynman
-import layouts
-import phi
-import circle
 
-from feynman import FeynmanLayout
-from dual import DualLayout
+import mcviz.tools.layouts.dual
+import mcviz.tools.layouts.extra
+import mcviz.tools.layouts.feynman
+import mcviz.tools.layouts.layouts
+import mcviz.tools.layouts.phi
+import mcviz.tools.layouts.circle
+
+from mcviz.tools.layouts.feynman import FeynmanLayout
+from mcviz.tools.layouts.dual import DualLayout

@@ -1,28 +1,29 @@
-from .. import log; log = log.getChild(__name__)
 
-from csv import reader as csv_reader
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+
 from subprocess import Popen, PIPE
 
-from .. import FatalError
+from mcviz.exception import FatalError
 from . import Spline, SplineLine, Point2D
-
 
 REF_PREFIX = "MCVIZ_REF_"
 
 def run_graphviz(layout_engine, input_dot, options=[]):
     args = [layout_engine] + options
     try:
-        p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    except OSError as e:
-        if e.errno == 2:
-            log.fatal("Couldn't run graphviz, is it installed? (try 'which dot')")
+        proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    except OSError as err:
+        if err.errno == 2:
+            LOG.fatal("Couldn't run graphviz, is it installed? "\
+                      "(try 'which dot')")
             raise FatalError
         else:
             raise
-    
-    gv_output, gv_errors = p.communicate(input_dot)
-    p.wait()
-    
+
+    gv_output, gv_errors = proc.communicate(input_dot)
+    proc.wait()
+
     return gv_output, gv_errors
 
 def pretty_value(value):
@@ -48,26 +49,28 @@ def make_properties_string(**properties):
     if not properties:
         return ""
 
-    propgen = ("%s=%s" % (prop, pretty_value(value)) 
+    propgen = ("%s=%s" % (prop, pretty_value(value))
                for prop, value in sorted(properties.iteritems()))
 
     return " [%s]" % ", ".join(propgen)
 
 def make_node(name, comment="", **properties):
     properties = make_properties_string(**properties)
-    if comment: comment = " // %s" % comment 
+    if comment:
+        comment = " // %s" % comment
     return "%s%s%s" % (name, properties, comment)
-    
+
 def make_edge(from_, to_, comment="", directed=True, **properties):
     properties = make_properties_string(**properties)
-    if comment: comment = " // %s" % comment 
-    if directed: link = "->"
+    if comment:
+        comment = " // %s" % comment
+    if directed:
+        link = "->"
     else: link = "--"
     return "%s %s %s%s%s" % (from_, link, to_, properties, comment)
 
 class PlainOutput(object):
     def __init__(self, plain):
-
         self.scale = None
         self.width, self.height = None, None
         self.nodes = {}
@@ -94,13 +97,13 @@ class PlainOutput(object):
 
     def handle_node(self, parameters):
         node_ref = parameters[0][len(REF_PREFIX):]
-        x, y = float(parameters[1]), self.height - float(parameters[2])
-        w, h = float(parameters[3]), float(parameters[4])
-        self.nodes[node_ref] = Point2D(x, y), (w, h)
+        pos = Point2D(float(parameters[1]), self.height - float(parameters[2]))
+        size = float(parameters[3]), float(parameters[4])
+        self.nodes[node_ref] = pos, size
 
     def handle_edge(self, parameters):
         """
-        Reads an edge from graphviz plain output and updates LayoutEdges with 
+        Reads an edge from graphviz plain output and updates LayoutEdges with
         this information.
         """
         ref_in, ref_out = parameters[0], parameters[1]
@@ -126,7 +129,8 @@ class PlainOutput(object):
             label_position = None
         else:
             label = remaining[0].strip('"')
-            label_position = (float(remaining[1]), self.height - float(remaining[2]))
+            label_position = (float(remaining[1]),
+                              self.height - float(remaining[2]))
             remaining = remaining[3:]
 
         edge_ref = remaining[0][len(REF_PREFIX):]

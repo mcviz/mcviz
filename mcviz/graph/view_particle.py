@@ -15,15 +15,15 @@ class ViewParticle(ViewObject):
     @property
     def initial_state(self):
         return self.start_vertex.initial
-    
+
     @property
     def final_state(self):
         return self.end_vertex.final
-    
+
     @property
     def antiparticle(self):
         return self.pdgid < 0
-    
+
     @property
     def pt(self):
         return (self.p[0]**2 + self.p[1]**2)**0.5
@@ -75,7 +75,7 @@ class ViewParticle(ViewObject):
     def squark(self):
         return (1000001 <= abs(self.pdgid) <= 1000006 or
                 2000001 <= abs(self.pdgid) <= 2000006)
-    
+
     @property
     def lepton(self):
         return 11 <= abs(self.pdgid) <= 18
@@ -88,16 +88,16 @@ class ViewParticle(ViewObject):
     @property
     def chargino(self):
         return abs(self.pdgid) in [1000024, 1000037]
-        
+
     @property
     def descends_both(self):
         return self.descends(1) and self.descends(2)
-    
+
     @property
     def descends_one(self):
-        return ((self.descends(1) or self.descends(2)) 
+        return ((self.descends(1) or self.descends(2))
                 and not (self.descends(1) and self.descends(2)))
-        
+
     def descends(self, n):
         assert n == 1 or n == 2, "Only supported for initial particles"
         return "descendant_of_p%i" % n in self.tags
@@ -125,15 +125,15 @@ class ViewParticleSingle(ViewParticle):
         self.color = self.event_particle.color
         self.anticolor = self.event_particle.anticolor
         self.status = self.event_particle.status
-        
+
         if not self.colored and self.quark:
             self.color = not self.antiparticle
             self.anticolor = self.antiparticle
-    
+
     def __repr__(self):
         return "<ViewParticleSingle pdgid={0} ref='{1}'>"\
             .format(self.pdgid, self.reference)
-    
+
     @property
     def start_vertex(self):
         return self.graph.particle_start_vertex(self.particle_number)
@@ -149,7 +149,7 @@ class ViewParticleSingle(ViewParticle):
     @property
     def order_number(self):
         return self.particle_number
-        
+
     @property
     def represented_numbers(self):
         return set([self.particle_number])
@@ -161,7 +161,7 @@ class ViewParticleSummary(ViewParticle, Summary):
     def __init__(self, graph, summarized_particle_numbers):
         super(ViewParticleSummary, self).__init__(graph)
         self.particle_numbers = summarized_particle_numbers
-        
+
         # For storing information before we did the summary (so we can invert it)
         self.orig_p_map, self.orig_v_map = {}, {}
 
@@ -172,10 +172,10 @@ class ViewParticleSummary(ViewParticle, Summary):
 
         start_vnrs = (self.graph._start_vertex[p_nr] for p_nr in self.particle_numbers)
         end_vnrs = (self.graph._end_vertex[p_nr] for p_nr in self.particle_numbers)
-        
+
         start_vertices = set(self.graph.numbers_to_vertices(start_vnrs))
         end_vertices = set(self.graph.numbers_to_vertices(end_vnrs))
-        
+
         # internal vertex := vertex that has no non-summarized incoming and outgoings
         #                    AND is not final or initial
         def is_internal(vertex):
@@ -190,7 +190,7 @@ class ViewParticleSummary(ViewParticle, Summary):
             for nr in vertex.represented_numbers:
                 self.orig_v_map[nr] = self.graph.v_map[nr]
                 self.graph.v_map[nr] = None
-        
+
         assert len(start_vertices) == 1
         assert len(end_vertices) == 1
 
@@ -226,9 +226,9 @@ class ViewParticleSummary(ViewParticle, Summary):
 
         self.pdgid = min(pdgids)
         self.color, self.anticolor = max(color), max(anticolor)
-        
+
         self.status = max(p.status for p in self.represented_particles)
-        
+
     @property
     def start_vertex(self):
         svs = self.graph.numbers_to_vertices(self._start_vertices)
@@ -240,15 +240,15 @@ class ViewParticleSummary(ViewParticle, Summary):
         evs = self.graph.numbers_to_vertices(self._end_vertices)
         assert len(evs) == 1
         return evs.pop()
-    
+
     @property
     def order_number(self):
         return min(self.particle_numbers)
-        
+
     @property
     def represented_numbers(self):
         return self.particle_numbers
-    
+
     @property
     def represented_particles(self):
         return [self.graph.event.particles[p] for p in self.particle_numbers]

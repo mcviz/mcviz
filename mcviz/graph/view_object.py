@@ -8,7 +8,7 @@ class ViewObject(object):
     """
     Inherited by ViewParticle and ViewVertex
     """
-    
+
     def __init__(self, graph):
         self.graph = graph
         self.subscripts = []
@@ -17,25 +17,25 @@ class ViewObject(object):
 
     def tag(self, tag):
         """
-        Tag a view object with some information. Can be arbitrary hashable 
-        information. Usually used to test if the object should be styled or 
+        Tag a view object with some information. Can be arbitrary hashable
+        information. Usually used to test if the object should be styled or
         layed out in a specific fashion.
         """
         self.tags.add(tag)
 
     @classmethod
-    def tagger(self, what):
+    def tagger(cls, what):
         """
         Return a function which tags particles with `what`
         """
         def tag(obj, depth):
             obj.tags.add(what)
         return tag
-    
+
     @classmethod
-    def attr_setter(self, what, f):
+    def attr_setter(self, what, func):
         def dosetattr(obj, depth):
-            setattr(obj, what, f(obj))
+            setattr(obj, what, func(obj))
         return dosetattr
 
     def __lt__(self, rhs):

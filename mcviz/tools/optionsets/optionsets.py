@@ -1,7 +1,9 @@
-from .. import log; log = log.getChild(__name__)
 
-from mcviz.tools import OptionSet, Arg
-from mcviz.tools.tools import ToolSetting, tool_classes, tool_types
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+
+from mcviz.tools.tools import Arg, ToolSetting, tool_types
+from mcviz.tools.types import OptionSet
 
 def setdefault(tools, tool_type, default, *args, **kwargs):
     """
@@ -22,10 +24,11 @@ class CommandLineOptionSet(OptionSet):
         defstyle = "Default"
         if not defstyle in [s.name for s in tools["style"]]:
             tools["style"].insert(0, ToolSetting(defstyle))
-            
+
 class DemoOptionSet(CommandLineOptionSet):
     _name = "demo"
-    _args = [Arg("layout", str, "choose a layout to demo: Feynman, Dual or InlineLabels", 
+    _args = [Arg("layout", str,
+                 "choose a layout to demo: Feynman, Dual or InlineLabels",
                  choices=("Feynman", "Dual", "InlineLabels"), default="Dual")]
     def __call__(self, tools):
         for tool_type in sorted(tool_types.keys()):
@@ -39,7 +42,10 @@ class DemoOptionSet(CommandLineOptionSet):
         tools["transform"].append(ToolSetting("NoKinks"))
         tools["transform"].append(ToolSetting("Gluballs"))
         tools["transform"].append(ToolSetting("Chainmail"))
-        log.info("--demo is equivalent to '-pnavisvg:mcviz.svg -sSimpleColors -sFancyLines -tNoKinks -tGluballs -tChainmail -l%s -lFixIni'" % self.options["layout"])
+        LOG.info("--demo is equivalent to '-pnavisvg:mcviz.svg "\
+                "-sSimpleColors -sFancyLines -tNoKinks -tGluballs "\
+                "-tChainmail -l%s -lFixIni'" % self.options["layout"])
         return super(DemoOptionSet, self).__call__(tools)
 
-# If we add more optionsets, please update "OptionSets" in the wiki (grep for it!), or send an email.
+# If we add more optionsets, please update "OptionSets" in the wiki
+# (grep for it!), or send an email.

@@ -7,7 +7,7 @@ class Annotation(Tool):
     _type = "annotation"
     _short_opt = "a"
     _short_help = "Add an annotation specifying a property to the label "
-    _args = (Arg("position", str, "position of the label", default="super", 
+    _args = (Arg("position", str, "position of the label", default="super",
                  choices=("super", "sub", "over", "under")),)
 
     def annotate_particles(self, particles, annotate_function):

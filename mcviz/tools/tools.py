@@ -1,4 +1,6 @@
-from .. import log; log = log.getChild(__name__)
+
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
 import re
 
@@ -29,13 +31,13 @@ class ToolSetting(object):
 
         for arg in args:
             # Try to find an unescaped equal sign
-            tp = re.split(r"(?<!\\)\=", arg)
-            if len(tp) == 2:
-                arg, val = tp
+            assignment = re.split(r"(?<!\\)\=", arg)
+            if len(assignment) == 2:
+                arg, val = assignment
                 keyword_args[arg] = val
             elif not arg.strip():
                 pass
-            elif len(tp) == 1:
+            elif len(assignment) == 1:
                 positional_args.append(arg)
             else:
                 raise ToolParseError(self, "too many '=' in %s" % arg)
@@ -49,25 +51,26 @@ class ToolSetting(object):
             tool_strings = getattr(options, tool_type.replace("-","_"))
             res[tool_type] = map(cls.from_string, tool_strings)
         return res
-        
+
     def get_class(self, tool_type):
         class_args = []
         if not self.name in tool_classes[tool_type]:
             possible = tool_classes[tool_type].keys()
-            log.error("No such {0} tool {1}".format(tool_type, self.name))
-            
+            LOG.error("No such {0} tool {1}".format(tool_type, self.name))
+
             found = False
-            from ..help import did_you_mean
+            from mcviz.utils.help import did_you_mean
             meant = did_you_mean(self.name, possible)
             if meant and isatty(stdin.fileno()):
                 try:
                     yes = raw_input("[Y/n] ").lower() in ("y", "")
                     if yes:
-                        log.debug("Rewriting tool '{0}' to '{1}'".format(self.name, meant))
+                        LOG.debug("Rewriting tool '{0}' to '{1}'"\
+                                .format(self.name, meant))
                         self.name, found = meant, True
                 except (IOError, EOFError):
                     pass
-            
+
             if not found:
                 choices = ", ".join(possible)
                 raise ArgParseError(
@@ -77,7 +80,7 @@ class ToolSetting(object):
 
 
 class ToolParseError(ArgParseError):
-    def __init__(self, tool, msg, exc = None):
+    def __init__(self, tool, msg, exc=None):
         self.tool = tool
         self.original_exception = exc
         new_msg = "%s %s: %s" % (tool._type, tool._name, msg)
@@ -98,14 +101,15 @@ class Arg(object):
     def convert(self, in_string, tool):
         try:
             return self.converter(in_string)
-        except Exception, x:
-            raise ToolParseError(tool, "cannot convert '%s' to %s for argument '%s'" % (in_string, self.converter, self.name) )
+        except Exception:
+            raise ToolParseError(tool, "cannot convert '%s' to %s for "\
+                    "argument '%s'" % (in_string, self.converter, self.name))
 
     @classmethod
-    def bool(cls, s):
-        if s.lower() in ("true", "1", "wahr", "yes"):
+    def bool(cls, value):
+        if value.lower() in ("true", "1", "wahr", "yes"):
             return True
-        elif s.lower() in ("false", "0", "falsch", "no"):
+        elif value.lower() in ("false", "0", "falsch", "no"):
             return False
         else:
             raise Exception("Unknown bool value!")
@@ -123,16 +127,16 @@ def tool_type_options():
 
 def debug_tools():
     for name, cls in tool_types.iteritems():
-        log.debug("Tool-Type '%s'; short option: %s; merge: %s"
-            % (cls._type, cls._short_opt, cls._merge_classes))
-        for tname, cls in tool_classes[name].iteritems():
-            log.debug(" %s '%s'" % (cls._type, name))
-            log.debug("   using global arguments: %s" % str(cls.global_args()))
-            log.debug("   local arguments: %s" % str(cls.args()))
+        LOG.debug("Tool-Type '%s'; short option: %s; merge: %s"
+                  % (cls._type, cls._short_opt, cls._merge_classes))
+        for _, cls in tool_classes[name].iteritems():
+            LOG.debug(" %s '%s'" % (cls._type, name))
+            LOG.debug("   using global arguments: %s" % str(cls.global_args()))
+            LOG.debug("   local arguments: %s" % str(cls.args()))
 
 class ToolCreator(type):
-    def __new__(cls, name, baseClasses, classdict):
-        ncls = type.__new__(cls, name, baseClasses, classdict)
+    def __new__(mcs, name, baseClasses, classdict):
+        ncls = type.__new__(mcs, name, baseClasses, classdict)
         if "_type" in classdict:
             tool_classes.setdefault(ncls._type, {})
             tool_types[ncls._type] = ncls
@@ -151,18 +155,19 @@ class ToolCreator(type):
 class Tool(object):
     __metaclass__ = ToolCreator
 
-    """Name of this tool"""
-    #_name = "Empty"
+    #Name of this tool
+    # _name = "Empty"
 
-    """list of Arguments to this tool (Arg class)"""
+    #list of Arguments to this tool (Arg class)
     _args = ()
 
-    """list of (string) global arguments which are used - they are copied into options"""
+    #list of (string) global arguments which are used
+    #- they are copied into options
     _global_args = ()
 
-    """Set to true for example in Layout; if the classes should be merged
-    and one tool created instead of instantiating every class.
-    You need one FundamentalTool in the list!"""
+    #Set to true for example in Layout; if the classes should be merged
+    #and one tool created instead of instantiating every class.
+    #You need one FundamentalTool in the list!
     _merge_classes = False
 
 
@@ -194,7 +199,7 @@ class Tool(object):
         def decorated(func):
             def tool_specific(self, *pargs):
                 return func(*pargs, **self.options)
-            clsd = dict(_args=args, _name=title, __call__=tool_specific, 
+            clsd = dict(_args=args, _name=title, __call__=tool_specific,
                         __doc__=func.__doc__, __module__=func.__module__)
             return classobj(name, (cls,), clsd)
         return decorated
@@ -215,8 +220,8 @@ class Tool(object):
             specific_class = cls.create_specific_class(tool_type, classes)
             tool = specific_class()
             tool.read_global_args(global_args)
-            for s in settings:
-                tool.read_settings(s)
+            for setting in settings:
+                tool.read_settings(setting)
             tools = [tool]
         else:
             tools = []
@@ -230,17 +235,18 @@ class Tool(object):
     @classmethod
     def create_specific_class(cls, tool_type, classes):
         """
-        Compose a new layout from other layouts. This is tricky because we 
-        dynamically create a new layout class out of objects passed on the 
-        commandline. This means that the commandline must follow Python's 
+        Compose a new layout from other layouts. This is tricky because we
+        dynamically create a new layout class out of objects passed on the
+        commandline. This means that the commandline must follow Python's
         inheritance rules. Not ideal, but convenient for the moment.
         """
         bases = tuple(reversed(classes))
-        n_fundamental = len([1 for b in bases if issubclass(b, FundamentalTool)])
+        n_fundamental = len([1 for b in bases
+                             if issubclass(b, FundamentalTool)])
         if n_fundamental != 1:
             # We didn't include a fundamental layout or have more than one!
-            blist= ", ".join(tc._name for tc in tool_classes[tool_type].values()
-                             if issubclass(tc, FundamentalTool))
+            blist = ", ".join(t._name for t in tool_classes[tool_type].values()
+                              if issubclass(t, FundamentalTool))
             if n_fundamental == 0:
                 msg = ("You tried to construct a combination of {type}s "
                        "without including one of the base {type}s. Please "
@@ -253,9 +259,9 @@ class Tool(object):
                        "{blist}".format(type=tool_type, blist=blist))
 
             raise ArgParseError(msg)
-        
+
         classname = "%s_specific" % tool_type
-        log.debug("Creating %s with bases %r", classname, bases)
+        LOG.debug("Creating %s with bases %r", classname, bases)
         return classobj(classname, bases, {})
 
     def read_global_args(self, global_args):
@@ -267,7 +273,6 @@ class Tool(object):
         my_args_dict = dict(my_args)
 
         keyword_args = {}
-        positional_args = []
 
         for arg, val in setting.kwargs.iteritems():
             if not arg in my_args_dict:
@@ -280,8 +285,8 @@ class Tool(object):
             raise ToolParseError(self, "too many arguments!")
 
         positional_arg_d = {}
-        for (n, arg), in_string in zip(my_args, setting.args):
-            positional_arg_d[n] = arg.convert(in_string, self)
+        for (name, arg), in_string in zip(my_args, setting.args):
+            positional_arg_d[name] = arg.convert(in_string, self)
 
         for arg in keyword_args:
             if arg in positional_arg_d:
@@ -294,13 +299,14 @@ class Tool(object):
         for arg, val in self.options.iteritems():
             if arg in my_args_dict and my_args_dict[arg].choices:
                 if not val in my_args_dict[arg].choices:
-                    raise ToolParseError(self, "invalid choice '%s' (%s)" 
+                    raise ToolParseError(self, "invalid choice '%s' (%s)"\
                                 % (val, ", ".join(my_args_dict[arg].choices)))
 
-        log.debug("%s %s options after local args: %s" % (self._type, self._name, self.options))
+        LOG.debug("%s %s options after local args: %s"\
+                % (self._type, self._name, self.options))
 
 class FundamentalTool(object):
     """
-    Needed for tool types which merge classes. 
+    Needed for tool types which merge classes.
     At least one class must have this.
     """

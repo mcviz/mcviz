@@ -1,8 +1,11 @@
-from .. import log; log = log.getChild(__name__)
+
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+from mcviz.utils.timer import Timer
+TIMER = Timer(LOG)
 
 from ..tools import FundamentalTool, Arg
 
-from mcviz.utils.timer import Timer; timer = Timer(log)
 from mcviz.utils.svg.svg_document import (
     XMLNode, RawNode,
     SVGDocument, NavigableSVGDocument, MCVizWebNavigableSVGDocument)
@@ -18,36 +21,35 @@ class SVGPainter(StdPainter, FundamentalTool):
     Write out the result to plain SVG.
     """
     _name = "svg"
-    _args = [
-            Arg("debug", Arg.bool, "add debug information into the SVG", default=False),
-            ]
+    _args = [Arg("debug", Arg.bool, "add debug information into the SVG",
+                 default=False),]
 
     document_creator = SVGDocument
 
     type_map = {"identity": identity,
                 "invisible": invisible,
-                "photon": photon, 
+                "photon": photon,
                 "final_photon": final_photon,
-                "gluon": gluon, 
+                "gluon": gluon,
                 "gluino": gluino,
-                "multigluon": multigluon, 
-                "boson": boson, 
-                "fermion": fermion, 
+                "multigluon": multigluon,
+                "boson": boson,
+                "fermion": fermion,
                 "sfermion": sfermion,
                 "chargino": chargino,
-                "hadron": hadron, 
+                "hadron": hadron,
                 "vertex": vertex,
                 "cut":cut,
                 "jet":jet
-                }
+               }
 
     def __call__(self, workspace, layout):
-        with timer("create the SVG document"):
+        with TIMER("create the SVG document"):
             args = layout.width, layout.height, layout.scale
             self.label_size = layout.label_size
             self.doc = self.document_creator(*args)
-            cl = XMLNode("mcviz:cmdline", children=[RawNode(workspace.cmdline)])
-            self.doc.svg.children[:0] = [cl]
+            cmdline = XMLNode("mcviz:cmdline", children=[RawNode(workspace.cmdline)])
+            self.doc.svg.children[:0] = [cmdline]
             for edge in layout.edges:
                 if not edge.spline:
                     # Nothing to paint!
@@ -72,9 +74,9 @@ class SVGPainter(StdPainter, FundamentalTool):
                 line(w, 0, w, h, sz)
                 line(w, h, 0, h, sz)
                 line(0, h, 0, 0, sz)
-                text(2*sz, -3*sz , 0.8*sz, "Scale : %.4f" % layout.scale)
-                text(2*sz, -2*sz, 0.8*sz,  "Width : %.4f" % w)
-                text(2*sz, -1*sz, 0.8*sz,  "Height: %.4f" % h)
+                text(2*sz, -3*sz, 0.8*sz, "Scale : %.4f" % layout.scale)
+                text(2*sz, -2*sz, 0.8*sz, "Width : %.4f" % w)
+                text(2*sz, -1*sz, 0.8*sz, "Height: %.4f" % h)
 
 
         self.write_data(self.doc.toprettyxml())
@@ -87,7 +89,9 @@ class SVGPainter(StdPainter, FundamentalTool):
         if edge.show and edge.spline:
             display_func = self.type_map.get(edge.style_line_type, hadron)
             if edge.style_line_type == "cut":
-                display = display_func(spline=edge.spline, n_represented=edge.item.n_represented, **edge.style_args)
+                display = display_func(spline=edge.spline,
+                                       n_represented=edge.item.n_represented,
+                                       **edge.style_args)
             else: display = display_func(spline=edge.spline, **edge.style_args)
             self.doc.add_object(edge.reference, display)
 
@@ -97,10 +101,10 @@ class SVGPainter(StdPainter, FundamentalTool):
 
     def paint_vertex(self, node):
         if node.show and node.center:
-            vx = vertex(node.center, node.width/2, node.height/2,
-                        **node.style_args)
-            self.doc.add_object(node.reference, vx)
-           
+            vert = vertex(node.center, node.width/2, node.height/2,
+                          **node.style_args)
+            self.doc.add_object(node.reference, vert)
+
         if not node.label is None and node.center:
             self.doc.add_glyph(node.reference, node.label, node.center.tuple(),
                                node.label_size, node.item.subscripts)
@@ -113,8 +117,8 @@ class NavigableSVGPainter(SVGPainter):
     """
     _name = "navisvg"
     document_creator = NavigableSVGDocument
-    
-    
+
+
 class MCVizWebNavigableSVGPainter(SVGPainter):
     """
     UNDOCUMENTED
@@ -122,6 +126,6 @@ class MCVizWebNavigableSVGPainter(SVGPainter):
     """
     _name = "webnavisvg"
     document_creator = MCVizWebNavigableSVGDocument
-    
+
     def paint_additional(self, layout):
         self.doc.add_event_data(layout.graph)

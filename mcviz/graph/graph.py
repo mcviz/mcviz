@@ -1,12 +1,10 @@
 #! /usr/bin/env python
 """EventGraph - representation of input event"""
 
-from .. import log
-LOG = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from mcviz import FatalError
-from . import EventParseError
-#from mcviz.tests.test_graph import graph_is_consistent
+from mcviz.exception import FatalError, EventParseError
 
 class EventGraph(object):
     """Representation of an event, as it is structure in the input file"""
@@ -45,7 +43,7 @@ class EventGraph(object):
     def from_hepmc(cls, args):
         """Load event from HepMC file
         (http://lcgapp.cern.ch/project/simu/HepMC)"""
-        from .loaders.hepmc import load_event
+        from mcviz.graph.loaders.hepmc import load_event
         vertices, particles, units, pdfinfo = load_event(args)
         return cls(vertices, particles, units, pdfinfo)
 
@@ -53,7 +51,7 @@ class EventGraph(object):
     def from_pythia_log(cls, args):
         """Load event from Pythia log file
         (http://home.thep.lu.se/~torbjorn/Pythia.html)"""
-        from .loaders.pythialog import load_event
+        from mcviz.graph.loaders.pythialog import load_event
         vertices, particles, units = load_event(args)
         return cls(vertices, particles, units)
 
@@ -61,7 +59,7 @@ class EventGraph(object):
     def from_lhe(cls, args):
         """Load event from Les Houches event file
         (http://arxiv.org/abs/hep-ph/0609017)"""
-        from .loaders.leshouchesevent import load_event
+        from mcviz.graph.loaders.leshouchesevent import load_event
         vertices, particles, units = load_event(args)
         return cls(vertices, particles, units)
 

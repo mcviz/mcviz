@@ -2,13 +2,14 @@
 This whole module is begging for a refactor, but by some miracle it works.
 """
 
-from ... import log
-LOG = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from mcviz import FatalError
+from mcviz.exception import FatalError, EventParseError
 from mcviz.utils import Units
 from mcviz.utils.trydecompress import try_decompress
-from .. import EventParseError, Particle, Vertex
+from mcviz.graph.particle import Particle
+from mcviz.graph.vertex import Vertex
 
 # Pythia status codes:
 # (taken from http://hep.ps.uci.edu/~arajaram/worksheet.pdf)
@@ -163,7 +164,12 @@ def load_event(args):
     #TODO: What?
     first = 0
     for _ in range(event_number+1):
-        first = lines.index(header, first) + 2
+        try:
+            first = lines.index(header, first) + 2
+        except ValueError:
+            LOG.fatal("Input does not contain an event {0:d}!"\
+                    .format(event_number))
+            raise FatalError
     last = first + lines[first:].index(END_LIST) - 1
 
     #TODO: have this run an entire line

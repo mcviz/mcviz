@@ -1,2 +1,3 @@
-import qcd
-import styles
+
+import mcviz.tools.styles.styles
+import mcviz.tools.styles.qcd

@@ -1,6 +1,6 @@
-from mcviz.tools import FundamentalTool, Arg
 
-from .layouts import BaseLayout, LayoutEdge, LayoutNode
+from mcviz.tools.tools import FundamentalTool, Arg
+from mcviz.tools.layouts.layouts import BaseLayout, LayoutEdge, LayoutNode
 
 class DualLayout(BaseLayout, FundamentalTool):
     """
@@ -20,7 +20,7 @@ class DualLayout(BaseLayout, FundamentalTool):
 
         lo.label = particle.pdgid
         lo.label_size = self.options["label_size"]
-         
+
         if particle.initial_state:
             # Big red initial vertices
             lo.width = lo.height = 1.0
@@ -34,9 +34,9 @@ class DualLayout(BaseLayout, FundamentalTool):
                if tag != 'jet' and tag[:4] == 'jet_':
                     jet_id = int(tag[4:]) + 1
             lo.label = "jet {0:d} ({1:.4g} {2:s}eV)".format(jet_id, *self.graph.units.pick_mag(particle.pt))
-        
+
         return lo
-   
+
     def get_vertex(self, vertex, node_style=None):
         items = []
 
@@ -55,17 +55,17 @@ class DualLayout(BaseLayout, FundamentalTool):
             helper_node.width = 0.5
             helper_node.height = 0.5
             items.append(helper_node)
-            
+
             for particle in vertex.incoming:
                 items.append(LayoutEdge(vertex, particle, vertex))
             for particle in vertex.outgoing:
                 items.append(LayoutEdge(vertex, vertex, particle))
             return items
-            
+
         for particle in vertex.outgoing:
             for mother in particle.mothers:
                 items.append(LayoutEdge(vertex, mother, particle))
-        
+
         return items
 
 class DualDecongestedHad(DualLayout):
@@ -85,12 +85,12 @@ class DualDecongestedHad(DualLayout):
             had_node.width = 5.0
             had_node.height = 1.0
             items.append(had_node)
-            
+
             for particle in vertex.incoming:
                 items.append(LayoutEdge(vertex, particle, vertex))
             for particle in vertex.outgoing:
                 items.append(LayoutEdge(vertex, vertex, particle))
-                
+
             return items
         else:
             return super(DualDecongestedHad, self).get_vertex(vertex, node_style)

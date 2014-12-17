@@ -1,10 +1,10 @@
+
 from __future__ import division
 
-from sys import stderr
-from math import sin, cos, atan2, log as ln
+from math import sin, cos, atan2
 
 from mcviz.utils import Point2D
-from mcviz.tools import Arg
+from mcviz.tools.tools import Arg
 
 from .feynman import FeynmanLayout
 
@@ -73,7 +73,7 @@ class PhiLayout(FeynmanLayout):
 
                     #scale = ln(edge.item.e)
                     scale = e / 1000.0 + pt * 10
-                    if scale < 0.1: 
+                    if scale < 0.1:
                         scale = 0.1
                     elif scale > 100:
                         scale = 100

@@ -1,3 +1,4 @@
+
 from .view_object import ViewObject, Summary
 
 class ViewVertex(ViewObject):
@@ -8,19 +9,19 @@ class ViewVertex(ViewObject):
     @property
     def kink(self):
         return len(self.incoming) == 1 and len(self.outgoing) == 1
-        
+
     @property
     def initial(self):
         return not self.incoming and len(self.outgoing) == 1
-    
-    @property    
+
+    @property
     def final(self):
         return not self.outgoing and len(self.incoming) == 1
 
-    @property    
+    @property
     def vacuum(self):
         return (not self.incoming and not self.initial) or (not self.outgoing and not self.final)
-    
+
     @property
     def dangling(self):
         return self.initial and self.final
@@ -39,21 +40,21 @@ class ViewVertex(ViewObject):
                 all(not p.color and not p.anticolor for p in self.outgoing) and
                 # No bosons
                 not any(p.boson for p in self.outgoing))
-                
+
     @property
     def connecting(self):
         """
-        A connecting vertex is one which connects the two initial states 
+        A connecting vertex is one which connects the two initial states
         together.
-        """        
-        return (any(p.descends_one  for p in self.incoming) and 
+        """
+        return (any(p.descends_one  for p in self.incoming) and
                 all(p.descends_both for p in self.outgoing))
-    
+
     @property
     def reference(self):
         # replace - for negative vertex numbers
         return ("V%i" % self.order_number).replace("-","N")
-    
+
     @property
     def through(self):
         """
@@ -66,15 +67,15 @@ class ViewVertexSingle(ViewVertex):
         super(ViewVertex, self).__init__(graph)
         self.vertex_number = vertex_number
         self.graph.v_map[vertex_number] = self
-        
+
     def __repr__(self):
         args = self.reference, len(self.incoming), len(self.outgoing)
         return '<ViewVertexSingle ref="%s" n_in="%i" n_out="%i">' % args
-        
+
     @property
     def incoming(self):
         return self.graph.vertex_incoming_particles(self.vertex_number)
-    
+
     @property
     def outgoing(self):
         return self.graph.vertex_outgoing_particles(self.vertex_number)
@@ -82,7 +83,7 @@ class ViewVertexSingle(ViewVertex):
     @property
     def event_vertex(self):
         return self.graph.event.vertices[self.vertex_number]
-        
+
     @property
     def order_number(self):
         # replace - for negative vertex numbers
@@ -95,39 +96,39 @@ class ViewVertexSingle(ViewVertex):
 class ViewVertexSummary(ViewVertex, Summary):
     def __init__(self, graph, vertex_numbers):
         super(ViewVertexSummary, self).__init__(graph)
-        
+
         self.vertex_numbers = vertex_numbers
         self._incoming = []
-        self._outgoing = [] 
+        self._outgoing = []
         self.orig_v_map, self.orig_p_map = {}, {}
-        
+
         summarized_particle_nrs = set()
-        
+
         for v_nr in self.vertex_numbers:
             self.orig_v_map[v_nr] = self.graph.v_map[v_nr]
             self.graph.v_map[v_nr] = self
-            
+
             for p_nr in self.graph._incoming[v_nr]:
                 if self.graph._start_vertex[p_nr] in self.vertex_numbers:
                     summarized_particle_nrs.add(p_nr)
                 else:
                     self._incoming.append(p_nr)
-                    
+
             for p_nr in self.graph._outgoing[v_nr]:
                 if self.graph._end_vertex[p_nr] in self.vertex_numbers:
                     summarized_particle_nrs.add(p_nr)
                 else:
                     self._outgoing.append(p_nr)
-            
+
         for p_nr in summarized_particle_nrs:
             self.orig_p_map[p_nr] = self.graph.p_map[p_nr]
             self.graph.p_map[p_nr] = None
-            
-            
+
+
         self.tags.add("summary")
 
     def __repr__(self):
-        args = (self.reference, len(self.vertex_numbers), len(self.incoming), 
+        args = (self.reference, len(self.vertex_numbers), len(self.incoming),
                 len(self.outgoing))
         return '<ViewVertexSummary ref="%s" n=%i in=%i, out=%i>' % args
 

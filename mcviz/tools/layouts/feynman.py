@@ -1,8 +1,9 @@
+
 from __future__ import division
 
 from math import log10
 
-from mcviz.tools import FundamentalTool, Arg
+from mcviz.tools.tools import FundamentalTool, Arg
 from mcviz.graph import ViewVertex, ViewParticle
 
 from .layouts import BaseLayout, LayoutEdge, LayoutNode
@@ -17,7 +18,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
     _args = [Arg("gluid", Arg.bool, "label gluons")]
 
     dummy_number = -1000
-    
+
     def get_subgraph(self, vertex):
         if vertex.initial:
             return "initial"
@@ -27,9 +28,9 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
     def process(self):
 
         # TODO: do something with the edge ordering. It is currently nonsensical
-        def ordering(edge): 
-            order = (1 if edge.item.gluon else 
-                     0 if edge.item.color else 
+        def ordering(edge):
+            order = (1 if edge.item.gluon else
+                     0 if edge.item.color else
                      2 if edge.item.anticolor else None)
             return edge.going.reference, order, edge.item.reference
 
@@ -44,11 +45,11 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
 
         if node_style:
             lo.dot_args.update(node_style)
-        
+
         # Put clusters in the same graphviz "group".
         if "after_cluster" in vertex.tags:
             lo.dot_args["group"] = "cluster_%i" % vertex.cluster_index
-        elif (all("after_cluster" in p.tags for p in vertex.outgoing) and 
+        elif (all("after_cluster" in p.tags for p in vertex.outgoing) and
               vertex.outgoing):
             cluster_particle = (p for p in vertex.outgoing if "after_cluster" in p.tags).next()
             lo.dot_args["group"] = "cluster_%i" % cluster_particle.cluster_index
@@ -59,23 +60,23 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
         elif vertex.final:
             # Don't show final particle vertices
             lo.show = False
-            
+
         elif "cut_summary" in vertex.tags:
             return None
-            
+
         elif "summary" in vertex.tags:
             lo.width = lo.height = 1.0
-            
+
         elif vertex.hadronization:
             # Big white hardronization vertices
             lo.width = lo.height = 1.0
-            
+
         else:
             nr_particles = len(vertex.incoming) + len(vertex.outgoing)
             lo.width = lo.height = nr_particles * 0.04
 
         return lo
-   
+
     def get_particle(self, particle):
 
         if "cut_summary" in particle.tags:
@@ -104,7 +105,7 @@ class FeynmanLayout(BaseLayout, FundamentalTool):
             lo.label = particle.pdgid
 
         #lo.dot_args["weight"] = log10(particle.e+1)*0.1 + 1
-        
+
         return lo
 
 
@@ -114,19 +115,19 @@ class InlineLabelsLayout(FeynmanLayout):
     by the side of them.
     """
     _name = "InlineLabels"
-    
+
     def get_particle(self, particle):
-            
+
         down = super(InlineLabelsLayout, self).get_particle(particle)
         if not down.label:# or "jet" in particle.tags:
             return down
-       
+
         middle = LayoutNode(down.item, label=down.label)
         middle.show = False
         middle.dot_args["margin"] = "0,0"
         #middle.dot_args["shape"] = "square"
         middle.dot_args["group"] = "particlelabels"
-        
+
         if 'jet' in down.item.tags: #Make a dummy item for the upstream particle
             item = ViewParticle(self.graph)
             item.pdgid = 0
@@ -139,21 +140,21 @@ class InlineLabelsLayout(FeynmanLayout):
         down.coming = middle.item
         up.label = down.label = None
         up.port_going = None
-        
+
         return [up, middle, down]
 
 
 class StringClustersLayout(FeynmanLayout):
     """
-    Causes strings to try and arrange the edges so that gluons go into 
-    the middle, coloured particles come in on the left, and anti-colours arrive 
+    Causes strings to try and arrange the edges so that gluons go into
+    the middle, coloured particles come in on the left, and anti-colours arrive
     on the right.
     """
     _name = "StringClusters"
 
     def __init__(self, *args, **kwargs):
         super(StringClustersLayout, self).__init__(*args, **kwargs)
-        
+
         #assert self.options.layout_engine == "dot", (
         #    "StringClustersLayout is only meaningful with dot.")
 
@@ -166,9 +167,9 @@ class StringClustersLayout(FeynmanLayout):
             lo.dot_args["shape"] = "record"
             record_shape = " <leftedge>|<left>|<middle>|<right>|<rightedge>"
             lo.dot_args["label"] = record_shape
-        
+
         return lo
-        
+
     def get_particle(self, particle):
         lo = super(StringClustersLayout, self).get_particle(particle)
         if particle.end_vertex.hadronization:
@@ -184,5 +185,5 @@ class StringClustersLayout(FeynmanLayout):
                 this_particle.port_going = "left"
             elif particle.anticolor:
                 this_particle.port_going = "right"
-                
+
         return lo

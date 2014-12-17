@@ -1,23 +1,26 @@
+
 from __future__ import division
 
-from .. import log; log = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
 from math import log as ln
 
-from mcviz.tools import Style, Arg
+from mcviz.tools.tools import Arg
+from mcviz.tools.types import Style
 from mcviz.tools.layouts import FeynmanLayout, DualLayout
 from mcviz.utils import rainbow_color
 from mcviz.graph import ViewParticle, ViewVertex
 
 
 DEFAULT_NODE_ARGS = {"stroke": "black", "fill": "white", "stroke-width": "0.05"}
-DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black", 
+DEFAULT_EDGE_ARGS = {"energy": 0.2, "stroke": "black", "fill": "black",
                      "stroke-width": 0.05, "scale": 1}
 
 class Default(Style):
     "The default style. All lines are black, with no enhancements."
     _name = "Default"
-    
+
     def __call__(self, layout):
         for edge in layout.edges:
             if "cut_summary" in edge.item.tags:
@@ -30,7 +33,7 @@ class Default(Style):
             else:
                 edge.style_line_type = "identity"
                 edge.style_args.update(DEFAULT_EDGE_ARGS)
-        
+
         for node in layout.nodes:
             node.style_args.update(DEFAULT_NODE_ARGS)
 
@@ -59,12 +62,13 @@ class SimpleColors(Style):
     Photons are orange, bosons magenta and leptons almond.
     """
     _name = "SimpleColors"
-    
+
     def __call__(self, layout):
         """ just do some simple coloring of lines """
         for edge in layout.edges:
             if isinstance(edge.item, ViewParticle):
-                edge.style_args["stroke"] = edge.style_args["fill"] = particle_color(edge.item)
+                edge.style_args["stroke"] = edge.style_args["fill"] \
+                        = particle_color(edge.item)
             else:
                 pass
                 # no coloring for vertices-as-lines
@@ -80,7 +84,8 @@ class SimpleColors(Style):
                 # label in Inline; particle in Dual
                 # fill will be ignored in inline
                 node.style_args["fill"] = particle_color(node.item)
-                node.style_args["fill"] = node.style_args["fill"].replace("black", "white")
+                node.style_args["fill"] = node.style_args["fill"]\
+                                          .replace("black", "white")
                 if node.item.initial_state:
                     node.style_args["fill"] = initial_color
 
@@ -111,7 +116,7 @@ class Highlight(Style):
         for edge in layout.edges:
             try:
                 if start <= abs(getattr(edge.item, param)) <= end:
-                  edge.style_args["stroke"] = edge.style_args["fill"] = color
+                    edge.style_args["stroke"] = edge.style_args["fill"] = color
             except AttributeError: # looks like the item doesn't have that param
                 pass
 
@@ -130,7 +135,7 @@ class FancyLines(Style):
     """
     _name = "FancyLines"
     _args = [Arg("scale", float, "scale of the line effects", default=1.0),]
-    
+
     def __call__(self, layout):
         """ set fancy line types, curly gluons, wavy photons etc."""
         for edge in layout.edges:
@@ -178,7 +183,7 @@ class FancyLines(Style):
                 edge.style_line_type = "sfermion"
             else:
                 edge.style_line_type = "hadron"
-                
+
 
 class LineWidthPt(Style):
     """
@@ -195,12 +200,14 @@ class LineWidthPt(Style):
             for edge in layout.edges:
                 particle = edge.going
                 if hasattr(particle, "pt"):
-                    edge.style_args["stroke-width"] = self.options["min"] + self.options["scale"]*ln(particle.pt+1)*0.1
+                    edge.style_args["stroke-width"] = self.options["min"] \
+                            + self.options["scale"]*ln(particle.pt+1)*0.1
 
         for element in elements:
             particle = element.item
             if hasattr(particle, "pt"):
-                element.style_args["stroke-width"] = self.options["min"] + +self.options["scale"]*ln(particle.pt+1)*0.1
+                element.style_args["stroke-width"] = self.options["min"] \
+                        + self.options["scale"]*ln(particle.pt+1)*0.1
 
 
 class LabelSizePt(Style):
@@ -214,18 +221,19 @@ class LabelSizePt(Style):
             particle = element.item
             if not hasattr(particle, "pt"):
                 continue
-            element.label_size = self.options["scale"]*ln(particle.pt+1)*0.5 + 0.5
+            element.label_size = self.options["scale"] * ln(particle.pt+1) \
+                                 * 0.5 + 0.5
 
 
 class ThickenColor(Style):
     """
-    This can be used to make a single (anti)colour line very thick, so that it 
+    This can be used to make a single (anti)colour line very thick, so that it
     can be easily seen.
     """
 
     _name = "ThickenColor"
     _args = [Arg("color_id", int, "id of the color to thicken")]
-    
+
     def __call__(self, layout):
         color_id = self.options["color_id"]
         for edge in layout.edges:
@@ -242,28 +250,28 @@ class StatusColor(Style):
     def __call__(self, layout):
 
         colors = [rainbow_color(i/10, 0.25 + 0.5*(i%2)) for i in xrange(10)]
-        log.info("Colors are: %r", colors)
-        
+        LOG.info("Colors are: %r", colors)
+
         if isinstance(layout, FeynmanLayout):
             for edge in layout.edges:
                 particle = edge.item
                 edge.style_args["stroke"] = colors[abs(particle.status) // 10]
-                
+
         elif isinstance(layout, DualLayout):
             for node in layout.nodes:
                 particle = node.item
                 if hasattr(particle, "status"):
                     node.style_args["fill"] = colors[abs(particle.status) // 10]
-            
+
 
 @Style.decorate("ColorPassing")
 def color_passing(layout):
-	for edge in layout.edges:
-		if "pass" in edge.item.tags:
-			edge.style_args["stroke"] = "#00ffff"
-			
+    for edge in layout.edges:
+        if "pass" in edge.item.tags:
+            edge.style_args["stroke"] = "#00ffff"
+
 @Style.decorate("ColorFinal")
 def color_final(layout):
-	for edge in layout.edges:
-		if "pass" in edge.item.tags: #edge.item.final_state:
-			edge.style_args["stroke"] = "#ff0000"
+    for edge in layout.edges:
+        if "pass" in edge.item.tags: #edge.item.final_state:
+            edge.style_args["stroke"] = "#ff0000"

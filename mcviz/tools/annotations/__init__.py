@@ -1,1 +1,2 @@
-import annotations
+
+import mcviz.tools.annotations.annotations

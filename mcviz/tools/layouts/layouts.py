@@ -1,10 +1,10 @@
+
 from __future__ import division
 
-from math import log10
 from itertools import chain
 
-from mcviz.tools import Layout, Arg
-from mcviz.utils import latexize_particle_name, make_unicode_name, Point2D
+from mcviz.tools.tools import Arg
+from mcviz.tools.types import Layout
 from mcviz.utils.svg import TexGlyph
 from mcviz.utils.graphviz import make_node, make_edge, PlainOutput, REF_PREFIX
 
@@ -14,14 +14,14 @@ class BaseLayout(Layout):
     """
     Class that encapsulates the layout and styling information of the graph
     """
-    _args = [Arg("x", int, "width"), Arg("y", int, "height"), 
+    _args = [Arg("x", int, "width"), Arg("y", int, "height"),
              Arg("ratio", float, "aspect ratio"),
              Arg("label_size", float, "size of labels (1.0 is normal)", 1.0),]
     _base = True
 
     def __call__(self, graph):
         self.graph = graph
-        
+
         self.width, self.height = self.options["x"], self.options["y"]
         self.ratio = self.options["ratio"]
         self.scale = 1.0
@@ -60,7 +60,7 @@ class BaseLayout(Layout):
             for o in obj:
                 self.add_object(o)
             return
-            
+
         obj.item.layout_objects.append(obj)
         if isinstance(obj, LayoutNode):
             obj = self.process_node(obj)
@@ -116,7 +116,7 @@ class BaseLayout(Layout):
             if node.item.reference in data.nodes:
                 node.center, size = data.nodes[node.item.reference]
                 node.width, node.height = size
-    
+
 
 
 class LayoutObject(object):
@@ -149,7 +149,7 @@ class LayoutObject(object):
                 return "|%i|" % self.label
         else:
             return str(self.label) # WTF?
-        
+
 
 class LayoutEdge(LayoutObject):
     def __init__(self, item, coming, going, **args):
@@ -172,7 +172,7 @@ class LayoutEdge(LayoutObject):
     @property
     def dot(self):
         def join_port(to, port):
-            return ":".join((to, port)) if port else to 
+            return ":".join((to, port)) if port else to
         coming = join_port(self.coming.reference, self.port_coming)
         going = join_port(self.going.reference, self.port_going)
 

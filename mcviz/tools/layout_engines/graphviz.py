@@ -1,8 +1,12 @@
-from .. import log; log = log.getChild(__name__)
 
-from mcviz.tools import LayoutEngine, Arg
-from mcviz.utils.graphviz import run_graphviz, REF_PREFIX
-from mcviz.utils.timer import Timer; timer = Timer(log, log.VERBOSE)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+from mcviz.utils.timer import Timer
+TIMER = Timer(LOG, LOG.VERBOSE)
+
+from mcviz.tools.tools import Arg
+from mcviz.tools.types import LayoutEngine
+from mcviz.utils.graphviz import run_graphviz
 
 from new import classobj
 
@@ -12,30 +16,30 @@ class GraphvizEngine(LayoutEngine):
     _base = True
 
     def graphviz_pass(self, engine, graphviz_options, dot_data):
-        log.debug("dot_data hash: 0x%0X", hash(dot_data))
+        LOG.debug("dot_data hash: 0x%0X", hash(dot_data))
 
         # Dump the whole dot file before passing it to graphviz if requested
         if self.options["dump_dot"]:
-            log.debug("Data passed to %s:" % engine)
+            LOG.debug("Data passed to %s:" % engine)
             # TODO: flush log FD
             print dot_data
 
         # Process the DOT data with graphviz
-        log.verbose("Calling '%s' with options %s" % (engine, graphviz_options))
-        with timer("run graphviz", log.VERBOSE):
+        LOG.verbose("Calling '%s' with options %s" % (engine, graphviz_options))
+        with TIMER("run graphviz", LOG.VERBOSE):
             output, errors = run_graphviz(engine, dot_data, graphviz_options)
         errors = map(str.strip, errors.split("\n"))
         errors = filter(lambda e : e and not "Warning: gvrender" in e, errors)
         if errors:
-            log.warning("********* GraphViz Output **********")
+            LOG.warning("********* GraphViz Output **********")
             for error in errors:
-                log.warning(error)
-            log.warning("************************************")
+                LOG.warning(error)
+            LOG.warning("************************************")
         if not output.strip():
-            log.error("No output from %s " % engine)
-            log.error("There may be too many constraints on the graph.")
+            LOG.error("No output from %s " % engine)
+            LOG.error("There may be too many constraints on the graph.")
         if self.options["dump_dot"]:
-            log.debug("Data received from %s:" % engine)
+            LOG.debug("Data received from %s:" % engine)
             print output
         return output
 
@@ -46,7 +50,7 @@ class GraphvizEngine(LayoutEngine):
         engine, options = self.get_graphviz_options()
         data = self.graphviz_pass(engine, options, self.dot(layout))
         self.update(layout, data)
-    
+
     def get_graphviz_options(self):
         """
         Return (binary, option list)
@@ -55,7 +59,7 @@ class GraphvizEngine(LayoutEngine):
         if not any(options.startswith("-T") for opt in options):
             options.append("-Tplain")
         return self._name, options
-    
+
     def update(self, layout, data):
         """
         Update the `layout` with information from `data`, obtained from a
@@ -76,11 +80,12 @@ class GraphvizEngine(LayoutEngine):
 
 class DotEngine(GraphvizEngine):
     _name = "dot"
-    _args = [Arg("orientation", str, "orientation of the graph", "TB", choices=["LR","RL", "TB", "BT"])]
+    _args = [Arg("orientation", str, "orientation of the graph", "TB",
+                 choices=["LR", "RL", "TB", "BT"])]
 
     def dot(self, layout):
         """ tuning parameters specific to dot:
-          * rankdir (G) - direction of layout LR, RL, TB, BT 
+          * rankdir (G) - direction of layout LR, RL, TB, BT
 
           * nodesep (G, 0.25) - minimum in-rank separation
           * ranksep (G, 0.5) - minimum separation between ranks
@@ -96,7 +101,7 @@ class DotEngine(GraphvizEngine):
 
           * rank (S) -  same, min, max, source or sink (force to that rank)
           * group (N) - if same at start and end, try to connect straight
-          * constraint (E, true) - edge used for ranking 
+          * constraint (E, true) - edge used for ranking
           * minlen (E, 1) - minumum edge length in rank difference
           * weight (E, 1) - heavier is shorter, 0 is minimum
           """
@@ -120,7 +125,7 @@ class DotEngine(GraphvizEngine):
 
 class FDPEngine(GraphvizEngine):
     _name = "fdp"
-    
+
     def dot(self, layout, extra=()):
         """ tuning parameters specific to FDP:
          * K (GC, 0.3) - ideal edge length, overruled by edge len
@@ -136,7 +141,7 @@ class FDPEngine(GraphvizEngine):
                     for expansion in Voronoi technique. dim' = (1+2*margin)*dim
          * dim, dimen (G, 2) - dimensionality
 
-         * weight (E, 1.0) - must be >1; 
+         * weight (E, 1.0) - must be >1;
          * len (E, 0.3) - preferred edge length
 
          * pin (N) - if true, fix the position of that node
@@ -162,10 +167,6 @@ class FDPEngine(GraphvizEngine):
         out.append("}")
         return "\n".join(out)
 
-
 for le in ["neato", "sfdp", "circo", "twopi"]:
     # create class and apply "tool" decorator
     classobj(le, (GraphvizEngine,), {"_name" : le})
-
-
-

@@ -26,7 +26,7 @@ class RawNode(XMLNode):
 
     def __str__(self):
         return self.data
-        
+
     def __unicode__(self):
         return self.data
 

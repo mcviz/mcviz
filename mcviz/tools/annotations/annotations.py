@@ -1,5 +1,7 @@
-from ... import log; log = log.getChild(__name__)
-from mcviz.tools import Annotation, Arg
+
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+from mcviz.tools.types import Annotation
 
 class Index(Annotation):
     """
@@ -33,7 +35,6 @@ class Status(Annotation):
     _name = "status"
     def __call__(self, graph):
         self.annotate_particles(graph.particles, lambda p: p.status)
-            
 
 class E(Annotation):
     """
@@ -41,8 +42,8 @@ class E(Annotation):
     """
     _name = "e"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles,
-            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.e)))
+        self.annotate_particles(graph.particles, \
+                lambda p: graph.units.energy_formatter(p.e))
 
 
 class Pt(Annotation):
@@ -51,13 +52,12 @@ class Pt(Annotation):
     """
     _name = "pt"
     def __call__(self, graph):
-        self.annotate_particles(graph.particles,
-            lambda p: "{0:.4g}{1:s}eV".format(*graph.units.pick_mag(p.pt)))
-        
-        
+        self.annotate_particles(graph.particles, \
+                lambda p: graph.units.energy_formatter(p.pt))
+
 class PDGID(Annotation):
     """
-    Particle transverse momentum (in Monte-Carlo units)
+    PDG species number
     """
     _name = "pdg"
     def __call__(self, graph):
@@ -69,12 +69,14 @@ class PDFInfo(Annotation):
     """
     _name = "pdfinfo"
     def __call__(self, graph):
-        for ip in graph.initial_particles:
-            if ip.reference == "P1":
+        for particle in graph.initial_particles:
+            if particle.reference == "P1":
                 pdfinfo = graph.event.pdfinfo
-                ip.subscripts.append(("id: %s" % pdfinfo.id1, "left"))
-                ip.subscripts.append(("x: %f" % float(pdfinfo.x1), "left"))
-            elif ip.reference == "P2":
+                particle.subscripts.append(("id: %s" % pdfinfo.id1, "left"))
+                particle.subscripts.append(("x: %f" \
+                        % float(pdfinfo.x1), "left"))
+            elif particle.reference == "P2":
                 pdfinfo = graph.event.pdfinfo
-                ip.subscripts.append(("id: %s" % pdfinfo.id2, "left"))
-                ip.subscripts.append(("x: %f" % float(pdfinfo.x2), "left"))
+                particle.subscripts.append(("id: %s" % pdfinfo.id2, "left"))
+                particle.subscripts.append(("x: %f" \
+                        % float(pdfinfo.x2), "left"))

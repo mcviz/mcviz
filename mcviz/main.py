@@ -19,17 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from textwrap import dedent
 
-from . import log
-LOG = log.getChild(__name__)
+from mcviz.logger import LOG, get_logger_level, log_level
+LOG = LOG.getChild(__name__)
 
-from . import EventGraph, EventParseError, GraphWorkspace, FatalError, \
-parse_options
+from mcviz.exception import FatalError, EventParseError
+from mcviz.graph.graph import EventGraph
+from mcviz.workspace import GraphWorkspace
+from mcviz.options import parse_options
 
-from .logger import get_logger_level, log_level
 # from .utils import Units
-from .utils.timer import Timer
-TIMER = Timer(log, log.VERBOSE)
-from .help import run_help
+from mcviz.utils.timer import Timer
+TIMER = Timer(LOG, LOG.VERBOSE)
+from mcviz.help import run_help
 
 def run(args, argv):
     """Load event and apply tools to resulting Workspace"""
@@ -65,7 +66,7 @@ def real_main(argv):
     """Parse arguments then call run"""
     parser, args = parse_options()
     if args.help:
-        with log_level(log.ERROR):
+        with log_level(LOG.ERROR):
             return run_help(parser, args)
 
     try:

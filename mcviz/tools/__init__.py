@@ -1,15 +1,16 @@
-from .. import log; log = log.getChild(__name__)
 
-from .tools import Tool, ToolSetting, Arg, FundamentalTool, tool_type_options, ArgParseError
-from .types import (Annotation, Transform, Layout, LayoutEngine, Style, Painter, 
-                    OptionSet)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from .tools import debug_tools
+from mcviz.tools.tools import (Tool, ToolSetting, Arg, FundamentalTool,
+                               tool_type_options, ArgParseError, debug_tools)
+from mcviz.tools.types import (Annotation, Transform, Layout, LayoutEngine,
+                               Style, Painter, OptionSet)
 
-import annotations
-import layouts
-import layout_engines
-import painters
-import styles
-import transforms
-import optionsets
+import mcviz.tools.annotations
+import mcviz.tools.layouts
+import mcviz.tools.layout_engines
+import mcviz.tools.painters
+import mcviz.tools.styles
+import mcviz.tools.transforms
+import mcviz.tools.optionsets

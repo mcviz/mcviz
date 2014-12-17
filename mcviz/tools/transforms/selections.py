@@ -1,7 +1,8 @@
-from .. import log; log = log.getChild(__name__)
 
-from mcviz.tools import Transform, Arg
-from mcviz.graph import Summary
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
+
+from mcviz.tools.types import Transform
 
 
 @Transform.decorate("OnlyHard")
@@ -9,15 +10,17 @@ def only_hard(graph_view):
     """
     Select only the hard interaction
     """
-    def is_hard(p):
-        return 20 <= abs(p.status) < 30
+    # TODO: is this right?
+    def is_hard(particle):
+        return 20 <= abs(particle.status) < 30
 
     # first summarize all particles which are not hard
     # and also have no hard mothers
     for particle in graph_view.particles:
         if not is_hard(particle):
             if not any(is_hard(p) for p in particle.mothers):
-                graph_view.summarize_vertices((particle.start_vertex, particle.end_vertex))
+                graph_view.summarize_vertices((particle.start_vertex, \
+                        particle.end_vertex))
 
     # really drop all particles
     for vertex in graph_view.vertices:
@@ -27,4 +30,5 @@ def only_hard(graph_view):
     # re-summarize the leftovers
     for particle in graph_view.particles:
         if not is_hard(particle):
-            graph_view.summarize_vertices((particle.start_vertex, particle.end_vertex))
+            graph_view.summarize_vertices((particle.start_vertex, \
+                    particle.end_vertex))

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 texglyph.py
 functions for converting LaTeX equation string into SVG path
@@ -34,10 +35,12 @@ from textwrap import dedent
 from cPickle import dumps, loads
 from pkg_resources import resource_string, resource_exists, resource_filename
 
-def fixup_unicodedata_name(x):
+# TODO: Dedup this code:
+def fixup_unicodedata_name(name):
     "Oh dear. unicodedata misspelt lambda."
-    if x == "lamda": return "lambda"
-    return x
+    if name == "lamda":
+        return "lambda"
+    return name
 
 GREEK_RANGE = xrange(0x3b1, 0x3ca)
 GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
@@ -99,7 +102,7 @@ def test_particle_data():
 def particle_to_latex(gd, bastardize=False):
     """
     Generate latex from particle
-    
+
     `bastardize`: Generate ROOT latex from particle
     """
     rep = []
@@ -156,12 +159,12 @@ def particle_to_latex(gd, bastardize=False):
 
     if gd["mass"]:
         rep.append(r"}")
-    
+
     if not bastardize:
         rep.append(r"}$")
-        
+
     greek_prefix = "#" if bastardize else "\\"
-        
+
     name = "".join(rep)
     name = GREEK_FINDER.sub(lambda g: greek_prefix + g.group(0), name)
     return name
@@ -188,7 +191,7 @@ def process_path_data(d, tf_x, tf_y):
             x_positions.append(x)
             y_positions.append(y)
             new_points.append("%.2f,%.2f" % (x, y))
-        return (" ".join(new_points), min(x_positions), max(x_positions), 
+        return (" ".join(new_points), min(x_positions), max(x_positions),
                                       min(y_positions), max(y_positions))
 
     # split and preprocess command strings
@@ -242,7 +245,7 @@ class TexGlyph(object):
         for pdgid, label, gd in sorted(db.values()):
             print >> sys.stderr, "Processing %s (PDG ID %i)" % (label, pdgid)
             glyph = TexGlyph(particle_to_latex(gd), pdgid)
-            print >> sys.stderr, (" box: X %.1f to %.1f / Y %.1f to %.1f" % 
+            print >> sys.stderr, (" box: X %.1f to %.1f / Y %.1f to %.1f" %
                                   (glyph.xmin, glyph.xmax, glyph.ymin, glyph.ymax))
             cls.library[pdgid] = glyph
         avg_height = cls.get_average_dimensions()[1]
@@ -255,7 +258,7 @@ class TexGlyph(object):
     def get_library(cls):
         if cls.library:
             return cls.library
-        
+
         if resource_exists("mcviz.utils.svg.data", "texglyph.cache.bz2"):
             cls.library = loads(resource_string("mcviz.utils.svg.data", "texglyph.cache.bz2").decode("bz2"))
         elif resource_exists("mcviz.utils.svg.data", "texglyph.cache"):
@@ -264,7 +267,7 @@ class TexGlyph(object):
             cls.make_library()
             with file(resource_filename("mcviz.utils.svg", "texglyph.cache"), "w") as f:
                 f.write(dumps(cls.library, 2))
-                
+
         return cls.library
 
     @classmethod
@@ -274,11 +277,11 @@ class TexGlyph(object):
             return glyph
 
         wx, wy = glyph.dimensions
-        
+
         doc = minidom.parseString(glyph.xml)
         grp = doc.childNodes[0]
         box = doc.createElement("ellipse")
-        
+
         box.setAttribute("cx", "%.3f" % (glyph.xmin + wx / 2))
         box.setAttribute("cy", "%.3f" % (glyph.ymin + wy / 2))
         box.setAttribute("rx", "%.3f" % (wx*1.2))
@@ -286,7 +289,7 @@ class TexGlyph(object):
         box.setAttribute("fill", "red")
         box.setAttribute("opacity", "0")
         grp.appendChild(box)
-        
+
         glyph._with_bounding_box = True
         glyph.dom = grp
         glyph.dom2xml()
@@ -332,7 +335,7 @@ class TexGlyph(object):
         self.write_tex_file(latex_file)
         os.system('%slatex "-output-directory=%s" -halt-on-error "%s" > "%s"'
                   % ("pdf" if use_pdf else "", base_dir, latex_file, out_file))
-                  
+
         try:
             os.stat(texout_file)
         except OSError:
@@ -361,7 +364,7 @@ class TexGlyph(object):
                 if not line.startswith('pstoedit: version'):
                     sys.stderr.write(line + '\n')
             err_stream.close()
- 
+
         self.process_svg_file(svg_file)
 
         clean()
@@ -420,9 +423,9 @@ class TexGlyph(object):
             for c in node_in.childNodes:
                 if c.nodeName not in ('g', 'path', 'polyline', 'polygon', 'line'):
                     continue
-                    
+
                 child = clone_and_rewrite(self, c)
-                
+
                 if c.nodeName == 'g':
                     child.removeAttribute("transform")
                     child.setAttribute('id', "pdg%i" % self.pdgid)
@@ -451,13 +454,13 @@ class TexGlyph(object):
                     child.setAttribute("stroke-width", "%.2f" % width)
 
                 node_out.appendChild(child)
-                
+
             return node_out
 
         doc = minidom.parse(filename)
         svg = [cn for cn in doc.childNodes if cn.childNodes][0]
         self.dom = clone_and_rewrite(self, svg).childNodes[0]
-    
+
     @property
     def dimensions(self):
         """Returns width and height of glyph"""
@@ -488,7 +491,7 @@ if __name__ == '__main__':
         lmargin = 200
         lineskip = 200
         curx, cury, maxy = lmargin, 200, 0
-        
+
         with file("test.svg", "w") as f:
             f.write('<?xml version="1.0" standalone="no"?>\n')
             f.write('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 100 100" version = "1.1">\n')
@@ -537,4 +540,5 @@ if __name__ == '__main__':
                 f.write('<path d="M 0 %s H 100" fill = "none" stroke ="red" />\n' % baseline)
                 f.write('</svg>')
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 encoding=utf-8 textwidth=99
+# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 textwidth=99
+# vim: fileencoding=utf-8

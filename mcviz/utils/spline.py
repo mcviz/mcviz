@@ -1,13 +1,14 @@
+
 from __future__ import division
 
 from copy import deepcopy
 from math import sqrt, hypot
 from bisect import bisect_left, bisect_right
-from ..utils import Point2D
+from .point import Point2D
 
 class Spline(object):
     def __init__(self, p0, p1, p2, p3, N = 100):
-        """ Create a spline given the start point, 
+        """ Create a spline given the start point,
         two control points and the end point"""
         assert not (p0 == p1 == p2 == p3)
         def make_point(p):
@@ -110,7 +111,7 @@ class Spline(object):
         s = min(1, max(0, s))
         s *= self.length
         i = bisect_left(self.cumulative, s)
-        if i == 0: 
+        if i == 0:
             i = 1
         part = (s - self.cumulative[i]) / self.distances[i-1]
         return (i*1.0 + part)/self.N
@@ -135,7 +136,7 @@ class Spline(object):
         s1T = self.transform_x_point(spline.points[0].x,spline.points[1])
         s2T = self.transform_x_point(spline.points[3].x,spline.points[2])
         return Spline(s0T, s1T, s2T, s3T)
-    
+
     def transform_splineline(self, splineline):
         new_splines = [self.transform_spline(s) for s in splineline.splines]
         return SplineLine(new_splines)
@@ -175,7 +176,7 @@ class Spline(object):
         if v32.len() > 0:
             self.points[2] = self.points[2] - v32 * (1 / v32.len()) * tp1.len() * p0.y
         self.points[3] += tp1
-    
+
     def get_clipped(self, clip_length):
         x = self.length - clip_length
         p0, p1 = self.points[0], self.points[1]
@@ -199,7 +200,7 @@ class Spline(object):
         s3 = deepcopy(self)
         s3.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
         return s1, s2, s3
-    
+
     @property
     def svg_path_data(self):
         f = self.fidelity
@@ -220,7 +221,7 @@ class Spline(object):
     #        y = self.points[i][1] - self.points[0][1]
     #        data.append("%.3f,%.3f " % (x, y))
     #    return data
-    @property 
+    @property
     def boundingbox(self):
         x0 = min(p.x for p in self.points)
         x1 = max(p.x for p in self.points)
@@ -269,15 +270,15 @@ class SplineLine(object):
         s3 = deepcopy(self)
         s3.shift_by(Line(Point2D(0, -start_amount), Point2D(self.length, -amount)))
         return s1, s2, s3
-    
+
     def perturb(self, direction, amount):
         "Perturb the middle of a line inward or outward."
         amount = amount if direction == "inward" else -amount
-        
+
         #self.splines[0].perturb(False, amount)
         for spline in self.splines: #[1:-1]:
             spline.perturb(True, amount)
-            spline.perturb(False, amount)        
+            spline.perturb(False, amount)
         #self.splines[-1].perturb(True, amount)
         return self
 
@@ -342,7 +343,7 @@ class SplineLine(object):
         for s in self.splines[1:]:
             sx0, sx1, sy0, sy1 = self.splines[0].boundingbox
             x0, x1, y0, y1 = min(x0, sx0), max(x1, sx1), min(y0, sy0), max(y1, sy1)
-        return x0, x1, y0, y1 
+        return x0, x1, y0, y1
 
     def get_clipped(self, clip_length):
         splines = self.splines[:-1] + [self.splines[-1].get_clipped(clip_length)]
@@ -362,8 +363,8 @@ if __name__=="__main__":
     for i in range(500):
         t = s.get_t(i / 500)
         x, y, px, py = s.get_point_perp(t)
-        if lx == 0 and ly == 0: 
-            lx, ly = x, y        
+        if lx == 0 and ly == 0:
+            lx, ly = x, y
         #print t, x,y, px, py, hypot(x - lx, y - ly)
         lx, ly = x, y
 

@@ -1,5 +1,7 @@
+
 # -*- coding: UTF-8 -*-
-from .. import log; log = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
 import re
 import unicodedata as UD
@@ -14,10 +16,11 @@ from .colors import rainbow_color
 from .spline import Spline, SplineLine, Line
 from .units import Units
 
-def fixup_unicodedata_name(x):
+def fixup_unicodedata_name(name):
     "Oh dear. unicodedata misspelt lambda."
-    if x == "lamda": return "lambda"
-    return x
+    if name == "lamda":
+        return "lambda"
+    return name
 
 GREEK_RANGE = xrange(0x3b1, 0x3ca)
 GREEK_LETTERS = (unichr(x) for x in GREEK_RANGE)
@@ -44,7 +47,7 @@ def latexize_particle_name(name, n=0):
     greekletter0 => {\greekletter}0
     """
     start_name = name
-    
+
     if not n:
         # only do this on the first pass
         name = GREEK_FINDER.sub(lambda g: "\\\\" + g.group(0), name)
@@ -57,13 +60,13 @@ def latexize_particle_name(name, n=0):
             ("_^", "_")]
         for what, replacement in replacements:
             name = name.replace(what, replacement)
-    
+
     name = BAR_FINDER.sub(lambda g: "\\\\bar{%s}%s" % g.groups(), name)
-    
+
     if name != start_name:
         # Keep going until we didn't make any changes
         return latexize_particle_name(name, n+1)
-    
+
     return "$\\\\mathbf{" + name + "}$"
 
 def make_unicode_name(name):
@@ -73,10 +76,10 @@ def make_unicode_name(name):
         ("-", SUPER_MINUS),
         ("bar", BAR),
     ] + GREEK_NAMECHARS + GREEK_UNAMECHARS
-    
+
     for what, replacement in replacements:
         name = name.replace(what, replacement)
-        
+
     return name.encode("UTF-8")
 
 @contextmanager

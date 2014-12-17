@@ -8,13 +8,14 @@ from collections import namedtuple
 from itertools import izip
 import re
 
-from ... import log
-LOG = log.getChild(__name__)
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from mcviz import FatalError
+from mcviz.exception import FatalError, EventParseError
 from mcviz.utils import Units
 from mcviz.utils.trydecompress import try_decompress
-from .. import EventParseError, Particle, Vertex
+from mcviz.graph.particle import Particle
+from mcviz.graph.vertex import Vertex
 
 
 LHE_TEXT = re.compile(r"""

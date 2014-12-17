@@ -1,24 +1,25 @@
-from . import log; log = log.getChild(__name__)
+"""Container for event representations and tools"""
+from mcviz.logger import LOG
+LOG = LOG.getChild(__name__)
 
-from . import Tool, FatalError
-from .graph import GraphView
-from .tools import ToolSetting, ArgParseError, debug_tools
-from .tools.transforms.tagging import tag
-from .utils.timer import Timer
-
+from mcviz.exception import FatalError
+from mcviz.tools import Tool
+from mcviz.graph import GraphView
+from mcviz.tools import ToolSetting, ArgParseError, debug_tools
+from mcviz.tools.transforms.tagging import tag
+from mcviz.utils.timer import Timer
 
 class GraphWorkspace(object):
-
+    """Container for event representations and tools"""
     def __init__(self, name, event_graph, cmdline=""):
-        
-        self.log = log.getChild(name)
+        self.log = LOG.getChild(name)
         self.log.debug('Creating new graph workspace {0}'.format(name))
         self.timer = Timer(self.log)
-        
+
         self.name = name
         self.event_graph = event_graph
         self.cmdline = cmdline
-                
+
         self.graph_view = GraphView(event_graph)
         self.layout = None
         self.tools = {}
@@ -30,8 +31,8 @@ class GraphWorkspace(object):
             try:
                 settings = ToolSetting.settings_from_options(options)
                 self.tools_from_settings(settings, options)
-            except ArgParseError, e:
-                self.log.fatal("Parse error in arguments: %s" % e.args[0])
+            except ArgParseError, err:
+                self.log.fatal("Parse error in arguments: %s" % err.args[0])
                 raise FatalError
 
     def tools_from_settings(self, settings, global_args):
@@ -41,7 +42,7 @@ class GraphWorkspace(object):
         for tool_type in settings:
             tools = Tool.build_tools(tool_type, settings[tool_type], global_args)
             self.tools[tool_type] = tools
-    
+
     def apply_tools(self, tool_type, *args):
         tools = self.tools.get(tool_type, ())
         for tool in tools:
@@ -50,14 +51,14 @@ class GraphWorkspace(object):
                 tool(*args)
 
     def apply_tags(self):
-        # Apply all Taggers on the graph
+        """Apply all Taggers on the graph"""
         self.log.debug('tagging graph')
         with self.timer('tag the graph'):
             tag(self.graph_view)
 
     def clear_tags(self):
         self.log.debug('TODO: remove tags from graph')
-    
+
     def apply_transforms(self):
         self.log.debug("Graph state (before transforms): %s", self.graph_view)
         self.log.verbose("applying transforms")
@@ -70,7 +71,7 @@ class GraphWorkspace(object):
         self.graph_view = GraphView(self.event_graph)
 
     def apply_annotations(self):
-        # Apply any specified annotations onto the layouted graph
+        """Apply any specified annotations onto the layouted graph"""
         self.log.verbose("applying annotations")
         with self.timer("applied all annotations"):
             self.apply_tools("annotation", self.graph_view)
@@ -79,7 +80,7 @@ class GraphWorkspace(object):
         self.log.debug('TODO: remove annotations from graph')
 
     def create_layout(self):
-        # Get the specified layout class and create a layout of the graph
+        """Get the specified layout class and create a layout of the graph"""
         self.log.verbose("applying layout classes")
         with self.timer("layout the graph", self.log.VERBOSE):
             layout, = self.tools["layout"]
@@ -91,7 +92,7 @@ class GraphWorkspace(object):
             self.apply_tools("layout-engine", self.layout)
 
     def apply_styles(self):
-        # Apply any specified styles onto the layouted graph
+        """Apply any specified styles onto the layouted graph"""
         self.log.verbose("applying styles")
         with self.timer("applied all styles"):
             self.apply_tools("style", self.layout)
@@ -100,7 +101,7 @@ class GraphWorkspace(object):
         self.log.debug('TODO: remove styles from graph')
 
     def apply_optionsets(self):
-        # Apply any specified styles onto the layouted graph
+        """Apply any specified styles onto the layouted graph"""
         self.log.verbose("applying optionsets")
         with self.timer("applied all optionsets"):
             self.apply_tools("optionset", self.tools)
@@ -109,7 +110,7 @@ class GraphWorkspace(object):
         self.log.verbose("painting the graph")
         with self.timer("painted the graph"):
             self.apply_tools("painter", self, self.layout)
-       
+
     def restyle(self):
         self.clear_tags()
         self.clear_styles()
@@ -119,6 +120,7 @@ class GraphWorkspace(object):
         self.apply_styles()
 
     def run(self):
+        """Assemble graph and render"""
         self.apply_optionsets()
         self.apply_transforms()
         self.apply_tags()

@@ -1,3 +1,4 @@
+
 from __future__ import division
 
 from xml.dom.minidom import getDOMImplementation
@@ -66,7 +67,7 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
     N = n_waves * 2
     wavelength = length / N
     cntrl_strength = wavelength / 2 # TUNING PARAMETER
-    
+
     # scaling envelope
     divisor = 2*N - 1 if half_open else N - 1
     if power:
@@ -81,7 +82,7 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
 
     # y offsets of points:
     py = [0.0] + [amplitude * envelope[i] for i in range(N)] + [0.0]
-    
+
     splines = []
     sgn = 1
     for i in range(1, N + (1 if half_open else 2)): # STYLE HALF OPEN PHOTONS: Was N+2
@@ -97,21 +98,21 @@ def get_photon_splines(length, amplitude, n_waves, power, amp, half_open = False
         sgn = -sgn
     return SplineLine(splines)
 
-def get_gluon_splines(length, amplitude, n_waves, amp): 
+def get_gluon_splines(length, amplitude, n_waves, amp):
     loopyness = 0.75 # TUNING PARAMETER
     init_length = 2 # TUNING PARAMETER
 
     N = n_waves * 2 + 1
     wavelength = length / (N - 1 + 2*init_length)
     cntrl_strength = wavelength * loopyness
-    
+
     # x offsets of points:
     px = [0.0] + [wavelength * (init_length + i) for i in range(N)]
     px.append(px[-1] + init_length * wavelength)
 
     # y offsets of points:
     py = [0.0] + [amplitude for i in range(N)] + [0.0]
-    
+
     splines = []
     sgn = 1
     for i in range(1, N+2):
@@ -160,7 +161,7 @@ def segment_data(energy, spline, n_segments, n_segment, offset=0):
 
 # TUNING DEFAULTS
 def photon_data(energy, spline, n_max=10, n_min=3, power=5, amp=1, half_open=False):
-    """Get the SVG path data for a photon. 
+    """Get the SVG path data for a photon.
     energy must be between 0 and 1"""
     length = spline.length
     # Here are parametrizations:
@@ -168,7 +169,7 @@ def photon_data(energy, spline, n_max=10, n_min=3, power=5, amp=1, half_open=Fal
     amplitude = (0.5 + 0.5*energy) * amp # TUNING FUNCTION
     n_per_10 = (n_min + energy * (n_max - n_min)) / amp
     n = max(2, int(n_per_10 * length / 10))
-    splineline = get_photon_splines(length, amplitude, n, power, 
+    splineline = get_photon_splines(length, amplitude, n, power,
                                     amplitude, half_open)
     if spline: splineline = spline.transform_splineline(splineline)
     return splineline.svg_path_data
@@ -269,7 +270,7 @@ def multigluon(energy, spline, scale=1, **kwds):
     line1, line2 = spline.bifurcate(energy*scale)
     line1 = line1.svg_path_data
     line2 = line2.svg_path_data
-    
+
     path1 = svgxml.createElement("path"); path1.setAttribute("fill", "none"); path1.setAttribute("d", line1)
     path1.setAttribute("stroke", kwds.pop("color"))
     path2 = svgxml.createElement("path"); path2.setAttribute("fill", "none"); path2.setAttribute("d", line2)
@@ -332,7 +333,7 @@ def cut(energy, spline, n_represented, scale = 8, **kwds):
     for path in all_paths:
         grp.appendChild(path)
     return grp
-        
+
 #    arrowsize = (0.2 + energy) * scale * 3
 #    path = svgxml.createElement("path")
 #    path.setAttribute("fill", "none")
@@ -416,14 +417,14 @@ def hadron(energy, spline, scale = 1, **kwds):
     return grp
 
 def identity(energy, spline, scale = 1, **kwds):
-    
+
     path = svgxml.createElement("path")
     path.setAttribute("fill", "none")
     path.setAttribute("d", spline.svg_path_data)
-    
+
     grp = svg_group(kwds)
     grp.appendChild(path)
-    
+
     return grp
 
 def vertex(pt, rx, ry, **kwds):
@@ -439,13 +440,13 @@ def vertex(pt, rx, ry, **kwds):
 #if __name__=="__main__":
 def test():
     from spline import Spline, SplineLine, Line
-    
+
     spline1 = Spline((5.0, -10), (20.000, -10), (15.0, 30.000), (40.0, 10.000))
     spline2 = Spline((40, 10), (65, -10), (60, 30), (80, 20))
     spline = SplineLine((spline1, spline2))
     line = Line((0,0),(spline.length,0))
 
-    doc = svgxml.createElement("svg") 
+    doc = svgxml.createElement("svg")
     doc.setAttribute("xmlns", "http://www.w3.org/2000/svg")
     doc.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
     doc.setAttribute("viewBox", "0 0 1000 1000")
@@ -466,15 +467,15 @@ def test():
         x = 10
         y = 40 + i*25
         e = i/n
-        doc.appendChild(photon(e, line, transform="translate(%i,%i)" % (x, y),**args)).toprettyxml() 
+        doc.appendChild(photon(e, line, transform="translate(%i,%i)" % (x, y),**args)).toprettyxml()
         doc.appendChild(photon(e, spline, transform="translate(%i,%i)" % (x+100, y),**args)).toprettyxml()
-        doc.appendChild(gluon(e, line, transform="translate(%i,%i)" % (x+200, y),**args)).toprettyxml()    
+        doc.appendChild(gluon(e, line, transform="translate(%i,%i)" % (x+200, y),**args)).toprettyxml()
         doc.appendChild(gluon(e, spline, transform="translate(%i,%i)" % (x+300, y),**args)).toprettyxml()
-        doc.appendChild(boson(e, line, transform="translate(%i,%i)" % (x+400, y),**args)).toprettyxml()    
+        doc.appendChild(boson(e, line, transform="translate(%i,%i)" % (x+400, y),**args)).toprettyxml()
         doc.appendChild(boson(e, spline, transform="translate(%i,%i)" % (x+500, y),**args)).toprettyxml()
-        doc.appendChild(fermion(e, line, transform="translate(%i,%i)" % (x+600, y),**fargs)).toprettyxml()    
+        doc.appendChild(fermion(e, line, transform="translate(%i,%i)" % (x+600, y),**fargs)).toprettyxml()
         doc.appendChild(fermion(e, spline, transform="translate(%i,%i)" % (x+700, y),**fargs)).toprettyxml()
-        doc.appendChild(multigluon(e, spline, transform="translate(%i,%i)" % (x+800, y),**mgargs)).toprettyxml()    
+        doc.appendChild(multigluon(e, spline, transform="translate(%i,%i)" % (x+800, y),**mgargs)).toprettyxml()
 
     for i in range(n+1):
         x = 10

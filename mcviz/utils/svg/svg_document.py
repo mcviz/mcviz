@@ -9,7 +9,7 @@ from ..nanodom import XMLNode, RawNode
 SCRIPT_TAG = re.compile('<script type="text/ecmascript" xlink:href="([^"]+)"/>')
 
 def mkattrs(**kwargs):
-    return " ".join('{0}="{1}"'.format(*i) 
+    return " ".join('{0}="{1}"'.format(*i)
                      for i in sorted(kwargs.iteritems()))
 
 class SVGDocument(object):
@@ -17,17 +17,17 @@ class SVGDocument(object):
 
         self.scale = scale
         viewbox = "0 0 %.1f %.1f" % (wx * scale, wy * scale)
-        self.svg = XMLNode("svg", 
+        self.svg = XMLNode("svg",
             'version="1.1" viewBox="%s" '
             'xmlns="http://www.w3.org/2000/svg" '
             'xmlns:mcviz="http://mcviz.net" '
             'xmlns:xlink="http://www.w3.org/1999/xlink"' % viewbox)
-        
+
         # Adds a big white background rect
         self.svg.appendChild(RawNode('<rect id="background" x="0" y="0" width="%.1f" '
                                      'height="%.1f" style="fill:white;" />'
                                       % ((wx * scale), (wy * scale))))
-        
+
         self.defs = XMLNode("defs")
         self.defined_pdgids = []
         self.svg.appendChild(self.defs)
@@ -110,7 +110,7 @@ class SVGDocument(object):
         subscripts_by_pos = {}
         for subscript, pos in subscripts:
             subscripts_by_pos.setdefault(pos, []).append(subscript)
-    
+
         for pos, subscripts in sorted(subscripts_by_pos.iteritems()):
             subscript = ", ".join(map(str, subscripts))
             x, y  = center
@@ -151,7 +151,7 @@ class NavigableSVGDocument(SVGDocument):
 
     def __init__(self, *args, **kwargs):
         super(NavigableSVGDocument, self).__init__(*args, **kwargs)
-        
+
         # No viewbox for a NavigableSVGDocument
         self.svg.attrs = ['version="1.1" '
                           'xmlns="http://www.w3.org/2000/svg" '
@@ -162,69 +162,69 @@ class NavigableSVGDocument(SVGDocument):
         self.full_svg_document = self.svg
         self.svg = XMLNode("g", 'id="everything"')
         self.full_svg_document.appendChild(self.svg)
-    
+
     def inject_javascript(self, javascript_text):
-        
+
         def match(m):
             (javascript_filename,) = m.groups()
             if not resource_exists("mcviz.utils.svg.data", javascript_filename):
                 return
-                
+
             args = "mcviz.utils.svg.data", javascript_filename
-            
+
             # ]]> is not allowed in CDATA and it appears in jquery!
             # Try to prevent that..
             javascript = resource_string(*args).replace("']]>'", "']' + ']>'")
-            
+
             stag = '<script type="text/javascript"><![CDATA[\n%s\n]]></script>'
-            
+
             return stag % javascript.decode("UTF-8")
-        
+
         return SCRIPT_TAG.sub(match, javascript_text)
-    
+
     def toprettyxml(self):
-        script_fragments = resource_string("mcviz.utils.svg.data", 
+        script_fragments = resource_string("mcviz.utils.svg.data",
                                            "navigable_svg_fragment.xml")
-        
+
         script_fragments = self.inject_javascript(script_fragments)
-                         
+
         #self.full_svg_document.appendChild(self.svg)
         self.full_svg_document.appendChild(RawNode(script_fragments))
         self.svg = self.full_svg_document
         result = super(NavigableSVGDocument, self).toprettyxml()
         return result
-        
-        
+
+
 class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
     """
     Overrides inject_javascript in the case that we're running within mcviz.web
     so that the URLs are correct
     """
     def inject_javascript_(self, javascript_text):
-        
+
         def match(m):
             (javascript_filename,) = m.groups()
-            
+
             #from mcviz.web import get_mcviz_data_url
             #data_url = get_mcviz_data_url()
             from pkg_resources import resource_filename
             data_url = "file://" + resource_filename("mcviz.utils.svg.data", "/")
             javascript_path = data_url + javascript_filename
-            
+
             stag = '<script type="text/javascript" xlink:href="%s"></script>'
             return stag % javascript_path
-        
+
         return SCRIPT_TAG.sub(match, javascript_text)
-    
+
     def add_event_data(self, graph):
-    
+
         element = XMLNode("mcviz:eventdata", attrs='xmlns="http://mcviz.net"')
         self.full_svg_document.appendChild(element)
-        
+
         event = graph.event
-        
+
         graph.particles
-        
+
         for i, p in sorted(event.particles.iteritems()):
             element.appendChild(XMLNode("particle", mkattrs(
                 id=p.no,
@@ -239,19 +239,19 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
                 m=p.m,
                 daughters=" ".join("{0.no}".format(d) for d in sorted(p.daughters)),
             )))
-            
-    
+
+
         element = XMLNode("mcviz:viewdata", attrs='xmlns="http://mcviz.net"')
         self.full_svg_document.appendChild(element)
-        
-        for p in graph.particles:            
+
+        for p in graph.particles:
             element.appendChild(XMLNode("particle", mkattrs(
                 id=p.reference,
                 vin=p.start_vertex.reference,
                 vout=p.end_vertex.reference,
                 event=" ".join("{0}".format(i) for i in sorted(p.represented_numbers)),
             )))
-        
+
         for vertex in graph.vertices:
             element.appendChild(XMLNode("vertex", mkattrs(
                 id=vertex.reference,
@@ -259,22 +259,22 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
                 pin=" ".join(p.reference for p in vertex.incoming),
                 pout=" ".join(p.reference for p in vertex.outgoing),
             )))
-        
+
         info = RawNode(dedent("""
             <foreignObject x="5" y="5" width="300" height="400">
                 <html xmlns="http://www.w3.org/1999/xhtml">
                 <body style="margin: 0px;" id="interface">
-                    <!-- 
+                    <!--
                         Webkit hack. Works because the border is correctly drawn over the SVG.
                     -->
                     <span style="border: 400px solid rgba(180, 180, 250, .9);">.</span>
-                    
+
                     <div id="particle_info" style="padding: 0px; margin-left: 0.3em; margin-top: -0.7em;">
-                    
+
                         <button id="hidelowpt">Hide low pt</button>
                         <button id="hidehieta">Hide eta > 2</button>
                         <button id="reset">Show all</button>
-                    
+
                         <div>Particle <span id="id"></span> in:<span id="vin"></span> out:<span id="vout"></span></div>
                         <div id="contents">
                         </div>
@@ -287,18 +287,18 @@ class MCVizWebNavigableSVGDocument(NavigableSVGDocument):
                             <div id="m"></div>
                         </div>
                     </div>
-                    
+
                 </body>
                 </html>
             </foreignObject>
 
             <rect stroke="black" stroke-width="2px" x="5" y="5" width="300" height="400" fill="none"/>
         """))
-        
+
         self.svg.appendChild(RawNode(dedent("""
             <circle cx="-100" cy="-100" r="0.8px" stroke-width="0.1px" stroke="red" id="selected-particle" fill="none"/>
         """)))
-        
+
         self.full_svg_document.appendChild(info)
-        
-        
+
+
