@@ -178,6 +178,10 @@ class Tool(object):
         if settings:
             self.apply_settings(settings)
 
+    def apply_settings(self, settings):
+        """TODO: Implemented in ..."""
+        raise NotImplementedError
+
     @classmethod
     def args(cls):
         args_names = []
@@ -192,6 +196,7 @@ class Tool(object):
 
     @classmethod
     def decorate(cls, name, title=None, args=None):
+        """Transform a function into a Tool"""
         if title is None:
             title = name
         if args is None:
