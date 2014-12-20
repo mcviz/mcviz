@@ -21,9 +21,11 @@ COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 
 def insert_seqs(message):
+    """Swap out color tokens with their ansi code"""
     return message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
 
 def remove_seqs(message):
+    """Strip color tokens"""
     return message.replace("$RESET", "").replace("$BOLD", "")
 
 COLORS = {
@@ -39,9 +41,9 @@ COLORS = {
 class MCVizFormatter(logging.Formatter):
 
     def mcviz_strip(self, record):
+        """If we're running as mcviz, omit the "mcviz" name, which doesn't
+        introduce any additional information"""
         if record.name.startswith("mcviz."):
-            # If we're running as mcviz, omit the "mcviz" name, which doesn't
-            # introduce any additional information
             record.name = record.name[len("mcviz."):]
 
     def format(self, record):
