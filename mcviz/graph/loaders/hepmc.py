@@ -1,11 +1,13 @@
 from ... import log; log = log.getChild(__name__)
 
+
 from collections import namedtuple
 from itertools import izip
 import re
 
 from mcviz import FatalError
 from mcviz.utils import Units
+from mcviz.utils.trydecompress import try_decompress
 from .. import EventParseError, Particle, Vertex
 
 
@@ -32,7 +34,9 @@ HEvent = namedtuple("HEvent",
     "id interaction_count ev_scale alpha_qcd alpha_qed signal_proc_id "
     "signal_proc_vertex_barcode num_vertices beam_p1_barcode beam_p2_barcode "
     "random_states weights")
-HVertex = namedtuple("HVertex", 
+HPDF = namedtuple("HPDF",
+    "id1 id2 x1 x2 scalePDF pdf1 pdf2 pdf_id1 pdf_id2")
+HVertex = namedtuple("HVertex",
     "barcode id x y z ctau num_orphan_incoming num_outgoing weights")
 HParticle = namedtuple("HParticle",
     "barcode pdgid px py pz energy mass status pol_theta pol_phi "
@@ -105,6 +109,8 @@ def make_record(record):
         u = Units(record[0] + " " + record[1])
         return u
 
+    elif type_ == "F":
+        return HPDF._make(record)
 
 def load_single_event(ev, args):
     """
@@ -125,7 +131,9 @@ def load_single_event(ev, args):
         units = None
     
     orphans = 0
-    
+
+    pdfinfo = None
+
     # Loop over event records.
     # Read a vertex, then read N particles. When we get to the next vertex, 
     # associate the N particles with the previous vertexEventParseError
@@ -165,7 +173,10 @@ def load_single_event(ev, args):
                 initial_particles.append(particle)
             
             vertex_incoming.setdefault(int(record.vertex_out_barcode), set()).add(particle)
-    
+
+        elif isinstance(record, HPDF):
+            pdfinfo = record
+
     # Use default units if they are not specified
     if units is None:
         units = Units()
@@ -224,7 +235,7 @@ def load_single_event(ev, args):
     vertices = dict((vno, vertex) for vno, vertex in vertices.iteritems()
                                   if vertex.outgoing or vertex.incoming)
 
-    return vertices, particles, units
+    return vertices, particles, units, pdfinfo
 
 def load_event(args):
     """
@@ -242,7 +253,8 @@ def load_event(args):
         event_number = 0
     
     with open(filename) as fd:
-        match = HEPMC_TEXT.search(fd.read())
+        data = try_decompress(fd.read())
+        match = HEPMC_TEXT.search(data)
 
     if not match:
         raise EventParseError("Not obviously hepmc data.")

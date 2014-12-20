@@ -157,6 +157,7 @@
              nu*_mu0 | *
                tau*- | *
             nu*_tau0 | *
+            KKgluon* | *
            Graviton* | *
 --------------------------------------------------------------------------------
     extra
@@ -549,6 +550,7 @@
               nu*_e0 | _e
              nu*_mu0 | _mu
             nu*_tau0 | _tau
+                Z_KK | _KK
            a_0(980)0 | _0
            a_0(980)+ | _0
             f_0(980) | _0
@@ -577,6 +579,45 @@
            rho_12_tc | _tc
            rho_21_tc | _tc
            rho_22_tc | _tc
+--------------------------------------------------------------------------------
+    hv
+--------------------------------------------------------------------------------
+              rhovDn | vDn
+               pivDn | vDn
+               qvbar | v
+           nuTAUvbar | TAUv
+             TAUvbar | v
+            nuMUvbar | MUv
+              MUvbar | v
+             nuEvbar | Ev
+               Evbar | v
+               Tvbar | v
+               Bvbar | v
+               Cvbar | v
+               Svbar | v
+               Uvbar | v
+               Dvbar | v
+                  Dv | v
+                  Uv | v
+                  Sv | v
+                  Cv | v
+                  Bv | v
+                  Tv | v
+                  Ev | v
+                nuEv | Ev
+                 MUv | v
+               nuMUv | MUv
+                TAUv | v
+              nuTAUv | TAUv
+                  gv | v
+              gammav | v
+                  Zv | v
+                  qv | v
+             pivDiag | vDiag
+            rhovDiag | vDiag
+               pivUp | vUp
+              rhovUp | vUp
+                 ggv | v
 --------------------------------------------------------------------------------
     susy
 --------------------------------------------------------------------------------
@@ -642,9 +683,137 @@
 --------------------------------------------------------------------------------
     alt
 --------------------------------------------------------------------------------
+       Rbar+(~g bss) | ~g bss
+       Rbar0(~g bsu) | ~g bsu
+       Rbar+(~g bsd) | ~g bsd
+       Rbar-(~g buu) | ~g buu
+       Rbar0(~g bud) | ~g bud
+       Rbar+(~g bdd) | ~g bdd
+       Rbar0(~g css) | ~g css
+       Rbar-(~g csu) | ~g csu
+       Rbar0(~g csd) | ~g csd
+      Rbar--(~g cuu) | ~g cuu
+       Rbar-(~g cud) | ~g cud
+       Rbar0(~g cdd) | ~g cdd
+       Rbar+(~g sss) | ~g sss
+       Rbar0(~g ssu) | ~g ssu
+       Rbar+(~g ssd) | ~g ssd
+       Rbar-(~g suu) | ~g suu
+       Rbar0(~g sud) | ~g sud
+       Rbar+(~g sdd) | ~g sdd
+      Rbar--(~g uuu) | ~g uuu
+       Rbar-(~g uud) | ~g uud
+       Rbar0(~g udd) | ~g udd
+       Rbar+(~g ddd) | ~g ddd
+       R-(~g b cbar) | ~g b cbar
+       R0(~g b sbar) | ~g b sbar
+       R-(~g b ubar) | ~g b ubar
+       R0(~g b dbar) | ~g b dbar
+       R-(~g s cbar) | ~g s cbar
+       R0(~g u cbar) | ~g u cbar
+       R-(~g d cbar) | ~g d cbar
+       R-(~g s ubar) | ~g s ubar
+       R0(~g s dbar) | ~g s dbar
+       R-(~g d ubar) | ~g d ubar
+      Rtemp(~g qbar) | ~g qbar
+       Rbar0(~t ss1) | ~t ss1
+       Rbar0(~t su1) | ~t su1
+       Rbar0(~t su0) | ~t su0
+       Rbar+(~t sd1) | ~t sd1
+       Rbar+(~t sd0) | ~t sd0
+      Rbar--(~t uu1) | ~t uu1
+       Rbar-(~t ud1) | ~t ud1
+       Rbar-(~t ud0) | ~t ud0
+       Rbar0(~t dd1) | ~t dd1
+       Rbar+(~b ss1) | ~b ss1
+       Rbar0(~b su1) | ~b su1
+       Rbar0(~b su0) | ~b su0
+       Rbar+(~b sd1) | ~b sd1
+       Rbar+(~b sd0) | ~b sd0
+       Rbar-(~b uu1) | ~b uu1
+       Rbar0(~b ud1) | ~b ud1
+       Rbar0(~b ud0) | ~b ud0
+       Rbar+(~b dd1) | ~b dd1
+         R-(~tbar b) | ~tbar b
+         R0(~tbar c) | ~tbar c
+         R-(~tbar s) | ~tbar s
+         R0(~tbar u) | ~tbar u
+         R-(~tbar d) | ~tbar d
+         R0(~bbar b) | ~bbar b
+         R+(~bbar c) | ~bbar c
+         R0(~bbar s) | ~bbar s
+         R+(~bbar u) | ~bbar u
+         R0(~bbar d) | ~bbar d
              h0(H_1) | H_1
              H0(H_2) | H_2
              A0(H_3) | H_3
+         R0(~b dbar) | ~b dbar
+         R-(~b ubar) | ~b ubar
+         R0(~b sbar) | ~b sbar
+         R-(~b cbar) | ~b cbar
+         R0(~b bbar) | ~b bbar
+         R+(~t dbar) | ~t dbar
+         R0(~t ubar) | ~t ubar
+         R+(~t sbar) | ~t sbar
+         R0(~t cbar) | ~t cbar
+         R+(~t bbar) | ~t bbar
+            R0(~g g) | ~g g
+          R-(~b dd1) | ~b dd1
+          R0(~b ud0) | ~b ud0
+          R0(~b ud1) | ~b ud1
+          R+(~b uu1) | ~b uu1
+          R-(~b sd0) | ~b sd0
+          R-(~b sd1) | ~b sd1
+          R0(~b su0) | ~b su0
+          R0(~b su1) | ~b su1
+          R-(~b ss1) | ~b ss1
+          R0(~t dd1) | ~t dd1
+          R+(~t ud0) | ~t ud0
+          R+(~t ud1) | ~t ud1
+         R++(~t uu1) | ~t uu1
+          R-(~t sd0) | ~t sd0
+          R-(~t sd1) | ~t sd1
+          R0(~t su0) | ~t su0
+          R0(~t su1) | ~t su1
+          R0(~t ss1) | ~t ss1
+         Rtemp(~g q) | ~g q
+       R0(~g d dbar) | ~g d dbar
+       R+(~g u dbar) | ~g u dbar
+       R0(~g u ubar) | ~g u ubar
+       R0(~g d sbar) | ~g d sbar
+       R+(~g u sbar) | ~g u sbar
+       R0(~g s sbar) | ~g s sbar
+       R+(~g c dbar) | ~g c dbar
+       R0(~g c ubar) | ~g c ubar
+       R+(~g c sbar) | ~g c sbar
+       R0(~g c cbar) | ~g c cbar
+       R0(~g d bbar) | ~g d bbar
+       R+(~g u bbar) | ~g u bbar
+       R0(~g s bbar) | ~g s bbar
+       R+(~g c bbar) | ~g c bbar
+       R0(~g b bbar) | ~g b bbar
+          R-(~g ddd) | ~g ddd
+          R0(~g udd) | ~g udd
+          R+(~g uud) | ~g uud
+         R++(~g uuu) | ~g uuu
+          R-(~g sdd) | ~g sdd
+          R0(~g sud) | ~g sud
+          R+(~g suu) | ~g suu
+          R-(~g ssd) | ~g ssd
+          R0(~g ssu) | ~g ssu
+          R-(~g sss) | ~g sss
+          R0(~g cdd) | ~g cdd
+          R+(~g cud) | ~g cud
+         R++(~g cuu) | ~g cuu
+          R0(~g csd) | ~g csd
+          R+(~g csu) | ~g csu
+          R0(~g css) | ~g css
+          R-(~g bdd) | ~g bdd
+          R0(~g bud) | ~g bud
+          R+(~g buu) | ~g buu
+          R-(~g bsd) | ~g bsd
+          R0(~g bsu) | ~g bsu
+          R-(~g bss) | ~g bss
 --------------------------------------------------------------------------------
     prime
 --------------------------------------------------------------------------------
@@ -682,6 +851,7 @@
 --------------------------------------------------------------------------------
          p_diffrbar- | bar
          n_diffrbar0 | bar
+               qvbar | bar
            nuTAUvbar | bar
              TAUvbar | bar
             nuMUvbar | bar
@@ -715,6 +885,46 @@
              ~s_Rbar | bar
              ~u_Rbar | bar
              ~d_Rbar | bar
+       Rbar+(~g bss) | bar
+       Rbar0(~g bsu) | bar
+       Rbar+(~g bsd) | bar
+       Rbar-(~g buu) | bar
+       Rbar0(~g bud) | bar
+       Rbar+(~g bdd) | bar
+       Rbar0(~g css) | bar
+       Rbar-(~g csu) | bar
+       Rbar0(~g csd) | bar
+      Rbar--(~g cuu) | bar
+       Rbar-(~g cud) | bar
+       Rbar0(~g cdd) | bar
+       Rbar+(~g sss) | bar
+       Rbar0(~g ssu) | bar
+       Rbar+(~g ssd) | bar
+       Rbar-(~g suu) | bar
+       Rbar0(~g sud) | bar
+       Rbar+(~g sdd) | bar
+      Rbar--(~g uuu) | bar
+       Rbar-(~g uud) | bar
+       Rbar0(~g udd) | bar
+       Rbar+(~g ddd) | bar
+       Rbar0(~t ss1) | bar
+       Rbar0(~t su1) | bar
+       Rbar0(~t su0) | bar
+       Rbar+(~t sd1) | bar
+       Rbar+(~t sd0) | bar
+      Rbar--(~t uu1) | bar
+       Rbar-(~t ud1) | bar
+       Rbar-(~t ud0) | bar
+       Rbar0(~t dd1) | bar
+       Rbar+(~b ss1) | bar
+       Rbar0(~b su1) | bar
+       Rbar0(~b su0) | bar
+       Rbar+(~b sd1) | bar
+       Rbar+(~b sd0) | bar
+       Rbar-(~b uu1) | bar
+       Rbar0(~b ud1) | bar
+       Rbar0(~b ud0) | bar
+       Rbar+(~b dd1) | bar
          ~nu_tauLbar | bar
           ~nu_muLbar | bar
            ~nu_eLbar | bar
@@ -885,18 +1095,21 @@
                H_L-- | H
                 W_R- | W
            a_0(980)- | a
-           nuTAUvbar | nuTAUv
-             TAUvbar | TAUv
-            nuMUvbar | nuMUv
-              MUvbar | MUv
-             nuEvbar | nuEv
-               Evbar | Ev
-               Tvbar | Tv
-               Bvbar | Bv
-               Cvbar | Cv
-               Svbar | Sv
-               Uvbar | Uv
-               Dvbar | Dv
+              rhovDn | rho
+               pivDn | pi
+               qvbar | q
+           nuTAUvbar | nu
+             TAUvbar | TAU
+            nuMUvbar | nu
+              MUvbar | MU
+             nuEvbar | nu
+               Evbar | E
+               Tvbar | T
+               Bvbar | B
+               Cvbar | C
+               Svbar | S
+               Uvbar | U
+               Dvbar | D
          nu*_taubar0 | nu
             tau*bar+ | tau
           nu*_mubar0 | nu
@@ -923,6 +1136,67 @@
              ~s_Rbar | s
              ~u_Rbar | u
              ~d_Rbar | d
+       Rbar+(~g bss) | R
+       Rbar0(~g bsu) | R
+       Rbar+(~g bsd) | R
+       Rbar-(~g buu) | R
+       Rbar0(~g bud) | R
+       Rbar+(~g bdd) | R
+       Rbar0(~g css) | R
+       Rbar-(~g csu) | R
+       Rbar0(~g csd) | R
+      Rbar--(~g cuu) | R
+       Rbar-(~g cud) | R
+       Rbar0(~g cdd) | R
+       Rbar+(~g sss) | R
+       Rbar0(~g ssu) | R
+       Rbar+(~g ssd) | R
+       Rbar-(~g suu) | R
+       Rbar0(~g sud) | R
+       Rbar+(~g sdd) | R
+      Rbar--(~g uuu) | R
+       Rbar-(~g uud) | R
+       Rbar0(~g udd) | R
+       Rbar+(~g ddd) | R
+       R-(~g b cbar) | R
+       R0(~g b sbar) | R
+       R-(~g b ubar) | R
+       R0(~g b dbar) | R
+       R-(~g s cbar) | R
+       R0(~g u cbar) | R
+       R-(~g d cbar) | R
+       R-(~g s ubar) | R
+       R0(~g s dbar) | R
+       R-(~g d ubar) | R
+      Rtemp(~g qbar) | Rtemp
+       Rbar0(~t ss1) | R
+       Rbar0(~t su1) | R
+       Rbar0(~t su0) | R
+       Rbar+(~t sd1) | R
+       Rbar+(~t sd0) | R
+      Rbar--(~t uu1) | R
+       Rbar-(~t ud1) | R
+       Rbar-(~t ud0) | R
+       Rbar0(~t dd1) | R
+       Rbar+(~b ss1) | R
+       Rbar0(~b su1) | R
+       Rbar0(~b su0) | R
+       Rbar+(~b sd1) | R
+       Rbar+(~b sd0) | R
+       Rbar-(~b uu1) | R
+       Rbar0(~b ud1) | R
+       Rbar0(~b ud0) | R
+       Rbar+(~b dd1) | R
+         R-(~tbar b) | R
+         R0(~tbar c) | R
+         R-(~tbar s) | R
+         R0(~tbar u) | R
+         R-(~tbar d) | R
+         R0(~bbar b) | R
+         R+(~bbar c) | R
+         R0(~bbar s) | R
+         R+(~bbar u) | R
+         R0(~bbar d) | R
              ~chi_2- | chi
              ~chi_1- | chi
          ~nu_tauLbar | nu
@@ -1394,6 +1668,73 @@
              ~chi_2+ | chi
           ~Gravitino | Gravitino
              ~chi_50 | chi
+         R0(~b dbar) | R
+         R-(~b ubar) | R
+         R0(~b sbar) | R
+         R-(~b cbar) | R
+         R0(~b bbar) | R
+         R+(~t dbar) | R
+         R0(~t ubar) | R
+         R+(~t sbar) | R
+         R0(~t cbar) | R
+         R+(~t bbar) | R
+            R0(~g g) | R
+          R-(~b dd1) | R
+          R0(~b ud0) | R
+          R0(~b ud1) | R
+          R+(~b uu1) | R
+          R-(~b sd0) | R
+          R-(~b sd1) | R
+          R0(~b su0) | R
+          R0(~b su1) | R
+          R-(~b ss1) | R
+          R0(~t dd1) | R
+          R+(~t ud0) | R
+          R+(~t ud1) | R
+         R++(~t uu1) | R
+          R-(~t sd0) | R
+          R-(~t sd1) | R
+          R0(~t su0) | R
+          R0(~t su1) | R
+          R0(~t ss1) | R
+         Rtemp(~g q) | Rtemp
+       R0(~g d dbar) | R
+       R+(~g u dbar) | R
+       R0(~g u ubar) | R
+       R0(~g d sbar) | R
+       R+(~g u sbar) | R
+       R0(~g s sbar) | R
+       R+(~g c dbar) | R
+       R0(~g c ubar) | R
+       R+(~g c sbar) | R
+       R0(~g c cbar) | R
+       R0(~g d bbar) | R
+       R+(~g u bbar) | R
+       R0(~g s bbar) | R
+       R+(~g c bbar) | R
+       R0(~g b bbar) | R
+          R-(~g ddd) | R
+          R0(~g udd) | R
+          R+(~g uud) | R
+         R++(~g uuu) | R
+          R-(~g sdd) | R
+          R0(~g sud) | R
+          R+(~g suu) | R
+          R-(~g ssd) | R
+          R0(~g ssu) | R
+          R-(~g sss) | R
+          R0(~g cdd) | R
+          R+(~g cud) | R
+         R++(~g cuu) | R
+          R0(~g csd) | R
+          R+(~g csu) | R
+          R0(~g css) | R
+          R-(~g bdd) | R
+          R0(~g bud) | R
+          R+(~g buu) | R
+          R-(~g bsd) | R
+          R0(~g bsu) | R
+          R-(~g bss) | R
                 ~d_R | d
                 ~u_R | u
                 ~s_R | s
@@ -1432,22 +1773,30 @@
              nu*_mu0 | nu
                tau*- | tau
             nu*_tau0 | nu
-                  Dv | Dv
-                  Uv | Uv
-                  Sv | Sv
-                  Cv | Cv
-                  Bv | Bv
-                  Tv | Tv
-                  Ev | Ev
-                nuEv | nuEv
-                 MUv | MUv
-               nuMUv | nuMUv
-                TAUv | TAUv
-              nuTAUv | nuTAUv
-                  gv | gv
-              gammav | gammav
-                  qv | qv
+                  Dv | D
+                  Uv | U
+                  Sv | S
+                  Cv | C
+                  Bv | B
+                  Tv | T
+                  Ev | E
+                nuEv | nu
+                 MUv | MU
+               nuMUv | nu
+                TAUv | TAU
+              nuTAUv | nu
+                  gv | g
+              gammav | gamma
+                  Zv | Z
+                  qv | q
+             pivDiag | pi
+            rhovDiag | rho
+               pivUp | pi
+              rhovUp | rho
+                 ggv | gg
+                Z_KK | Z
             Graviton | Graviton
+            KKgluon* | KKgluon
            Graviton* | Graviton
            a_0(980)0 | a
            a_0(980)+ | a
@@ -1499,6 +1848,66 @@
              ~tau_2+ | +
               ~mu_R+ | +
                ~e_R+ | +
+       Rbar+(~g bss) | +
+       Rbar0(~g bsu) | 0
+       Rbar+(~g bsd) | +
+       Rbar-(~g buu) | -
+       Rbar0(~g bud) | 0
+       Rbar+(~g bdd) | +
+       Rbar0(~g css) | 0
+       Rbar-(~g csu) | -
+       Rbar0(~g csd) | 0
+      Rbar--(~g cuu) | --
+       Rbar-(~g cud) | -
+       Rbar0(~g cdd) | 0
+       Rbar+(~g sss) | +
+       Rbar0(~g ssu) | 0
+       Rbar+(~g ssd) | +
+       Rbar-(~g suu) | -
+       Rbar0(~g sud) | 0
+       Rbar+(~g sdd) | +
+      Rbar--(~g uuu) | --
+       Rbar-(~g uud) | -
+       Rbar0(~g udd) | 0
+       Rbar+(~g ddd) | +
+       R-(~g b cbar) | -
+       R0(~g b sbar) | 0
+       R-(~g b ubar) | -
+       R0(~g b dbar) | 0
+       R-(~g s cbar) | -
+       R0(~g u cbar) | 0
+       R-(~g d cbar) | -
+       R-(~g s ubar) | -
+       R0(~g s dbar) | 0
+       R-(~g d ubar) | -
+       Rbar0(~t ss1) | 0
+       Rbar0(~t su1) | 0
+       Rbar0(~t su0) | 0
+       Rbar+(~t sd1) | +
+       Rbar+(~t sd0) | +
+      Rbar--(~t uu1) | --
+       Rbar-(~t ud1) | -
+       Rbar-(~t ud0) | -
+       Rbar0(~t dd1) | 0
+       Rbar+(~b ss1) | +
+       Rbar0(~b su1) | 0
+       Rbar0(~b su0) | 0
+       Rbar+(~b sd1) | +
+       Rbar+(~b sd0) | +
+       Rbar-(~b uu1) | -
+       Rbar0(~b ud1) | 0
+       Rbar0(~b ud0) | 0
+       Rbar+(~b dd1) | +
+         R-(~tbar b) | -
+         R0(~tbar c) | 0
+         R-(~tbar s) | -
+         R0(~tbar u) | 0
+         R-(~tbar d) | -
+         R0(~bbar b) | 0
+         R+(~bbar c) | +
+         R0(~bbar s) | 0
+         R+(~bbar u) | +
+         R0(~bbar d) | 0
              ~chi_2- | -
              ~chi_1- | -
              ~tau_1+ | +
@@ -1833,6 +2242,72 @@
              ~chi_40 | 0
              ~chi_2+ | +
              ~chi_50 | 0
+         R0(~b dbar) | 0
+         R-(~b ubar) | -
+         R0(~b sbar) | 0
+         R-(~b cbar) | -
+         R0(~b bbar) | 0
+         R+(~t dbar) | +
+         R0(~t ubar) | 0
+         R+(~t sbar) | +
+         R0(~t cbar) | 0
+         R+(~t bbar) | +
+            R0(~g g) | 0
+          R-(~b dd1) | -
+          R0(~b ud0) | 0
+          R0(~b ud1) | 0
+          R+(~b uu1) | +
+          R-(~b sd0) | -
+          R-(~b sd1) | -
+          R0(~b su0) | 0
+          R0(~b su1) | 0
+          R-(~b ss1) | -
+          R0(~t dd1) | 0
+          R+(~t ud0) | +
+          R+(~t ud1) | +
+         R++(~t uu1) | ++
+          R-(~t sd0) | -
+          R-(~t sd1) | -
+          R0(~t su0) | 0
+          R0(~t su1) | 0
+          R0(~t ss1) | 0
+       R0(~g d dbar) | 0
+       R+(~g u dbar) | +
+       R0(~g u ubar) | 0
+       R0(~g d sbar) | 0
+       R+(~g u sbar) | +
+       R0(~g s sbar) | 0
+       R+(~g c dbar) | +
+       R0(~g c ubar) | 0
+       R+(~g c sbar) | +
+       R0(~g c cbar) | 0
+       R0(~g d bbar) | 0
+       R+(~g u bbar) | +
+       R0(~g s bbar) | 0
+       R+(~g c bbar) | +
+       R0(~g b bbar) | 0
+          R-(~g ddd) | -
+          R0(~g udd) | 0
+          R+(~g uud) | +
+         R++(~g uuu) | ++
+          R-(~g sdd) | -
+          R0(~g sud) | 0
+          R+(~g suu) | +
+          R-(~g ssd) | -
+          R0(~g ssu) | 0
+          R-(~g sss) | -
+          R0(~g cdd) | 0
+          R+(~g cud) | +
+         R++(~g cuu) | ++
+          R0(~g csd) | 0
+          R+(~g csu) | +
+          R0(~g css) | 0
+          R-(~g bdd) | -
+          R0(~g bud) | 0
+          R+(~g buu) | +
+          R-(~g bsd) | -
+          R0(~g bsu) | 0
+          R-(~g bss) | -
                ~e_R- | -
               ~mu_R- | -
              ~tau_2- | -

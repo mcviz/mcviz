@@ -1,6 +1,6 @@
 import os
 
-from mcviz.svg import texglyph
+from mcviz.utils.svg import texglyph
 
 def test_particle_names():
 
