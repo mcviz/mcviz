@@ -1,34 +1,32 @@
 -----------------
-New in 2011.09.15
+New in 2014.12.21
 -----------------
 
-Johannes Ebke:
-    Code improvements / Consistency tweaks
-    Added OnlyHard transform that selects the hard process
-    Re-added circle and phi layout, reminder: use -e neato for this
-    Made LineWidthPt work for the Dual
-    Added helper vertices for vacuum pairs of particles in dual layout
-    view_particles are now only initial_state if they have no siblings
-    Added ViewVertex.vacuum property, and do not classify such vertices as initial or final state
-    Updated texglyph.py to use additional pdftops step, fixed regeneration, and work standalone
-    Updated texglyph cache
-    
-Peter Waller:
-    Add <mcviz:cmdline> tag to all svg output showing what was used to generate it
-    Add event picking to hepmc input
-    Make navisvg the default output type
-    First attempt at making hepmc parser able to read ATLAS files
-    Add Particle.antiparticle and add a heuristic in ViewParticleSingle to make quarks colored (color = True or False)
-    Add pdg annotation to show pdgid next to particle
-    New Transform: MergeVertices which treats vertices with the same 4-position as the same vertex
-    Code Improvements, consistency tweaks: better logging, better help, better timing
-    Autosuggest when there is one close match to a tool name
+Tim Brooks (10):
+      Remove deprecated flag
+      Regenerate bootstrap script
+      PEP8-ify bootstrap script
+      Update jQuery data
+      Fix jQuery breaking in SVG documents
+      Include wheels for virtualenv
+      Remove last vestiges of distribute
+      Update tests to current structure
+      Update reference particles
+      Ignore input files that find their way here
 
-Tim Brooks:
-    Fixes to HepMC loader
-    Added some features to Pluck
-    Added --units and units detection
-    Bug fixes / Code improvements / Improvements to help
-    Tidied units implementation, added --units switch
-    Switched to argparse
-    Updated ParticleData
+Sebastian Schmitt (7):
+      cut on exact value, useful for e.g. cutting on pdgid
+      read PdfInfo from HepMC ascii file
+      put basic pdf info left from beam particles
+      simplify cut conditionals
+      cut on mothers' and daughters' parameters
+      explain mothers and daughters functionality
+      minimize walking
+
+Peter Waller (2):
+      Break the graphviz layout engine up a bit so we can call sfdp with 3D switched on
+      Global constants should be capitalized
+
+Lukas Heinrich (1):
+      setup.py resource specification
+

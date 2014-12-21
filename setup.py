@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from textwrap import dedent
 
-version = "0.1"
+version = "2014.12.21"
 
 setup(name='mcviz',
       version=version,
