@@ -25,7 +25,19 @@ OUTPUT = virtualenv.create_bootstrap_script(textwrap.dedent("""
         if not ret:
             print "Finished! Now to run mcviz, type ./mcv"
 
+    def no_graphviz():
+        print "Graphviz not installed!"
+        print "Please install graphviz from http://www.graphviz.org/Download.php"
+        exit(1)
+
     def adjust_options(options, args):
+        try:
+            print "Graphviz 'dot' path:"
+            if os.system("which dot") != 0:
+                no_graphviz()
+        except OSError:
+            no_graphviz()
+
         args[:] = ["env"]
 """))
 open('mcviz_bootstrap.py', 'w').write(OUTPUT)
