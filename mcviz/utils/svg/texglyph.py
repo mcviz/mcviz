@@ -277,14 +277,8 @@ class TexGlyph(object):
         
         doc = minidom.parseString(glyph.xml)
         grp = doc.childNodes[0]
-        box = doc.createElement("ellipse")
+        box = doc.createElement("g")
         
-        box.setAttribute("cx", "%.3f" % (glyph.xmin + wx / 2))
-        box.setAttribute("cy", "%.3f" % (glyph.ymin + wy / 2))
-        box.setAttribute("rx", "%.3f" % (wx*1.2))
-        box.setAttribute("ry", "%.3f" % (wy*1.2))
-        box.setAttribute("fill", "red")
-        box.setAttribute("opacity", "0")
         grp.appendChild(box)
         
         glyph._with_bounding_box = True
